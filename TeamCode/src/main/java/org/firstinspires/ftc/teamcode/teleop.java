@@ -86,10 +86,10 @@ public class teleop extends LinearOpMode {
         IN2.setDirection(FORWARD);
 
         /**UD = hardwareMap.get(DcMotor.class, "uD");
-         UD.setDirection(DcMotor.Direction.FORWARD);
-         UD.setPower(0);
-         UD.setTargetPosition(0);
-         UD.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        UD.setDirection(DcMotor.Direction.FORWARD);
+        UD.setPower(0);
+        UD.setTargetPosition(0);
+        UD.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
          */
         S1 = hardwareMap.get(Servo.class, "servo");
         S2 = hardwareMap.get(Servo.class, "servo2");
@@ -124,22 +124,29 @@ public class teleop extends LinearOpMode {
                 IN1.setPower(0);
                 IN2.setPower(0);
             }
+            if(gamepad1.left_trigger!=0){
+                IN1.setPower(-gamepad1.left_trigger);
+                IN2.setPower(-gamepad1.left_trigger);
+            }else if(gamepad1.right_trigger!=0){
+                IN1.setPower(gamepad1.right_trigger);
+                IN2.setPower(gamepad1.right_trigger);
+            }
             /**if (gamepad1.x && !xPrev) {
-             UD.setTargetPosition(0);
-             UD.setPower(0.7);
-             } else if (gamepad1.y && !yPrev) {
-             UD.setTargetPosition(60);
-             UD.setPower(0.7);
-             }
-             if (gamepad1.start && !sPrev){
-             UD.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-             UD.setPower(0);
-             UD.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-             UD.setPower(0.7);
-             }
-             if(UD.getTargetPosition()==UD.getCurrentPosition()){
-             UD.setPower(0);
-             }*/
+                UD.setTargetPosition(0);
+                UD.setPower(0.7);
+            } else if (gamepad1.y && !yPrev) {
+                UD.setTargetPosition(60);
+                UD.setPower(0.7);
+            }
+            if (gamepad1.start && !sPrev){
+                UD.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                UD.setPower(0);
+                UD.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                UD.setPower(0.7);
+            }
+            if(UD.getTargetPosition()==UD.getCurrentPosition()){
+                UD.setPower(0);
+            }*/
 
             xPrev = gamepad1.x;
             yPrev = gamepad1.y;
@@ -155,7 +162,7 @@ public class teleop extends LinearOpMode {
                     (float)BL.getCurrentPosition(), (float)BR.getCurrentPosition());
             telemetry.addData("Set Arm Power:", armpower);
             /**telemetry.addData("Current Arm Position:", UD.getCurrentPosition());
-             telemetry.addData("ArmPos", UD.getTargetPosition());
+            telemetry.addData("ArmPos", UD.getTargetPosition());
              */
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Sound >", sounds[soundIndex]);
@@ -212,7 +219,7 @@ public class teleop extends LinearOpMode {
         double v2 = r * Math.sin(robotAngle) - rightX;
         double v3 = r * Math.sin(robotAngle) + rightX;
         double v4 = r * Math.cos(robotAngle) - rightX;
-        if (gamepad1.right_trigger != 0 || gamepad1.left_trigger != 0) {
+        if (gamepad1.x) {
             v1 *= 2.85;
             v2 *= 2.85;
             v3 *= 2.85;
@@ -227,36 +234,38 @@ public class teleop extends LinearOpMode {
     private void sounds(int soundIndex, boolean was_dpad_down, boolean was_dpad_up, int soundID, Context myApp, SoundPlayer.PlaySoundParams params){
 
 
-        // Look for DPAD presses to change the selection
-        if (gamepad2.dpad_down && !was_dpad_down) {
-            // Go to next sound (with list wrap) and display it
-            soundIndex = (soundIndex + 1) % sounds.length;
-        }
+                // Look for DPAD presses to change the selection
+                if (gamepad2.dpad_down && !was_dpad_down) {
+                    // Go to next sound (with list wrap) and display it
+                    soundIndex = (soundIndex + 1) % sounds.length;
+                }
 
-        if (gamepad2.dpad_up && !was_dpad_up) {
-            // Go to previous sound (with list wrap) and display it
-            soundIndex = (soundIndex + sounds.length - 1) % sounds.length;
-        }
+                if (gamepad2.dpad_up && !was_dpad_up) {
+                    // Go to previous sound (with list wrap) and display it
+                    soundIndex = (soundIndex + sounds.length - 1) % sounds.length;
+                }
 
-        // Look for trigger to see if we should play sound
-        // Only start a new sound if we are currently not playing one.
-        if (gamepad2.right_bumper && !soundPlaying) {
+                // Look for trigger to see if we should play sound
+                // Only start a new sound if we are currently not playing one.
+                if (gamepad2.right_bumper && !soundPlaying) {
 
-            // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
-            if ((soundID = myApp.getResources().getIdentifier(sounds[soundIndex], "raw", myApp.getPackageName())) != 0){
+                    // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
+                    if ((soundID = myApp.getResources().getIdentifier(sounds[soundIndex], "raw", myApp.getPackageName())) != 0){
 
-                // Signal that the sound is now playing.
-                soundPlaying = true;
+                        // Signal that the sound is now playing.
+                        soundPlaying = true;
 
-                // Start playing, and also Create a callback that will clear the playing flag when the sound is complete.
-                SoundPlayer.getInstance().startPlaying(myApp, soundID, params, null,
-                        new Runnable() {
-                            public void run() {
-                                soundPlaying = false;
-                            }} );
-            }
-        }
+                        // Start playing, and also Create a callback that will clear the playing flag when the sound is complete.
+                        SoundPlayer.getInstance().startPlaying(myApp, soundID, params, null,
+                                new Runnable() {
+                                    public void run() {
+                                        soundPlaying = false;
+                                    }} );
+                    }
+                }
 
 
     }
 }
+
+
