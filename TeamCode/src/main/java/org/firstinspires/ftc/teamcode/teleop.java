@@ -108,9 +108,9 @@ public class teleop extends LinearOpMode {
 
             if (gamepad1.a) {
                 S1.setPosition(0);
-                S2.setPosition(0.4);
+                S2.setPosition(0.5);
             } else if (gamepad1.b) {
-                S1.setPosition(0.4);
+                S1.setPosition(1);
                 S2.setPosition(0);
             }
             double INSPEED = 0.4;
@@ -160,11 +160,13 @@ public class teleop extends LinearOpMode {
             telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
                             "back left (%.1f), back right (%.1f)", (float)FL.getCurrentPosition(), (float)FR.getCurrentPosition(),
                     (float)BL.getCurrentPosition(), (float)BR.getCurrentPosition());
-            telemetry.addData("Set Arm Power:", armpower);
+            //telemetry.addData("Set Arm Power:", armpower);
             /**telemetry.addData("Current Arm Position:", UD.getCurrentPosition());
             telemetry.addData("ArmPos", UD.getTargetPosition());
              */
             telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("Servo1Pos", S1.getPosition());
+            telemetry.addData("Servo2Pos", S2.getPosition());
             telemetry.addData("Sound >", sounds[soundIndex]);
             telemetry.addData("INTAKE POWER", IN1.getPower());
             telemetry.update();
