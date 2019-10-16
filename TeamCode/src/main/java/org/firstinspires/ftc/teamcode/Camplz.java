@@ -26,6 +26,7 @@ import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -39,6 +40,8 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
+import org.openftc.easyopencv.OpenCvWebcam;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,12 +58,12 @@ public class Camplz extends LinearOpMode
     private Point   screenPosition = new Point(); // Screen position of the mineral
     private Rect    foundRect = new Rect(); // Found rect
     private List<Mat> channels = new ArrayList<>();
-    private double perfectRatio = 0.33;
+    private double perfectRatio = 1.67;
     private Size adjustedSize;
     public Size   downscaleResolution = new Size(320, 240);
-    public boolean useFixedDownscale = true;
+    public boolean useFixedDownscale = false;
     private Size initSize;
-    public double downscale = 0.25;
+    public double downscale = 0.5;
 
     @Override
     public void runOpMode()
@@ -74,7 +77,8 @@ public class Camplz extends LinearOpMode
          * single-parameter constructor instead (commented out below)
          */
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        phoneCam = new OpenCvInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+        //phoneCam = new OpenCvInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
+        phoneCam = new OpenCvWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
         // OR...  Do Not Activate the Camera Monitor View
         //phoneCam = new OpenCvInternalCamera(OpenCvInternalCamera.CameraDirection.BACK);
@@ -103,7 +107,7 @@ public class Camplz extends LinearOpMode
          * away from the user.
          */
 
-        phoneCam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+        phoneCam.startStreaming(1280, 720);
 
         /*
          * Wait for the user to press start on the Driver Station
@@ -238,11 +242,11 @@ public class Camplz extends LinearOpMode
             Mat colormat = workingMat.clone();
             channels = new ArrayList<>();
 
-            Imgproc.cvtColor(colormat, colormat, Imgproc.COLOR_RGB2Lab);
+            Imgproc.cvtColor(colormat, colormat, Imgproc.COLOR_RGB2YUV);
             Imgproc.GaussianBlur(colormat,colormat,new Size(3,3),0);
             Core.split(colormat, channels);
             if(channels.size() > 0){
-                Imgproc.threshold(channels.get(1), mask, 164, 255, Imgproc.THRESH_BINARY);
+                Imgproc.threshold(channels.get(1), mask, 70, 255, Imgproc.THRESH_BINARY_INV);
             }
 
 
@@ -263,6 +267,7 @@ public class Camplz extends LinearOpMode
                 // Get bounding rect of contour
                 Rect rect = Imgproc.boundingRect(cont);
                 Imgproc.rectangle(displayMat, rect.tl(), rect.br(), new Scalar(0,0,255),2); // Draw rect
+                Imgproc.putText(displayMat, ""+(int)(score), rect.tl(),0,0.3,new Scalar(255,255,255));
 
                 // If the result is better then the previously tracked one, set this rect as the new best
                 if(score < bestDiffrence){
@@ -273,7 +278,7 @@ public class Camplz extends LinearOpMode
             if(bestRect != null){
                 // Show chosen result
                 Imgproc.rectangle(displayMat, bestRect.tl(), bestRect.br(), new Scalar(255,0,0),4);
-                Imgproc.putText(displayMat, "Chosen", bestRect.tl(),0,1,new Scalar(255,255,255));
+                Imgproc.putText(displayMat, "Chosen", bestRect.tl(),0,0.1,new Scalar(255,255,255));
 
                 screenPosition = new Point(bestRect.x, bestRect.y);
                 foundRect = bestRect;
@@ -306,6 +311,7 @@ public class Camplz extends LinearOpMode
             double y = rect.y;
             double w = rect.width;
             double h = rect.height;
+            double right = -100*(rect.x+rect.width);
 
             double cubeRatio = Math.max(Math.abs(h/w), Math.abs(w/h)); // Get the ratio. We use max in case h and w get swapped??? it happens when u account for rotation
             double ratioDiffrence = Math.abs(cubeRatio - perfectRatio);
@@ -314,10 +320,13 @@ public class Camplz extends LinearOpMode
             MatOfPoint contourA = (MatOfPoint) input;
             double area = Imgproc.contourArea(contourA);
 
+
             double areascore = -area;
             totalScore += ratioscore;
             totalScore += areascore;
+            totalScore+=right;
             return totalScore;
+
         }
 
         public Size getAdjustedSize() {
