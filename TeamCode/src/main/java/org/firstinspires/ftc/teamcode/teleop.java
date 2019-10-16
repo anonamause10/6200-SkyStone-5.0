@@ -107,11 +107,14 @@ public class teleop extends LinearOpMode {
             drive();
 
             if (gamepad1.a) {
-                S1.setPosition(0);
-                S2.setPosition(0.5);
+                S1.setPosition(0.5);
+                S2.setPosition(0.35);
             } else if (gamepad1.b) {
+                S1.setPosition(0.4);
+                S2.setPosition(0.3);
+            }else if(gamepad1.y){
                 S1.setPosition(1);
-                S2.setPosition(0);
+                S2.setPosition(0.45);
             }
             double INSPEED = 0.4;
             if(gamepad1.left_bumper){
