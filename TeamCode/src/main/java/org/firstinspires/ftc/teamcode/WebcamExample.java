@@ -21,119 +21,74 @@
 
 package org.firstinspires.ftc.teamcode;
 
-
-import android.graphics.ImageFormat;
-import android.util.Log;
-
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraCharacteristics;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-
-import org.firstinspires.ftc.robotcore.internal.camera.CameraManagerInternal;
-import org.firstinspires.ftc.robotcore.internal.system.Deadline;
-import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
-import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.Camera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 @TeleOp
-public class Camplz extends LinearOpMode
+public class WebcamExample extends LinearOpMode
 {
-    OpenCvCamera phoneCam;
-    private Mat displayMat = new Mat(); // Display debug info to the screen (this is what is returned)
-    private Mat workingMat = new Mat(); // Used for preprocessing and working with (blurring as an example)
-    private Mat mask       = new Mat(); // Mask returned by color filter
-    private Mat hierarchy  = new Mat(); // hierarchy used by coutnours
-    private boolean found    = false; // Is the gold mineral found
-    private Point   screenPosition = new Point(); // Screen position of the mineral
-    private Rect    foundRect = new Rect(); // Found rect
-    private List<Mat> channels = new ArrayList<>();
-    private double perfectRatio = 1.67;
-    private Size adjustedSize;
-    public Size   downscaleResolution = new Size(320, 240);
-    public boolean useFixedDownscale = false;
-    private Size initSize;
-    public double downscale = 0.5;
+    OpenCvCamera webcam;
 
     @Override
     public void runOpMode()
     {
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
-         * In this sample, we're using the phone's internal camera. We pass it a
-         * CameraDirection enum indicating whether to use the front or back facing
-         * camera, as well as the view that we wish to use for camera monitor (on
+         * In this sample, we're using a webcam. Note that you will need to
+         * make sure you have added the webcam to your configuration file and
+         * adjusted the name here to match what you named it in said config file.
+         *
+         * We pass it the view that we wish to use for camera monitor (on
          * the RC phone). If no camera monitor is desired, use the alternate
          * single-parameter constructor instead (commented out below)
          */
-        CameraName cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        //phoneCam = new OpenCvInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
-        phoneCam = new OpenCvWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        webcam = new OpenCvWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
         // OR...  Do Not Activate the Camera Monitor View
-        //phoneCam = new OpenCvInternalCamera(OpenCvInternalCamera.CameraDirection.BACK);
+        //webcam = new OpenCvWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"));
 
         /*
          * Open the connection to the camera device
          */
-        phoneCam.openCameraDevice();
+        webcam.openCameraDevice();
 
         /*
          * Specify the image processing pipeline we wish to invoke upon receipt
          * of a frame from the camera. Note that switching pipelines on-the-fly
          * (while a streaming session is in flight) *IS* supported.
          */
-        phoneCam.setPipeline(new SamplePipeline());
+        webcam.setPipeline(new SamplePipeline());
 
         /*
-         * Tell the camera to start streaming images to us! Note that you must make sure
-         * the resolution you specify is supported by the camera. If it is not, an ex\eption
+         * Tell the webcam to start streaming images to us! Note that you must make sure
+         * the resolution you specify is supported by the camera. If it is not, an exception
          * will be thrown.
          *
-         * Also, we specify the rotation that the camera is used in. This is so that the image
+         * Keep in mind that the SDK's UVC driver (what OpenCvWebcam uses under the hood) only
+         * supports streaming from the webcam in the uncompressed YUV image format. This means
+         * that the maximum resolution you can stream at and still get up to 30FPS is 480p (640x480).
+         * Streaming at 720p will limit you to up to 10FPS. However, streaming at frame rates other
+         * than 30FPS is not currently supported, although this will likely be addressed in a future
+         * release. TLDR: You can't stream in greater than 480p from a webcam at the moment.
+         *
+         * Also, we specify the rotation that the webcam is used in. This is so that the image
          * from the camera sensor can be rotated such that it is always displayed with the image upright.
          * For a front facing camera, rotation is defined assuming the user is looking at the screen.
          * For a rear facing camera or a webcam, rotation is defined assuming the camera is facing
          * away from the user.
          */
-        /**
-        boolean sizeSupported = false;
-        CameraManagerInternal cameraManager = (CameraManagerInternal) ClassFactory.getInstance().getCameraManager();
-        Camera camera = cameraManager.requestPermissionAndOpenCamera(new Deadline(1, TimeUnit.SECONDS), cameraName, null);
-        if(camera==null){
-            Log.w("bib", "no camera");
-        }
-        CameraCharacteristics cameraCharacteristics = camera.getCameraName().getCameraCharacteristics();
-        if(cameraCharacteristics.getSizes(ImageFormat.YUY2).length==0){
-            Log.w("bib", "still no camera");
-        }
-        for(org.firstinspires.ftc.robotcore.external.android.util.Size s : cameraCharacteristics.getSizes(ImageFormat.YUY2))
-        {
-            Log.w("Camres","width: "+s.getWidth());
-            Log.w("Camres","height: "+s.getHeight());
-        }
-         */
-        phoneCam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
+        webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
 
         /*
          * Wait for the user to press start on the Driver Station
@@ -145,12 +100,12 @@ public class Camplz extends LinearOpMode
             /*
              * Send some stats to the telemetry
              */
-            telemetry.addData("Frame Count", phoneCam.getFrameCount());
-            telemetry.addData("FPS", String.format("%.2f", phoneCam.getFps()));
-            telemetry.addData("Total frame time ms", phoneCam.getTotalFrameTimeMs());
-            telemetry.addData("Pipeline time ms", phoneCam.getPipelineTimeMs());
-            telemetry.addData("Overhead time ms", phoneCam.getOverheadTimeMs());
-            telemetry.addData("Theoretical max FPS", phoneCam.getCurrentPipelineMaxFps());
+            telemetry.addData("Frame Count", webcam.getFrameCount());
+            telemetry.addData("FPS", String.format("%.2f", webcam.getFps()));
+            telemetry.addData("Total frame time ms", webcam.getTotalFrameTimeMs());
+            telemetry.addData("Pipeline time ms", webcam.getPipelineTimeMs());
+            telemetry.addData("Overhead time ms", webcam.getOverheadTimeMs());
+            telemetry.addData("Theoretical max FPS", webcam.getCurrentPipelineMaxFps());
             telemetry.update();
 
             /*
@@ -179,7 +134,7 @@ public class Camplz extends LinearOpMode
                  * time. Of course, this comment is irrelevant in light of the use case described in
                  * the above "important note".
                  */
-                phoneCam.stopStreaming();
+                webcam.stopStreaming();
                 //webcam.closeCameraDevice();
             }
 
@@ -197,11 +152,11 @@ public class Camplz extends LinearOpMode
              */
             else if(gamepad1.x)
             {
-                phoneCam.pauseViewport();
+                webcam.pauseViewport();
             }
             else if(gamepad1.y)
             {
-                phoneCam.resumeViewport();
+                webcam.resumeViewport();
             }
 
             /*
@@ -209,7 +164,7 @@ public class Camplz extends LinearOpMode
              * excess CPU cycles for no reason. (By default, telemetry is only sent to the DS at 4Hz
              * anyway). Of course in a real OpMode you will likely not want to do this.
              */
-
+            sleep(100);
         }
     }
 
@@ -242,7 +197,6 @@ public class Camplz extends LinearOpMode
         @Override
         public Mat processFrame(Mat input)
         {
-            Log.w("sizes","Input size: "+input.depth());
             /*
              * IMPORTANT NOTE: the input Mat that is passed in as a parameter to this method
              * will only dereference to the same image for the duration of this particular
@@ -254,111 +208,23 @@ public class Camplz extends LinearOpMode
             /*
              * Draw a simple box around the middle 1/2 of the entire frame
              */
-            initSize = input.size();
+            Imgproc.rectangle(
+                    input,
+                    new Point(
+                            input.cols()/4,
+                            input.rows()/4),
+                    new Point(
+                            input.cols()*(3f/4f),
+                            input.rows()*(3f/4f)),
+                    new Scalar(0, 255, 0), 4);
 
-            if(useFixedDownscale){
-                adjustedSize = downscaleResolution;
-            }else{
-                adjustedSize = new Size(initSize.width * downscale, initSize.height * downscale);
-            }
-            input.copyTo(displayMat);
-            input.copyTo(workingMat);
+            /**
+             * NOTE: to see how to get data from your pipeline to your OpMode as well as how
+             * to change which stage of the pipeline is rendered to the viewport when it is
+             * tapped, please see {@link PipelineStageSwitchingExample}
+             */
 
-            Imgproc.GaussianBlur(workingMat,workingMat,new Size(5,5),0);
-            Mat colormat = workingMat.clone();
-            channels = new ArrayList<>();
-
-            Imgproc.cvtColor(colormat, colormat, Imgproc.COLOR_RGB2YUV);
-            Imgproc.GaussianBlur(colormat,colormat,new Size(3,3),0);
-            Core.split(colormat, channels);
-            if(channels.size() > 0){
-                Imgproc.threshold(channels.get(1), mask, 70, 255, Imgproc.THRESH_BINARY_INV);
-            }
-
-
-            for(int i=0;i<channels.size();i++){
-                channels.get(i).release();
-            }
-
-            colormat.release();
-
-            List<MatOfPoint> contoursYellow = new ArrayList<>();
-            Imgproc.findContours(mask      , contoursYellow, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-                Imgproc.drawContours(displayMat,contoursYellow,-1,new Scalar(230,70,70),2);
-            Rect bestRect = null;
-            double bestDiffrence = Double.MAX_VALUE; // MAX_VALUE since less diffrence = better
-            for(MatOfPoint cont : contoursYellow){
-                double score = calculateScore(cont); // Get the diffrence score using the scoring API
-
-                // Get bounding rect of contour
-                Rect rect = Imgproc.boundingRect(cont);
-                Imgproc.rectangle(displayMat, rect.tl(), rect.br(), new Scalar(0,0,255),2); // Draw rect
-                Imgproc.putText(displayMat, ""+(int)(score), rect.tl(),0,0.3,new Scalar(255,255,255));
-
-                // If the result is better then the previously tracked one, set this rect as the new best
-                if(score < bestDiffrence){
-                    bestDiffrence = score;
-                    bestRect = rect;
-                }
-            }
-            if(bestRect != null){
-                // Show chosen result
-                Imgproc.rectangle(displayMat, bestRect.tl(), bestRect.br(), new Scalar(255,0,0),4);
-                Imgproc.putText(displayMat, "Chosen", bestRect.tl(),0,0.1,new Scalar(255,255,255));
-
-                screenPosition = new Point(bestRect.x, bestRect.y);
-                foundRect = bestRect;
-                found = true;
-            }else{
-                found = false;
-            }
-
-
-            //Print result
-            Imgproc.putText(displayMat,"Result: " + screenPosition.x +"/"+screenPosition.y,new Point(10,getAdjustedSize().height-30),0,1, new Scalar(255,255,0),1);
-
-            Log.w("sizes","Display size: "+displayMat.depth());
-
-            return displayMat;
-
-
+            return input;
         }
-
-        public double calculateScore(Mat input){
-            double totalScore = 0;
-
-            if(!(input instanceof MatOfPoint)) return Double.MAX_VALUE;
-            MatOfPoint contour = (MatOfPoint) input;
-            double score = Double.MAX_VALUE;
-
-            // Get bounding rect of contour
-            Rect rect = Imgproc.boundingRect(contour);
-            double x = rect.x;
-            double y = rect.y;
-            double w = rect.width;
-            double h = rect.height;
-            double right = -100*(rect.x+rect.width);
-
-            double cubeRatio = Math.max(Math.abs(h/w), Math.abs(w/h)); // Get the ratio. We use max in case h and w get swapped??? it happens when u account for rotation
-            double ratioDiffrence = Math.abs(cubeRatio - perfectRatio);
-            double ratioscore = ratioDiffrence*3;
-
-            MatOfPoint contourA = (MatOfPoint) input;
-            double area = Imgproc.contourArea(contourA);
-
-
-            double areascore = -area;
-            totalScore += ratioscore;
-            totalScore += areascore;
-            totalScore+=right;
-            return totalScore;
-
-        }
-
-        public Size getAdjustedSize() {
-            return adjustedSize;
-        }
-
-
     }
 }
