@@ -45,10 +45,10 @@ public class EncoderTester extends LinearOpMode{
         FR = hardwareMap.get(DcMotor.class, "fR");
         BL = hardwareMap.get(DcMotor.class, "bL");
         BR = hardwareMap.get(DcMotor.class, "bR");
-        FL.setDirection(DcMotor.Direction.FORWARD);
-        BL.setDirection(DcMotor.Direction.FORWARD);
-        FR.setDirection(DcMotor.Direction.REVERSE);
-        BR.setDirection(DcMotor.Direction.REVERSE);
+        FL.setDirection(DcMotor.Direction.REVERSE);
+        BL.setDirection(DcMotor.Direction.REVERSE);
+        FR.setDirection(DcMotor.Direction.FORWARD);
+        BR.setDirection(DcMotor.Direction.FORWARD);
         FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -70,7 +70,7 @@ public class EncoderTester extends LinearOpMode{
         BL.setPower(0);
         BR.setPower(0);
         thatYes = hardwareMap.get(Servo.class, "servo");
-        thatYes.setPosition(.4);
+        thatYes.setPosition(1);
         for (int i = 0; i < 4; i++) {
             targets[i] = 192;
         }
@@ -102,7 +102,7 @@ public class EncoderTester extends LinearOpMode{
                 BR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 FL.setTargetPosition(targets[0]);
                 FR.setTargetPosition(targets[1]);
-                BL.setTargetPosition((int)(targets[2]/1.3872));
+                BL.setTargetPosition(targets[2]);
                 BR.setTargetPosition(targets[3]);
             }
             if(gamepad1.dpad_right){

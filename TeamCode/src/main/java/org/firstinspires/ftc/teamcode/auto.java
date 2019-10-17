@@ -193,7 +193,7 @@ public class auto extends LinearOpMode
         uD = hardwareMap.get(DcMotor.class, "uD");
         uD.setDirection(DcMotor.Direction.FORWARD);
         servo = hardwareMap.get(Servo.class, "servo");
-        servo.setPosition(0.4);
+        servo.setPosition(1);
 
 
 

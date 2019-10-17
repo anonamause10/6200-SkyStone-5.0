@@ -75,6 +75,14 @@ public class teleop extends LinearOpMode {
         BL.setDirection(REVERSE);
         FR.setDirection(FORWARD);
         BR.setDirection(FORWARD);
+        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         FL.setPower(0);
         FR.setPower(0);
         BL.setPower(0);
@@ -93,8 +101,8 @@ public class teleop extends LinearOpMode {
          */
         S1 = hardwareMap.get(Servo.class, "servo");
         S2 = hardwareMap.get(Servo.class, "servo2");
-        S1.setPosition(.4);
-        S2.setPosition(0);
+        S1.setPosition(1);
+        S2.setPosition(1);
 
         telemetry.addData("Robot", "Initialized");
         telemetry.update();
@@ -108,13 +116,13 @@ public class teleop extends LinearOpMode {
 
             if (gamepad1.a) {
                 S1.setPosition(0.5);
-                S2.setPosition(0.35);
+                S2.setPosition(0.6);
             } else if (gamepad1.b) {
-                S1.setPosition(0.4);
+                S1.setPosition(0.35);
                 S2.setPosition(0.3);
             }else if(gamepad1.y){
                 S1.setPosition(1);
-                S2.setPosition(0.45);
+                S2.setPosition(1);
             }
             double INSPEED = 0.4;
             if(gamepad1.left_bumper){
