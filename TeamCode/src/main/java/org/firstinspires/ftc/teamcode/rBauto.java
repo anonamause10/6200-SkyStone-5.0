@@ -69,34 +69,23 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 
-@Autonomous(name="Silver Auto", group="ree")
+@Autonomous(name="RED STONE Auto", group="ree")
 
-public class auto extends LinearOpMode
+public class rBauto extends LinearOpMode
 {
-    private double TICKSTOINCHES = 35/1000;
+    private double FINPERTICK = 1000/23.5;
+    private double SINPERTICK = 1000/16.5;
+    private double DEGREESPERTICK = 1000/90;
+    private double STRAFEERROR = 3/23.5;
+
     private int skyStonPos = 0;
     private int[] skyStonesPos = new int[6];
     private double[] vuXYZ = new double[3];
-
     // IMPORTANT: If you are using a USB WebCam, you must select CAMERA_CHOICE = BACK; and PHONE_IS_PORTRAIT = false;
     private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
     private static final boolean PHONE_IS_PORTRAIT = false  ;
-
-    /*
-     * IMPORTANT: You need to obtain your own license key to use Vuforia. The string below with which
-     * 'parameters.vuforiaLicenseKey' is initialized is for illustration only, and will not function.
-     * A Vuforia 'Development' license key, can be obtained free of charge from the Vuforia developer
-     * web site at https://developer.vuforia.com/license-manager.
-     *
-     * Vuforia license keys are always 380 characters long, and look as if they contain mostly
-     * random data. As an example, here is a example of a fragment of a valid key:
-     *      ... yIgIzTqZ4mWjk9wd3cZO9T1axEqzuhxoGlfOOI2dRzKS4T0hQ8kT ...
-     * Once you've obtained a license key, copy the string from the Vuforia web site
-     * and paste it in to your code on the next line, between the double quotes.
-     */
     private static final String VUFORIA_KEY =
             "AWbfTmn/////AAABmY0xuIe3C0RHvL3XuzRxyEmOT2OekXBSbqN2jot1si3OGBObwWadfitJR/D6Vk8VEBiW0HG2Q8UAEd0//OliF9aWCRmyDJ1mMqKCJZxpZemfT5ELFuWnJIZWUkKyjQfDNe2RIaAh0ermSxF4Bq77IDFirgggdYJoRIyi2Ys7Gl9lD/tSonV8OnldIN/Ove4/MtEBJTKHqjUEjC5U2khV+26AqkeqbxhFTNiIMl0LcmSSfugGhmWFGFtuPtp/+flPBRGoBO+tSl9P2sV4mSUBE/WrpHqB0Jd/tAmeNvbtgQXtZEGYc/9NszwRLVNl9k13vrBcgsiNxs2UY5xAvA4Wb6LN7Yu+tChwc+qBiVKAQe09\n";
-
     // Since ImageTarget trackables use mm to specifiy their dimensions, we must use mm for all the physical dimension.
     // We will define some constants and conversions here
     private static final float mmPerInch        = 25.4f;
@@ -120,10 +109,6 @@ public class auto extends LinearOpMode
     private OpenGLMatrix lastLocation = null;
     private VuforiaLocalizer vuforia = null;
 
-    /**
-     * This is the webcam we are to use. As with other hardware devices such as motors and
-     * servos, this device is identified using the robot configuration tool in the FTC application.
-     */
     WebcamName webcamName = null;
 
     private boolean targetVisible = false;
@@ -133,18 +118,6 @@ public class auto extends LinearOpMode
     double objTurn = 0;
 
     private ElapsedTime runtime = new ElapsedTime();
-    /**private static final float mmPerInch        = 25.4f;
-    private static final float mmFTCFieldWidth  = (12*6) * mmPerInch;       // the width of the FTC field (from the center point to the outer panels)
-    private static final float mmTargetHeight   = (6) * mmPerInch;          // the height of the center of the target image above the floor
-
-    // Select which camera you want use.  The FRONT camera is the one on the same side as the screen.
-    // Valid choices are:  BACK or FRONT
-    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
-
-    private OpenGLMatrix lastLocation = null;
-    boolean targetVisible;
-    WebcamName webcamName;
-    List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();*/
 
     private DcMotor fL = null;
     private DcMotor fR = null;
@@ -152,12 +125,7 @@ public class auto extends LinearOpMode
     private DcMotor bR = null;
     private DcMotor uD = null;
     private Servo servo =null;
-    // The IMU sensor object
-    BNO055IMU imu;
 
-    // State used for updating telemetry
-    Orientation angles;
-    Acceleration gravity;
     private double voltage = 0.0;
     private double scale = 0.0;
 
@@ -195,29 +163,6 @@ public class auto extends LinearOpMode
         servo = hardwareMap.get(Servo.class, "servo");
         servo.setPosition(1);
 
-
-
-        BNO055IMU.Parameters parameters2 = new BNO055IMU.Parameters();
-        parameters2.angleUnit = BNO055IMU.AngleUnit.DEGREES;
-        parameters2.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
-        parameters2.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
-        parameters2.loggingEnabled = true;
-        parameters2.loggingTag = "IMU";
-        parameters2.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-
-// Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
-// on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
-// and named "imu".
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters2);
-
-        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
-
-        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-        gravity = imu.getGravity();
-        String angle = formatAngle(angles.angleUnit, angles.firstAngle);
-        double ang = Double.parseDouble(angle);
-
         telemetry.addData("Robot", "Initialized");
         voltage = getBatteryVoltage();
         scale = 12.7 / voltage;
@@ -226,40 +171,32 @@ public class auto extends LinearOpMode
         telemetry.update();
         waitForStart();
         runtime.reset();
+
         //START AUTO HERE LMAO
-        moveF(24);
-        boolean targetFound = runNavig();
+
+        moveFB(-18);
+        boolean targetFound = false;
         if(targetFound){
 
         }else{
-            negTurn(90);
-            moveF(6);
-            turn(90);
-            moveF(4);
-            pickUpBlock();
+            strafe(5);
+            servoToBlock();
+            moveFB(12);
+            servoUp();
+            strafe(12);
+            eTurn(90);
+            strafe(-9);
+            moveFB(48);
         }
 
 
-
-        boolean turned = false;
-        double vuAng = objTurn;
-
-
-
     }
-    private void pickUpBlock(){
-        servo.setPosition(0.4);
-        uD.setTargetPosition(downPosition);
-        while(uD.isBusy()&&runtime.seconds()<27){}
-        servo.setPosition(0);
-        uD.setTargetPosition(0);
-        while(uD.isBusy()&&runtime.seconds()<27){}
-    }
-    private void moveF(int inches){
-        int target = (int)(inches * TICKSTOINCHES);
-        fL.setTargetPosition(target);
+
+    private void eTurn(double degrees){ //COUNTER CLOCKWISE IS POSITIVE
+        int target = (int)(degrees * DEGREESPERTICK);
+        fL.setTargetPosition(-target);
         fR.setTargetPosition(target);
-        bL.setTargetPosition((int)(target/2.308));
+        bL.setTargetPosition(-target);
         bR.setTargetPosition(target);
         fL.setPower(0.3);
         fR.setPower(0.3);
@@ -278,18 +215,63 @@ public class auto extends LinearOpMode
             }
         }
     }
-
-    String format(OpenGLMatrix transformationMatrix) {
-        return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
+    private void moveFB(double inches){
+        int target = (int)(inches * FINPERTICK);
+        fL.setTargetPosition(target);
+        fR.setTargetPosition(target);
+        bL.setTargetPosition(target);
+        bR.setTargetPosition(target);
+        fL.setPower(0.3);
+        fR.setPower(0.3);
+        bL.setPower(0.3);
+        bR.setPower(0.3);
+        fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        while(fL.isBusy() && runtime.seconds()<28) {
+            if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition()) < 3) {
+                fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            }
+        }
+    }
+    private void strafe(double inches){
+        int target = (int)(inches * SINPERTICK);
+        fL.setTargetPosition(target);
+        fR.setTargetPosition(-target);
+        bL.setTargetPosition(-target);
+        bR.setTargetPosition(target);
+        fL.setPower(0.3);
+        fR.setPower(0.3);
+        bL.setPower(0.3);
+        bR.setPower(0.3);
+        fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        while(fL.isBusy() && runtime.seconds()<28) {
+            if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition()) < 3) {
+                fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            }
+        }
+        eTurn(inches*STRAFEERROR);
+    }
+    private void servoToBlock(){
+        servo.setPosition(0.5);
+    }
+    private void servoUp(){
+        servo.setPosition(1);
+    }
+    private void servoToFoun(){
+        servo.setPosition(0.35);
     }
 
-    String formatAngle(AngleUnit angleUnit, double angle) {
-        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
-    }
-
-    String formatDegrees(double degrees) {
-        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
-    }
     private double getBatteryVoltage() {
         double result = Double.POSITIVE_INFINITY;
         for (VoltageSensor sensor : hardwareMap.voltageSensor) {
@@ -301,96 +283,6 @@ public class auto extends LinearOpMode
         return result;
     }
 
-    void turn(double tun){
-        objTurn = tun;
-        double vuAng = objTurn;
-        boolean turned = false;
-        while (!turned && opModeIsActive()) {
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            gravity = imu.getGravity();
-            String angle = formatAngle(angles.angleUnit, angles.firstAngle);
-            double ang = Double.parseDouble(angle);
-            turned = (ang >= vuAng - 0.3) && (ang <= vuAng + 5);
-            telemetry.addData("Angle", ang);
-            telemetry.addData("TurnTo", objTurn);
-
-            telemetry.update();
-            if (ang < vuAng - 1 && ang >= 0) {
-                fL.setPower(0.29 * scale);
-                fR.setPower(-0.29 * scale);
-                bL.setPower(0.29 * scale);
-                bR.setPower(-0.29 * scale);
-            } else if (ang > vuAng + 1 && ang >= 0) {
-                fL.setPower(-0.29 * scale);
-                fR.setPower(0.29 * scale);
-                bL.setPower(-0.29 * scale);
-                bR.setPower(0.29 * scale);
-            } else if (Math.abs(vuAng - ang) < 1) {
-                fL.setPower(0.25 * scale);
-                fR.setPower(-0.25 * scale);
-                bL.setPower(0.25 * scale);
-                bR.setPower(-0.25 * scale);
-            }
-            if (ang < 0) {
-                fL.setPower(0.3 * scale);
-                fR.setPower(-0.3 * scale);
-                bL.setPower(0.3 * scale);
-                bR.setPower(-0.3 * scale);
-            }
-        }
-        fL.setPower(0);
-
-        fR.setPower(0);
-
-        bL.setPower(0);
-
-        bR.setPower(0);
-    }
-     void negTurn(double tun) {
-         objTurn = tun;
-         double vuAng = objTurn;
-         boolean turned = false;
-         while (!turned && opModeIsActive()) {
-             angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-             gravity = imu.getGravity();
-             String angle = formatAngle(angles.angleUnit, angles.firstAngle);
-             double ang = Double.parseDouble(angle);
-             turned = (ang >= vuAng - 1) && (ang <= vuAng + 0.5);
-             telemetry.addData("Angle", ang);
-             telemetry.addData("TurnTo", objTurn);
-
-             telemetry.update();
-             if (ang < vuAng - 1 && ang <= 0) {
-                 fL.setPower(0.3 * scale);
-                 fR.setPower(-0.3 * scale);
-                 bL.setPower(0.3 * scale);
-                 bR.setPower(-0.3 * scale);
-             } else if (ang > vuAng + 1 && ang <= 0) {
-                 fL.setPower(-0.3 * scale);
-                 fR.setPower(0.3 * scale);
-                 bL.setPower(-0.3 * scale);
-                 bR.setPower(0.3 * scale);
-             } else if (Math.abs(vuAng - ang) < 1) {
-                 fL.setPower(-0.2 * scale);
-                 fR.setPower(0.2 * scale);
-                 bL.setPower(-0.2 * scale);
-                 bR.setPower(0.2 * scale);
-             }
-             if (ang > 0) {
-                 fL.setPower(-0.3 * scale);
-                 fR.setPower(0.3 * scale);
-                 bL.setPower(-0.3 * scale);
-                 bR.setPower(0.3 * scale);
-             }
-             fL.setPower(0);
-
-             fR.setPower(0);
-
-             bL.setPower(0);
-
-             bR.setPower(0);
-         }
-     }
      boolean runNavig(){
              /*
               * Retrieve the camera we are to use.
