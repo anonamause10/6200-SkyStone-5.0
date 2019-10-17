@@ -168,7 +168,7 @@ public class auto extends LinearOpMode
 
     @Override
     public void runOpMode() {
-        webcamName = hardwareMap.get(WebcamName.class, "cam");
+        webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
 
 
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());

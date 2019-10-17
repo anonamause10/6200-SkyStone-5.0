@@ -6,7 +6,7 @@
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ * furnished to do so, subject to the fofllowing conditions:
  *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
@@ -67,7 +67,7 @@ public class Camplz extends LinearOpMode
     private Point   screenPosition = new Point(); // Screen position of the mineral
     private Rect    foundRect = new Rect(); // Found rect
     private List<Mat> channels = new ArrayList<>();
-    private double perfectRatio = 1.67;
+    private double perfectRatio = 0.5;
     private Size adjustedSize;
     public Size   downscaleResolution = new Size(320, 240);
     public boolean useFixedDownscale = false;
@@ -85,7 +85,6 @@ public class Camplz extends LinearOpMode
          * the RC phone). If no camera monitor is desired, use the alternate
          * single-parameter constructor instead (commented out below)
          */
-        CameraName cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         //phoneCam = new OpenCvInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
         phoneCam = new OpenCvWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
@@ -103,7 +102,8 @@ public class Camplz extends LinearOpMode
          * of a frame from the camera. Note that switching pipelines on-the-fly
          * (while a streaming session is in flight) *IS* supported.
          */
-        phoneCam.setPipeline(new SamplePipeline());
+        OpenCvPipeline pipeline = new SamplePipeline();
+        phoneCam.setPipeline(pipeline);
 
         /*
          * Tell the camera to start streaming images to us! Note that you must make sure
@@ -142,9 +142,12 @@ public class Camplz extends LinearOpMode
 
         while (opModeIsActive())
         {
+
             /*
              * Send some stats to the telemetry
              */
+
+            /**
             telemetry.addData("Frame Count", phoneCam.getFrameCount());
             telemetry.addData("FPS", String.format("%.2f", phoneCam.getFps()));
             telemetry.addData("Total frame time ms", phoneCam.getTotalFrameTimeMs());
@@ -152,7 +155,7 @@ public class Camplz extends LinearOpMode
             telemetry.addData("Overhead time ms", phoneCam.getOverheadTimeMs());
             telemetry.addData("Theoretical max FPS", phoneCam.getCurrentPipelineMaxFps());
             telemetry.update();
-
+            */
             /*
              * NOTE: stopping the stream from the camera early (before the end of the OpMode
              * when it will be automatically stopped for you) *IS* supported. The "if" statement
@@ -209,7 +212,6 @@ public class Camplz extends LinearOpMode
              * excess CPU cycles for no reason. (By default, telemetry is only sent to the DS at 4Hz
              * anyway). Of course in a real OpMode you will likely not want to do this.
              */
-
         }
     }
 
@@ -293,7 +295,7 @@ public class Camplz extends LinearOpMode
                 // Get bounding rect of contour
                 Rect rect = Imgproc.boundingRect(cont);
                 Imgproc.rectangle(displayMat, rect.tl(), rect.br(), new Scalar(0,0,255),2); // Draw rect
-                Imgproc.putText(displayMat, ""+(int)(score), rect.tl(),0,0.3,new Scalar(255,255,255));
+                Imgproc.putText(displayMat, ""+(int)(score), rect.tl(),0,0.5,new Scalar(255,255,255));
 
                 // If the result is better then the previously tracked one, set this rect as the new best
                 if(score < bestDiffrence){
@@ -319,8 +321,70 @@ public class Camplz extends LinearOpMode
 
             Log.w("sizes","Display size: "+displayMat.depth());
 
+            if(bestRect!=null) {
+                Point tr = new Point(bestRect.br().x,bestRect.tl().y);
+                Rect black = skystonepos(workingMat, bestRect);
+                int pos = 2;
+                double dist = 320.0;
+                if(black!=null) {
+                    dist = Math.abs(black.br().x - bestRect.br().x);
+                    pos = (int)Math.round(dist/160.0);
+                }
+                telemetry.addData("Distance: ", dist);
+                telemetry.addData("Position: ", pos);
+                telemetry.update();
+            }
             return displayMat;
+        }
 
+        public Rect skystonepos(Mat input, Rect rect){
+            int pos = 0;
+            Mat newMask = new Mat();
+            int height = rect.height;
+            Point tr = new Point(rect.br().x,rect.tl().y);
+            Rect sub = new Rect(0,(int)(tr.y),(int)(tr.x),rect.height);
+            Imgproc.rectangle(displayMat, sub, new Scalar(0, 255, 0), 4);
+            Mat submat = input.submat(sub);
+
+            Imgproc.GaussianBlur(submat,submat,new Size(5,5),0);
+            Mat colormat = submat.clone();
+            channels = new ArrayList<>();
+
+            Imgproc.cvtColor(colormat, colormat, Imgproc.COLOR_RGB2GRAY);
+            Imgproc.GaussianBlur(colormat,colormat,new Size(3,3),0);
+            Core.split(colormat, channels);
+            if(channels.size() > 0){
+                Imgproc.threshold(channels.get(0), newMask, 20, 255, Imgproc.THRESH_BINARY_INV);
+            }
+            for(int i=0;i<channels.size();i++) {
+                channels.get(i).release();
+            }
+
+            colormat.release();
+            List<MatOfPoint> contoursBlack = new ArrayList<>();
+            Imgproc.findContours(newMask      , contoursBlack, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+            Imgproc.drawContours(displayMat,contoursBlack,-1, new Scalar(255,255,255), 2, 1, hierarchy,1,new Point(0,rect.tl().y));
+             Rect bestblack = null;
+            double bestDiffblack = Double.MAX_VALUE; // MAX_VALUE since less diffrence = better
+            for(MatOfPoint cont : contoursBlack){
+                double score = calculateScore(cont); // Get the diffrence score using the scoring API
+
+                // Get bounding rect of contour
+                Rect recto = Imgproc.boundingRect(cont);
+
+                // If the result is better then the previously tracked one, set this rect as the new best
+                if(score < bestDiffblack){
+                    bestDiffblack = score;
+                    bestblack = recto;
+                }
+            }
+
+            if(bestblack != null) {
+                // Show chosen result
+                Imgproc.rectangle(displayMat, bestblack.tl(), bestblack.br(), new Scalar(0, 255, 0), 4);
+
+            }
+            return bestblack;
 
         }
 
@@ -351,10 +415,9 @@ public class Camplz extends LinearOpMode
             totalScore += ratioscore;
             totalScore += areascore;
             totalScore+=right;
-            return totalScore;
+            return totalScore  ;
 
         }
-
         public Size getAdjustedSize() {
             return adjustedSize;
         }
