@@ -182,6 +182,7 @@ public class autoTestyBoi extends LinearOpMode
     }
 
     private void eTurn(double degrees){ //COUNTER CLOCKWISE IS POSITIVE
+        runtime.reset();
         int target = (int)(degrees * DEGREESPERTICK);
         fL.setTargetPosition(-target);
         fR.setTargetPosition(target);
@@ -196,7 +197,7 @@ public class autoTestyBoi extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         boolean working = true;
-        while(fL.isBusy() && runtime.seconds()<28 && working) {
+        while(fL.isBusy() && runtime.seconds()<5 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition()) < 3) {
                 fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -224,6 +225,7 @@ public class autoTestyBoi extends LinearOpMode
         }
     }
     private void moveFB(double inches){
+        runtime.reset();
         int target = (int)(inches * FINPERTICK);
         fL.setTargetPosition(target);
         fR.setTargetPosition(target);
@@ -238,7 +240,7 @@ public class autoTestyBoi extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         boolean working = true;
-        while(fL.isBusy() && runtime.seconds()<28 && working) {
+        while(fL.isBusy() && runtime.seconds()<5 && working) {
             updateT();
 
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition()) < 3) {
@@ -267,6 +269,7 @@ public class autoTestyBoi extends LinearOpMode
         }
     }
     private void strafe(double inches){
+        runtime.reset();
         int target = (int)(inches * SINPERTICK);
         fL.setTargetPosition(target);
         fR.setTargetPosition(-target);
@@ -281,7 +284,7 @@ public class autoTestyBoi extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         boolean working = true;
-        while(fL.isBusy() && runtime.seconds()<28&&working) {
+        while(fL.isBusy() && runtime.seconds()<5&&working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition()) < 3) {
                 fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

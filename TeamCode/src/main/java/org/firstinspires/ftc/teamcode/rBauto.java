@@ -83,6 +83,7 @@ public class rBauto extends LinearOpMode
     WebcamName webcamName = null;
 
     private ElapsedTime runtime = new ElapsedTime();
+    private ElapsedTime runtim2 = new ElapsedTime();
 
     private DcMotor fL = null;
     private DcMotor fR = null;
@@ -118,6 +119,10 @@ public class rBauto extends LinearOpMode
         fR.setPower(0);
         bL.setPower(0);
         bR.setPower(0);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         IN1 = hardwareMap.get(DcMotor.class, "IN1");
         IN1.setDirection(DcMotor.Direction.FORWARD);
         IN2 = hardwareMap.get(DcMotor.class,"IN2");
@@ -139,130 +144,104 @@ public class rBauto extends LinearOpMode
         telemetry.addData("Position:", pos);
         telemetry.update();
 
-        moveFB(-29.75);
-
-        if(pos==2){
-            strafe(16);
-        }else if(pos==1){
-            strafe(8);
-        }
-
+        fL.setTargetPosition(-1303);
+        fR.setTargetPosition(-1297);
+        bL.setTargetPosition(-1294);
+        bR.setTargetPosition(-1291);
+        fL.setPower(0.5);
+        fR.setPower(0.5);
+        bL.setPower(0.5);
+        bR.setPower(0.5);
+        waitToFinish();
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         servoToBlock();
-        telemetry.addData("YEET:", pos);
-        telemetry.update();
-        moveFB(13.5);
+
+        fL.setTargetPosition(722);
+        fR.setTargetPosition(680);
+        bL.setTargetPosition(726);
+        bR.setTargetPosition(732);
+        fL.setPower(0.25);
+        fR.setPower(0.25);
+        bL.setPower(0.25);
+        bR.setPower(0.25);
+        waitToFinish();
+
         servoUp();
-        telemetry.addData("YOTE:", pos);
-        telemetry.update();
-        moveFB(6);
-        telemetry.addData("YEET:", pos);
-        telemetry.update();
-        strafe(14);
-        telemetry.addData("HELP:", pos);
-        telemetry.update();
-        eTurn(140);
+
+        fL.setTargetPosition(975);
+        fR.setTargetPosition(937);
+        bL.setTargetPosition(986);
+        bR.setTargetPosition(1006);
+        fL.setPower(0.5);
+        fR.setPower(0.5);
+        bL.setPower(0.5);
+        bR.setPower(0.5);
+        waitToFinish();
+
+        fL.setTargetPosition(1438);
+        fR.setTargetPosition(357);
+        bL.setTargetPosition(527);
+        bR.setTargetPosition(1514);
+        fL.setPower(0.6);
+        fR.setPower(0.6);
+        bL.setPower(0.6);
+        bR.setPower(0.6);
+        waitToFinish();
+
+        fL.setTargetPosition(256);
+        fR.setTargetPosition(1412);
+        bL.setTargetPosition(-575);
+        bR.setTargetPosition(2854);
+        fL.setPower(0.3);
+        fR.setPower(0.3);
+        bL.setPower(0.3);
+        bR.setPower(0.3);
+        waitToFinish();
+
         intake();
-        moveFB(11);
-        telemetry.addData("YEET:", pos);
-        telemetry.update();
+
+        fL.setTargetPosition(1096);
+        fR.setTargetPosition(2337);
+        bL.setTargetPosition(331);
+        bR.setTargetPosition(3770);
+        fL.setPower(0.5);
+        fR.setPower(0.5);
+        bL.setPower(0.5);
+        bR.setPower(0.5);
+        waitToFinish();
+
         intakeOff();
-        try {
-            wait(300);
-        }catch(Exception E){
-        }
-        intakeOff();
-        eTurn(-50);
-
 
     }
 
-    private void eTurn(double degrees){ //COUNTER CLOCKWISE IS POSITIVE
-        int target = (int)(degrees * DEGREESPERTICK);
-        fL.setTargetPosition(-target);
-        fR.setTargetPosition(target);
-        bL.setTargetPosition(-target);
-        bR.setTargetPosition(target);
-        fL.setPower(0.3);
-        fR.setPower(0.3);
-        bL.setPower(0.3);
-        bR.setPower(0.3);
+    private void waitToFinish(){
         fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runtim2.reset();
         boolean working = true;
-        while(fL.isBusy() && runtime.seconds()<28 && working) {
+        while(fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<10 && working) {
             updateT();
-            if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition()) < 3) {
-                fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
+                    + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
+                    + Math.abs(bL.getCurrentPosition() - bL.getTargetPosition())
+                    + Math.abs(bR.getCurrentPosition() - bR.getTargetPosition())
+                    < 40) {
                 working = false;
             }
         }
-        try {
-            wait(100);
-        }catch(Exception E){
-        }
-    }
-    private void moveFB(double inches){
-        int target = (int)(inches * FINPERTICK);
-        fL.setTargetPosition(target);
-        fR.setTargetPosition(target);
-        bL.setTargetPosition(target);
-        bR.setTargetPosition(target);
-        fL.setPower(0.3);
-        fR.setPower(0.3);
-        bL.setPower(0.3);
-        bR.setPower(0.3);
-        fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        boolean working = true;
-        while(fL.isBusy() && runtime.seconds()<28 && working) {
-            updateT();
-
-            if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition()) < 3) {
-                fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                working = false;
-            }
-        }
-        try {
-            wait(100);
-        }catch(Exception E){
-        }
-    }
-    private void strafe(double inches){
-        int target = (int)(inches * SINPERTICK);
-        fL.setTargetPosition(target);
-        fR.setTargetPosition(-target);
-        bL.setTargetPosition(-target);
-        bR.setTargetPosition(target);
-        fL.setPower(0.3);
-        fR.setPower(0.3);
-        bL.setPower(0.3);
-        bR.setPower(0.3);
-        fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        boolean working = true;
-        while(fL.isBusy() && runtime.seconds()<28&&working) {
-            updateT();
-            if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition()) < 3) {
-                fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                working = false;
-            }
-        }
-        eTurn(inches*STRAFEERROR);
+        fL.setPower(0);
+        fR.setPower(0);
+        bL.setPower(0);
+        bR.setPower(0);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
     private void servoToBlock(){
         servo.setPosition(0.5);
@@ -334,6 +313,7 @@ public class rBauto extends LinearOpMode
                          "back left (%.1f), back right (%.1f)", (float)fL.getCurrentPosition(), (float)fR.getCurrentPosition(),
                  (float)bL.getCurrentPosition(), (float)bR.getCurrentPosition());
          telemetry.addData("Status", "Run Time: " + runtime.toString());
+         telemetry.addData("Status", "Run Time2: " + runtim2.toString());
          telemetry.addData("ServoPos", servo.getPosition());
          telemetry.addData("INTAKE POWER", IN1.getPower());
          telemetry.update();
