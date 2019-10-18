@@ -27,6 +27,7 @@ import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraCharacteristics;
@@ -55,8 +56,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@TeleOp
-public class Camplz extends LinearOpMode
+
+public class SkystoneDetector
 {
     OpenCvCamera phoneCam;
     private Mat displayMat = new Mat(); // Display debug info to the screen (this is what is returned)
@@ -72,10 +73,10 @@ public class Camplz extends LinearOpMode
     public Size   downscaleResolution = new Size(320, 240);
     public boolean useFixedDownscale = false;
     private Size initSize;
+    private SamplePipeline pipeline;
     public double downscale = 0.5;
 
-    @Override
-    public void runOpMode()
+    public SkystoneDetector(HardwareMap hardwareMap, boolean webcam)
     {
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
@@ -86,8 +87,7 @@ public class Camplz extends LinearOpMode
          * single-parameter constructor instead (commented out below)
          */
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        //phoneCam = new OpenCvInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId); // USING PHONE CAMERA
-        phoneCam = new OpenCvWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId); // USING WEBCAM
+        phoneCam = webcam ? new OpenCvWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId): new OpenCvInternalCamera(OpenCvInternalCamera.CameraDirection.BACK, cameraMonitorViewId);
 
         // OR...  Do Not Activate the Camera Monitor View
         //phoneCam = new OpenCvInternalCamera(OpenCvInternalCamera.CameraDirection.BACK);
@@ -102,7 +102,7 @@ public class Camplz extends LinearOpMode
          * of a frame from the camera. Note that switching pipelines on-the-fly
          * (while a streaming session is in flight) *IS* supported.
          */
-        OpenCvPipeline pipeline = new SamplePipeline();
+        pipeline = new SamplePipeline();
         phoneCam.setPipeline(pipeline);
 
         /*
@@ -116,103 +116,24 @@ public class Camplz extends LinearOpMode
          * For a rear facing camera or a webcam, rotation is defined assuming the camera is facing
          * away from the user.
          */
-        /**
-        boolean sizeSupported = false;
-        CameraManagerInternal cameraManager = (CameraManagerInternal) ClassFactory.getInstance().getCameraManager();
-        Camera camera = cameraManager.requestPermissionAndOpenCamera(new Deadline(1, TimeUnit.SECONDS), cameraName, null);
-        if(camera==null){
-            Log.w("bib", "no camera");
-        }
-        CameraCharacteristics cameraCharacteristics = camera.getCameraName().getCameraCharacteristics();
-        if(cameraCharacteristics.getSizes(ImageFormat.YUY2).length==0){
-            Log.w("bib", "still no camera");
-        }
-        for(org.firstinspires.ftc.robotcore.external.android.util.Size s : cameraCharacteristics.getSizes(ImageFormat.YUY2))
-        {
-            Log.w("Camres","width: "+s.getWidth());
-            Log.w("Camres","height: "+s.getHeight());
-        }
-         */
         phoneCam.startStreaming(640, 480, OpenCvCameraRotation.UPRIGHT);
 
         /*
          * Wait for the user to press start on the Driver Station
          */
-        waitForStart();
 
-        while (opModeIsActive())
-        {
+    }
 
-            /*
-             * Send some stats to the telemetry
-             */
+    public double getDist(){
+        return pipeline.getDist();
+    }
 
-            /**
-            telemetry.addData("Frame Count", phoneCam.getFrameCount());
-            telemetry.addData("FPS", String.format("%.2f", phoneCam.getFps()));
-            telemetry.addData("Total frame time ms", phoneCam.getTotalFrameTimeMs());
-            telemetry.addData("Pipeline time ms", phoneCam.getPipelineTimeMs());
-            telemetry.addData("Overhead time ms", phoneCam.getOverheadTimeMs());
-            telemetry.addData("Theoretical max FPS", phoneCam.getCurrentPipelineMaxFps());
-            telemetry.update();
-            */
-            /*
-             * NOTE: stopping the stream from the camera early (before the end of the OpMode
-             * when it will be automatically stopped for you) *IS* supported. The "if" statement
-             * below will stop streaming from the camera when the "A" button on gamepad 1 is pressed.
-             */
-            if(gamepad1.a)
-            {
-                /*
-                 * IMPORTANT NOTE: calling stopStreaming() will indeed stop the stream of images
-                 * from the camera (and, by extension, stop calling your vision pipeline). HOWEVER,
-                 * if the reason you wish to stop the stream early is to switch use of the camera
-                 * over to, say, Vuforia or TFOD, you will also need to call closeCameraDevice()
-                 * (commented out below), because according to the Android Camera API documentation:
-                 *         "Your application should only have one Camera object active at a time for
-                 *          a particular hardware camera."
-                 *
-                 * NB: calling closeCameraDevice() will internally call stopStreaming() if applicable,
-                 * but it doesn't hurt to call it anyway, if for no other reason than clarity.
-                 *
-                 * NB2: if you are stopping the camera stream to simply save some processing power
-                 * (or battery power) for a short while when you do not need your vision pipeline,
-                 * it is recommended to NOT call closeCameraDevice() as you will then need to re-open
-                 * it the next time you wish to activate your vision pipeline, which can take a bit of
-                 * time. Of course, this comment is irrelevant in light of the use case described in
-                 * the above "important note".
-                 */
-                phoneCam.stopStreaming();
-                //webcam.closeCameraDevice();
-            }
+    public double getPos(){
+        return pipeline.getPos();
+    }
 
-            /*
-             * The viewport (if one was specified in the constructor) can also be dynamically "paused"
-             * and "resumed". The primary use case of this is to reduce CPU, memory, and power load
-             * when you need your vision pipeline running, but do not require a live preview on the
-             * robot controller screen. For instance, this could be useful if you wish to see the live
-             * camera preview as you are initializing your robot, but you no longer require the live
-             * preview after you have finished your initialization process; pausing the viewport does
-             * not stop running your pipeline.
-             *
-             * The "if" statements below will pause the viewport if the "X" button on gamepad1 is pressed,
-             * and resume the viewport if the "Y" button on gamepad1 is pressed.
-             */
-            else if(gamepad1.x)
-            {
-                phoneCam.pauseViewport();
-            }
-            else if(gamepad1.y)
-            {
-                phoneCam.resumeViewport();
-            }
-
-            /*
-             * For the purposes of this sample, throttle ourselves to 10Hz loop to avoid burning
-             * excess CPU cycles for no reason. (By default, telemetry is only sent to the DS at 4Hz
-             * anyway). Of course in a real OpMode you will likely not want to do this.
-             */
-        }
+    public void stop(){
+        phoneCam.stopStreaming();
     }
 
     /*
@@ -232,14 +153,10 @@ public class Camplz extends LinearOpMode
      */
     class SamplePipeline extends OpenCvPipeline
     {
-        /*
-         * NOTE: if you wish to use additional Mat objects in your processing pipeline, it is
-         * highly recommended to declare them here as instance variables and re-use them for
-         * each invocation of processFrame(), rather than declaring them as new local variables
-         * each time through processFrame(). This removes the danger of causing a memory leak
-         * by forgetting to call mat.release(), and it also reduces memory pressure by not
-         * constantly allocating and freeing large chunks of memory.
-         */
+
+        private double dist = 320.0;
+        private int pos = 2;
+
 
         @Override
         public Mat processFrame(Mat input)
@@ -286,7 +203,7 @@ public class Camplz extends LinearOpMode
 
             List<MatOfPoint> contoursYellow = new ArrayList<>();
             Imgproc.findContours(mask      , contoursYellow, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-                Imgproc.drawContours(displayMat,contoursYellow,-1,new Scalar(230,70,70),2);
+            Imgproc.drawContours(displayMat,contoursYellow,-1,new Scalar(230,70,70),2);
             Rect bestRect = null;
             double bestDiffrence = Double.MAX_VALUE; // MAX_VALUE since less diffrence = better
             for(MatOfPoint cont : contoursYellow){
@@ -324,18 +241,23 @@ public class Camplz extends LinearOpMode
             if(bestRect!=null) {
                 Point tr = new Point(bestRect.br().x,bestRect.tl().y);
                 Rect black = skystonepos(workingMat, bestRect);
-                int pos = 2;
-                double dist = 320.0;
+                pos = 2;
+                dist = 320.0;
                 if(black!=null) {
                     dist = Math.abs(black.br().x - bestRect.br().x);
                     pos = (int)Math.round((dist)/160.0);
                 }
-                telemetry.addData("Distance: ", dist);
-                telemetry.addData("Blockwidth", bestRect.width);
-                telemetry.addData("Position: ", pos);
-                telemetry.update();
+
             }
             return displayMat;
+        }
+
+        public double getDist() {
+            return dist;
+        }
+
+        public int getPos() {
+            return pos;
         }
 
         public Rect skystonepos(Mat input, Rect rect){
@@ -365,7 +287,7 @@ public class Camplz extends LinearOpMode
             List<MatOfPoint> contoursBlack = new ArrayList<>();
             Imgproc.findContours(newMask      , contoursBlack, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
             Imgproc.drawContours(displayMat,contoursBlack,-1, new Scalar(255,255,255), 2, 1, hierarchy,1,new Point(0,rect.tl().y));
-             Rect bestblack = null;
+            Rect bestblack = null;
             double bestDiffblack = Double.MAX_VALUE; // MAX_VALUE since less diffrence = better
             for(MatOfPoint cont : contoursBlack){
                 double score = calculateScore(cont); // Get the diffrence score using the scoring API
