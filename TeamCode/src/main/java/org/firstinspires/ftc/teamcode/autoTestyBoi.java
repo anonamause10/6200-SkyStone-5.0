@@ -31,7 +31,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -64,6 +64,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
+import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.Pif;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
@@ -71,16 +72,16 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 
-@Autonomous(name="RED STONE Auto", group="ree")
+@TeleOp(name="Auto big rart", group="ree")
 
-public class rBauto extends LinearOpMode
+public class autoTestyBoi extends LinearOpMode
 {
     private double FINPERTICK = 1000/23.5;
     private double SINPERTICK = 1000/19.5;
     private double DEGREESPERTICK = 1000/85;
     private double STRAFEERROR = 3/19.5;
 
-    WebcamName webcamName = null;
+    //WebcamName webcamName = null;
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -104,8 +105,8 @@ public class rBauto extends LinearOpMode
 
     @Override
     public void runOpMode() {
-        SkystoneDetector sky = new SkystoneDetector(hardwareMap, true);
-        webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+        //SkystoneDetector sky = new SkystoneDetector(hardwareMap, true);
+        //webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
         fL= hardwareMap.get(DcMotor.class, "fL");
         fR = hardwareMap.get(DcMotor.class, "fR");
         bL = hardwareMap.get(DcMotor.class, "bL");
@@ -133,45 +134,49 @@ public class rBauto extends LinearOpMode
         telemetry.update();
         waitForStart();
         runtime.reset();
+        int x = 0;
+        boolean aPrev = false;
+        boolean bPrev = false;
+        boolean dUpPrev = false;
+        boolean dDownPrev = false;
+        boolean dLeftPrev = false;
+        boolean dRightPrev = false;
 
-        //START AUTO HERE LMAO
-        int pos = runDetect(sky);
-        telemetry.addData("Position:", pos);
-        telemetry.update();
+        while(opModeIsActive()){
+            if(gamepad1.a&&!aPrev){
+                x++;
+            }
+            if(gamepad1.b&&!bPrev){
+                x--;
+            }
+            if(gamepad1.dpad_left&&!dLeftPrev){
+                eTurn(x);
+            }
+            if(gamepad1.dpad_right&&!dRightPrev){
+                strafe(x);
+            }
+            if(gamepad1.dpad_down&&!dDownPrev){
+            }
 
-        moveFB(-29.75);
+            if(gamepad1.left_bumper){
+                servoToBlock();
+            }
+            if(gamepad1.right_bumper){
+                servoUp();
+            }
+            if(gamepad1.dpad_up&&!dUpPrev){
+                moveFB(x);
+            }
 
-        if(pos==2){
-            strafe(16);
-        }else if(pos==1){
-            strafe(8);
+            aPrev = gamepad1.a;
+            bPrev = gamepad1.b;
+            dDownPrev = gamepad1.dpad_down;
+            dUpPrev = gamepad1.dpad_up;
+            dLeftPrev = gamepad1.dpad_left;
+            dRightPrev = gamepad1.dpad_right;
+            telemetry.addData("x", x);
+            telemetry.update();
         }
-
-        servoToBlock();
-        telemetry.addData("YEET:", pos);
-        telemetry.update();
-        moveFB(13.5);
-        servoUp();
-        telemetry.addData("YOTE:", pos);
-        telemetry.update();
-        moveFB(6);
-        telemetry.addData("YEET:", pos);
-        telemetry.update();
-        strafe(14);
-        telemetry.addData("HELP:", pos);
-        telemetry.update();
-        eTurn(140);
-        intake();
-        moveFB(11);
-        telemetry.addData("YEET:", pos);
-        telemetry.update();
-        intakeOff();
-        try {
-            wait(300);
-        }catch(Exception E){
-        }
-        intakeOff();
-        eTurn(-50);
 
 
     }
@@ -201,6 +206,18 @@ public class rBauto extends LinearOpMode
                 working = false;
             }
         }
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setPower(0);
+        fR.setPower(0);
+        bL.setPower(0);
+        bR.setPower(0);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         try {
             wait(100);
         }catch(Exception E){
@@ -232,6 +249,18 @@ public class rBauto extends LinearOpMode
                 working = false;
             }
         }
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setPower(0);
+        fR.setPower(0);
+        bL.setPower(0);
+        bR.setPower(0);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         try {
             wait(100);
         }catch(Exception E){
@@ -262,6 +291,18 @@ public class rBauto extends LinearOpMode
                 working = false;
             }
         }
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setPower(0);
+        fR.setPower(0);
+        bL.setPower(0);
+        bR.setPower(0);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         eTurn(inches*STRAFEERROR);
     }
     private void servoToBlock(){
@@ -321,22 +362,23 @@ public class rBauto extends LinearOpMode
         return result;
     }
 
-     private int runDetect( SkystoneDetector sky){
-             int result = (int) sky.getPos();
-             sky.stop();
-             return result;
-     }
-     private void updateT(){
-         telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
-                         "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
-                 bL.getPower(), bR.getPower());
-         telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
-                         "back left (%.1f), back right (%.1f)", (float)fL.getCurrentPosition(), (float)fR.getCurrentPosition(),
-                 (float)bL.getCurrentPosition(), (float)bR.getCurrentPosition());
-         telemetry.addData("Status", "Run Time: " + runtime.toString());
-         telemetry.addData("ServoPos", servo.getPosition());
-         telemetry.addData("INTAKE POWER", IN1.getPower());
-         telemetry.update();
-     }
+    private int runDetect( SkystoneDetector sky){
+        int result = (int) sky.getPos();
+        sky.stop();
+        return result;
+    }
+    private void updateT(){
+        telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
+                        "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
+                bL.getPower(), bR.getPower());
+        telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
+                        "back left (%.1f), back right (%.1f)", (float)fL.getCurrentPosition(), (float)fR.getCurrentPosition(),
+                (float)bL.getCurrentPosition(), (float)bR.getCurrentPosition());
+        telemetry.addData("Status", "Run Time: " + runtime.toString());
+        telemetry.addData("ServoPos", servo.getPosition());
+        telemetry.addData("INTAKE POWER", IN1.getPower());
+        telemetry.update();
+    }
 
 }
+
