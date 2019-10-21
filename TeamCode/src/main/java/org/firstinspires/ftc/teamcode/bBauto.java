@@ -71,9 +71,9 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 
-@Autonomous(name="RED STONE Auto", group="ree")
+@Autonomous(name="BLUE STONE Auto", group="ree")
 
-public class rBauto extends LinearOpMode
+public class bBauto extends LinearOpMode
 {
     private double FINPERTICK = 1000/23.5;
     private double SINPERTICK = 1000/19.5;
@@ -367,39 +367,38 @@ public class rBauto extends LinearOpMode
                             "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
                     bL.getPower(), bR.getPower());
             telemetry.update();
-            if (ang < vuAng) {
-                fL.setPower(-0.35 );
-                fR.setPower(0.35);
-                bL.setPower(-0.35 );
-                bR.setPower(0.35 );
-            } else if (ang > vuAng) {
-                fL.setPower(0.35 );
-                fR.setPower(-0.35 );
-                bL.setPower(0.35 );
-                bR.setPower(-0.35 );
+            if(Math.abs(ang - vuAng) <= 0.5){
+                fL.setPower(0);
+                fR.setPower(0);
+                bL.setPower(0);
+                bR.setPower(0);
+            }else if (ang-vuAng > 10){
+                fL.setPower(0.7 );
+                fR.setPower(-0.7 );
+                bL.setPower(0.7 );
+                bR.setPower(-0.7 );
+            }else if(vuAng - ang > 10){
+                fL.setPower(-0.7 );
+                fR.setPower(0.7 );
+                bL.setPower(-0.7 );
+                bR.setPower(0.7 );
+            }else if (ang < vuAng) {
+                fL.setPower(-0.25 );
+                fR.setPower(0.25);
+                bL.setPower(-0.25 );
+                bR.setPower(0.25 );
+            }else if (ang > vuAng) {
+                fL.setPower(0.25 );
+                fR.setPower(-0.25 );
+                bL.setPower(0.25 );
+                bR.setPower(-0.25 );
             }
-
-            if (ang-vuAng >20) {
-                fL.setPower(0.5 );
-                fR.setPower(-0.5 );
-                bL.setPower(0.5 );
-                bR.setPower(-0.5 );
-            }else if(vuAng - ang > 20){
-                fL.setPower(-0.5 );
-                fR.setPower(0.5 );
-                bL.setPower(-0.5 );
-                bR.setPower(0.5 );
-            }
-
             ang = getHeading();
             turned = (Math.abs(ang - vuAng) <= 0.5);
         }
         fL.setPower(0);
-
         fR.setPower(0);
-
         bL.setPower(0);
-
         bR.setPower(0);
     }
 
