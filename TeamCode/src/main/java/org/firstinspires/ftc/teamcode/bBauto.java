@@ -170,10 +170,10 @@ public class bBauto extends LinearOpMode
         telemetry.addData("Position:", pos);
         telemetry.update();
 
-        fL.setTargetPosition(-1270);
-        fR.setTargetPosition(-1270);
-        bL.setTargetPosition(-1270);
-        bR.setTargetPosition(-1270);
+        fL.setTargetPosition(-1250);
+        fR.setTargetPosition(-1250);
+        bL.setTargetPosition(-1250);
+        bR.setTargetPosition(-1250);
         fL.setPower(0.4);
         fR.setPower(0.4);
         bL.setPower(0.4);
@@ -205,10 +205,6 @@ public class bBauto extends LinearOpMode
         bR.setPower(0.5);
         waitToFinish();
         turn(180);
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         intake();
 
         fL.setTargetPosition(600);
@@ -223,11 +219,34 @@ public class bBauto extends LinearOpMode
 
         intakeOff();
         turn(90);
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        fL.setTargetPosition(1000);
+        fR.setTargetPosition(1000);
+        bL.setTargetPosition(1000);
+        bR.setTargetPosition(1000);
+        fL.setPower(0.7);
+        fR.setPower(0.7);
+        bL.setPower(0.7);
+        bR.setPower(0.7);
+        waitToFinish();
+        outtake();
+        try{
+            wait(500);
+        }catch(Exception e){
+        }
+        intakeOff();
+        fL.setTargetPosition(-600);
+        fR.setTargetPosition(-600);
+        bL.setTargetPosition(-600);
+        bR.setTargetPosition(-600);
+        fL.setPower(0.7);
+        fR.setPower(0.7);
+        bL.setPower(0.7);
+        bR.setPower(0.7);
+        waitToFinish();
+
+
+        turn(215);
     }
 
     private void waitToFinish(){
@@ -400,6 +419,14 @@ public class bBauto extends LinearOpMode
         fR.setPower(0);
         bL.setPower(0);
         bR.setPower(0);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
 
