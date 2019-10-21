@@ -80,7 +80,7 @@ public class rBauto extends LinearOpMode
     private double DEGREESPERTICK = 1000/85;
     private double STRAFEERROR = 3/19.5;
 
-    WebcamName webcamName = null;
+    //WebcamName webcamName = null;
 
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime runtim2 = new ElapsedTime();
@@ -99,14 +99,19 @@ public class rBauto extends LinearOpMode
     private int downPosition = 300;
     private int incremented = 0;
     private int increment = 50;
+    // The IMU sensor object
+    BNO055IMU imu;
 
+    // State used for updating telemetry
+    Orientation angles;
+    Acceleration gravity;
 
 
 
     @Override
     public void runOpMode() {
-        SkystoneDetector sky = new SkystoneDetector(hardwareMap, true);
-        webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+        SkystoneDetector sky = new SkystoneDetector(hardwareMap, false);
+        //webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
         fL= hardwareMap.get(DcMotor.class, "fL");
         fR = hardwareMap.get(DcMotor.class, "fR");
         bL = hardwareMap.get(DcMotor.class, "bL");
@@ -130,6 +135,27 @@ public class rBauto extends LinearOpMode
         servo = hardwareMap.get(Servo.class, "servo");
         servo.setPosition(1);
 
+        BNO055IMU.Parameters parameters2 = new BNO055IMU.Parameters();
+        parameters2.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters2.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters2.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters2.loggingEnabled = true;
+        parameters2.loggingTag = "IMU";
+        parameters2.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+// Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+// on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+// and named "imu".
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters2);
+
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        gravity = imu.getGravity();
+        String angle = formatAngle(angles.angleUnit, angles.firstAngle);
+        double ang = Double.parseDouble(angle);
+
         telemetry.addData("Robot", "Initialized");
         voltage = getBatteryVoltage();
         scale = 12.7 / voltage;
@@ -144,25 +170,23 @@ public class rBauto extends LinearOpMode
         telemetry.addData("Position:", pos);
         telemetry.update();
 
-        fL.setTargetPosition(-1303);
-        fR.setTargetPosition(-1297);
-        bL.setTargetPosition(-1294);
-        bR.setTargetPosition(-1291);
-        fL.setPower(0.5);
-        fR.setPower(0.5);
-        bL.setPower(0.5);
-        bR.setPower(0.5);
+        fL.setTargetPosition(-1270);
+        fR.setTargetPosition(-1270);
+        bL.setTargetPosition(-1270);
+        bR.setTargetPosition(-1270);
+        fL.setPower(0.4);
+        fR.setPower(0.4);
+        bL.setPower(0.4);
+        bR.setPower(0.4);
         waitToFinish();
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        servoToBlock();
 
-        fL.setTargetPosition(722);
-        fR.setTargetPosition(680);
-        bL.setTargetPosition(726);
-        bR.setTargetPosition(732);
+        servoToBlock();
+        sleep(300);
+
+        fL.setTargetPosition(650);
+        fR.setTargetPosition(650);
+        bL.setTargetPosition(650);
+        bR.setTargetPosition(650);
         fL.setPower(0.25);
         fR.setPower(0.25);
         bL.setPower(0.25);
@@ -171,49 +195,38 @@ public class rBauto extends LinearOpMode
 
         servoUp();
 
-        fL.setTargetPosition(975);
-        fR.setTargetPosition(937);
-        bL.setTargetPosition(986);
-        bR.setTargetPosition(1006);
+        fL.setTargetPosition(300);
+        fR.setTargetPosition(300);
+        bL.setTargetPosition(300);
+        bR.setTargetPosition(300);
         fL.setPower(0.5);
         fR.setPower(0.5);
         bL.setPower(0.5);
         bR.setPower(0.5);
         waitToFinish();
+        turn(180);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        intake();
 
-        fL.setTargetPosition(1438);
-        fR.setTargetPosition(357);
-        bL.setTargetPosition(527);
-        bR.setTargetPosition(1514);
-        fL.setPower(0.6);
-        fR.setPower(0.6);
-        bL.setPower(0.6);
-        bR.setPower(0.6);
-        waitToFinish();
-
-        fL.setTargetPosition(256);
-        fR.setTargetPosition(1412);
-        bL.setTargetPosition(-575);
-        bR.setTargetPosition(2854);
+        fL.setTargetPosition(600);
+        fR.setTargetPosition(600);
+        bL.setTargetPosition(600);
+        bR.setTargetPosition(600);
         fL.setPower(0.3);
         fR.setPower(0.3);
         bL.setPower(0.3);
         bR.setPower(0.3);
         waitToFinish();
 
-        intake();
-
-        fL.setTargetPosition(1096);
-        fR.setTargetPosition(2337);
-        bL.setTargetPosition(331);
-        bR.setTargetPosition(3770);
-        fL.setPower(0.5);
-        fR.setPower(0.5);
-        bL.setPower(0.5);
-        bR.setPower(0.5);
-        waitToFinish();
-
         intakeOff();
+        turn(90);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
     }
 
@@ -224,13 +237,13 @@ public class rBauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<10 && working) {
+        while(fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<6 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
                     + Math.abs(bL.getCurrentPosition() - bL.getTargetPosition())
                     + Math.abs(bR.getCurrentPosition() - bR.getTargetPosition())
-                    < 40) {
+                    < 60) {
                 working = false;
             }
         }
@@ -238,11 +251,22 @@ public class rBauto extends LinearOpMode
         fR.setPower(0);
         bL.setPower(0);
         bR.setPower(0);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+
+
+    public double getHeading() {
+        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        return (angles.firstAngle+360)%360;
+    }
+
     private void servoToBlock(){
         servo.setPosition(0.5);
         try {
@@ -264,6 +288,7 @@ public class rBauto extends LinearOpMode
         }catch(Exception E){
         }
     }
+
     private void intake(){
         IN1.setPower(0.7);
         IN2.setPower(0.7);
@@ -318,5 +343,65 @@ public class rBauto extends LinearOpMode
          telemetry.addData("INTAKE POWER", IN1.getPower());
          telemetry.update();
      }
+    String format(OpenGLMatrix transformationMatrix) {
+        return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
+    }
+
+    String formatAngle(AngleUnit angleUnit, double angle) {
+        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
+    }
+
+    String formatDegrees(double degrees) {
+        return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
+    }
+
+    void turn(double tun){
+        double vuAng = tun;
+        boolean turned = false;
+        while (!turned && opModeIsActive()) {
+            double ang = getHeading();
+
+            telemetry.addData("Angle", ang);
+            telemetry.addData("TurnTo", vuAng);
+            telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
+                            "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
+                    bL.getPower(), bR.getPower());
+            telemetry.update();
+            if (ang < vuAng) {
+                fL.setPower(-0.35 );
+                fR.setPower(0.35);
+                bL.setPower(-0.35 );
+                bR.setPower(0.35 );
+            } else if (ang > vuAng) {
+                fL.setPower(0.35 );
+                fR.setPower(-0.35 );
+                bL.setPower(0.35 );
+                bR.setPower(-0.35 );
+            }
+
+            if (ang-vuAng >20) {
+                fL.setPower(0.5 );
+                fR.setPower(-0.5 );
+                bL.setPower(0.5 );
+                bR.setPower(-0.5 );
+            }else if(vuAng - ang > 20){
+                fL.setPower(-0.5 );
+                fR.setPower(0.5 );
+                bL.setPower(-0.5 );
+                bR.setPower(0.5 );
+            }
+
+            ang = getHeading();
+            turned = (Math.abs(ang - vuAng) <= 0.5);
+        }
+        fL.setPower(0);
+
+        fR.setPower(0);
+
+        bL.setPower(0);
+
+        bR.setPower(0);
+    }
+
 
 }
