@@ -75,9 +75,11 @@ public class SkystoneDetector
     private Size initSize;
     private SamplePipeline pipeline;
     public double downscale = 0.5;
+    public boolean right;
 
-    public SkystoneDetector(HardwareMap hardwareMap, boolean webcam)
+    public SkystoneDetector(HardwareMap hardwareMap, boolean webcam, boolean right)
     {
+        this.right = right;
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
          * In this sample, we're using the phone's internal camera. We pass it a
@@ -238,14 +240,21 @@ public class SkystoneDetector
 
             Log.w("sizes","Display size: "+displayMat.depth());
 
-            if(bestRect!=null) {
-                Point tr = new Point(bestRect.br().x,bestRect.tl().y);
+            if(bestRect!=null){
                 Rect black = skystonepos(workingMat, bestRect);
                 pos = 2;
                 dist = 320.0;
-                if(black!=null) {
-                    dist = Math.abs(black.br().x - bestRect.br().x);
-                    pos = (int)Math.round((dist)/160.0);
+                if(right){ //if we're looking from the right:
+                    if(black!=null) {
+                        dist = Math.abs(black.br().x - bestRect.br().x);
+                        pos = (int) Math.round((dist) / 160.0);
+                    }
+                else{ //if we're looking from the left:
+                    if(black!=null) {
+                        dist = Math.abs(bestRect.tl().x - black.tl().x);
+                        pos = (int) Math.round((dist) / 160.0);
+                    }
+                    }
                 }
 
             }
@@ -264,8 +273,14 @@ public class SkystoneDetector
             int pos = 0;
             Mat newMask = new Mat();
             int height = rect.height;
-            Point tr = new Point(rect.br().x,rect.tl().y);
-            Rect sub = new Rect(0,(int)(tr.y),(int)(tr.x),rect.height);
+            Rect sub = null;
+            if(right){
+                Point tr = new Point(rect.br().x,rect.tl().y);
+                sub = new Rect(0,(int)(tr.y),(int)(tr.x),rect.height);
+            }
+            else{
+                sub = new Rect((int)(rect.tl().x),(int)(rect.tl().y),639 - (int)(rect.tl().x),rect.height);
+            }
             Imgproc.rectangle(displayMat, sub, new Scalar(0, 255, 0), 4);
             Mat submat = input.submat(sub);
 
@@ -285,7 +300,7 @@ public class SkystoneDetector
 
             colormat.release();
             List<MatOfPoint> contoursBlack = new ArrayList<>();
-            Imgproc.findContours(newMask      , contoursBlack, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+            Imgproc.findContours(newMask, contoursBlack, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
             Imgproc.drawContours(displayMat,contoursBlack,-1, new Scalar(255,255,255), 2, 1, hierarchy,1,new Point(0,rect.tl().y));
             Rect bestblack = null;
             double bestDiffblack = Double.MAX_VALUE; // MAX_VALUE since less diffrence = better
