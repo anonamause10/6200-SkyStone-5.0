@@ -29,6 +29,9 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.content.Context;
+
+import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
@@ -103,11 +106,28 @@ public class rFauto extends LinearOpMode
     // State used for updating telemetry
     Orientation angles;
     Acceleration gravity;
+    String  sounds[] =  {"ss_alarm", "ss_bb8_down", "ss_bb8_up", "ss_darth_vader", "ss_fly_by",
+            "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
+            "ss_light_speed", "ss_mine", "ss_power_up", "ss_r2d2_up", "ss_roger_roger", "ss_siren", "ss_wookie" };
+    boolean soundPlaying = false;
 
 
 
     @Override
     public void runOpMode() {
+        // Variables for choosing from the available sounds
+        int     soundIndex      = 0;
+        int     soundID         = -1;
+        boolean was_dpad_up     = false;
+        boolean was_dpad_down   = false;
+
+        Context myApp = hardwareMap.appContext;
+
+        // create a sound parameter that holds the desired player parameters.
+        SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
+
+        params.loopControl = 0;
+        params.waitForNonLoopingSoundsToFinish = true;
         fL= hardwareMap.get(DcMotor.class, "fL");
         fR = hardwareMap.get(DcMotor.class, "fR");
         bL = hardwareMap.get(DcMotor.class, "bL");
@@ -169,7 +189,7 @@ public class rFauto extends LinearOpMode
 
         //START AUTO HERE LMAO
 
-        tarunForHomecomingKing(22);
+        tarunForHomecomingKing(24);
 
         servoToFoun();
         sleep(300);
@@ -185,6 +205,32 @@ public class rFauto extends LinearOpMode
         waitToFinish();
 
         servoUp();
+        sleep(300);
+        turn(90);
+
+
+        fL.setTargetPosition(-1250);
+        fR.setTargetPosition(-1250);
+        bL.setTargetPosition(-1250);
+        bR.setTargetPosition(-1250);
+        fL.setPower(0.5);
+        fR.setPower(0.5);
+        bL.setPower(0.5);
+        bR.setPower(0.5);
+        waitToFinish();
+
+        turn(0);
+
+        fL.setTargetPosition(-1800);
+        fR.setTargetPosition(-1800);
+        bL.setTargetPosition(-1800);
+        bR.setTargetPosition(-1800);
+        fL.setPower(0.5);
+        fR.setPower(0.5);
+        bL.setPower(0.5);
+        bR.setPower(0.5);
+        waitToFinish();
+
         turn(90);
 
         fL.setTargetPosition(1250);
@@ -197,45 +243,55 @@ public class rFauto extends LinearOpMode
         bR.setPower(0.5);
         waitToFinish();
 
-        turn(0);
-
-        fL.setTargetPosition(-1850);
-        fR.setTargetPosition(-1850);
-        bL.setTargetPosition(-1850);
-        bR.setTargetPosition(-1850);
-        fL.setPower(0.5);
-        fR.setPower(0.5);
-        bL.setPower(0.5);
-        bR.setPower(0.5);
-        waitToFinish();
-
-        intakeOff();
-        turn(90);
-
-        fL.setTargetPosition(-1250);
-        fR.setTargetPosition(-1250);
-        bL.setTargetPosition(-1250);
-        bR.setTargetPosition(-1250);
-        fL.setPower(0.5);
-        fR.setPower(0.5);
-        bL.setPower(0.5);
-        bR.setPower(0.5);
-        waitToFinish();
-
         turn(180);
 
-        fL.setTargetPosition(-1330);
-        fR.setTargetPosition(-1330);
-        bL.setTargetPosition(-1330);
-        bR.setTargetPosition(-1330);
+        fL.setTargetPosition(-1380);
+        fR.setTargetPosition(-1380);
+        bL.setTargetPosition(-1380);
+        bR.setTargetPosition(-1380);
         fL.setPower(0.7);
         fR.setPower(0.7);
         bL.setPower(0.7);
         bR.setPower(0.7);
         waitToFinish();
 
+        fL.setTargetPosition(200);
+        fR.setTargetPosition(200);
+        bL.setTargetPosition(200);
+        bR.setTargetPosition(200);
+        fL.setPower(0.7);
+        fR.setPower(0.7);
+        bL.setPower(0.7);
+        bR.setPower(0.7);
+        waitToFinish();
 
-        turn(215);
+        turn(90);
+        fL.setTargetPosition(-2240);
+        fR.setTargetPosition(-2240);
+        bL.setTargetPosition(-2240);
+        bR.setTargetPosition(-2240);
+        fL.setPower(0.7);
+        fR.setPower(0.7);
+        bL.setPower(0.7);
+        bR.setPower(0.7);
+        waitToFinish();
+
+        while(opModeIsActive()){
+        // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
+        if ((soundID = myApp.getResources().getIdentifier(sounds[soundIndex], "raw", myApp.getPackageName())) != 0){
+
+            // Signal that the sound is now playing.
+            soundPlaying = true;
+
+            // Start playing, and also Create a callback that will clear the playing flag when the sound is complete.
+            SoundPlayer.getInstance().startPlaying(myApp, soundID, params, null,
+                    new Runnable() {
+                        public void run() {
+                            soundPlaying = false;
+                        }} );
+        }}
+
+
     }
 
     private void waitToFinish(){
@@ -245,7 +301,7 @@ public class rFauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<6 && working) {
+        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<6 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
@@ -370,11 +426,11 @@ public class rFauto extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        while(sR.getDistance(DistanceUnit.CM) > target){
-            fL.setPower(-0.2);
-            fR.setPower(-0.2);
-            bL.setPower(-0.2);
-            bR.setPower(-0.2);
+        while(opModeIsActive()&&(sR.getDistance(DistanceUnit.CM) > target)){
+            fL.setPower(-0.3);
+            fR.setPower(-0.3);
+            bL.setPower(-0.3);
+            bR.setPower(-0.3);
             updateT();
         }
         fL.setPower(0);
@@ -404,12 +460,22 @@ public class rFauto extends LinearOpMode
                 fR.setPower(0);
                 bL.setPower(0);
                 bR.setPower(0);
-            }else if (ang-vuAng > 10){
+            }else if(ang>=270&& vuAng<=90){
+                fL.setPower(-0.5);
+                fR.setPower(0.5);
+                bL.setPower(-0.5);
+                bR.setPower(0.5);
+            }else if(ang<=90&& vuAng>=270){
+                fL.setPower(0.5);
+                fR.setPower(-0.5);
+                bL.setPower(0.5);
+                bR.setPower(-0.5);
+            }else if (ang-vuAng > 25){
                 fL.setPower(0.7 );
                 fR.setPower(-0.7 );
                 bL.setPower(0.7 );
                 bR.setPower(-0.7 );
-            }else if(vuAng - ang > 10){
+            }else if(vuAng - ang > 25){
                 fL.setPower(-0.7 );
                 fR.setPower(0.7 );
                 bL.setPower(-0.7 );
@@ -426,7 +492,7 @@ public class rFauto extends LinearOpMode
                 bR.setPower(-0.25 );
             }
             ang = getHeading();
-            turned = (Math.abs(ang - vuAng) <= 0.5);
+            turned = (Math.abs(ang - vuAng) <= 0.75);
         }
         fL.setPower(0);
         fR.setPower(0);

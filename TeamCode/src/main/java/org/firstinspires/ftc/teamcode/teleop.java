@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import android.content.Context;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -11,6 +13,14 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.ftccommon.SoundPlayer;
+
+import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 
 import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.FORWARD;
 import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
@@ -43,7 +53,12 @@ public class teleop extends LinearOpMode {
             "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
             "ss_light_speed", "ss_mine", "ss_power_up", "ss_r2d2_up", "ss_roger_roger", "ss_siren", "ss_wookie" };
     boolean soundPlaying = false;
+    // The IMU sensor object
+    BNO055IMU imu;
 
+    // State used for updating telemetry
+    Orientation angles;
+    Acceleration gravity;
 
 
 
@@ -93,16 +108,29 @@ public class teleop extends LinearOpMode {
         IN2 = hardwareMap.get(DcMotor.class, "IN2");
         IN2.setDirection(FORWARD);
 
-        /**UD = hardwareMap.get(DcMotor.class, "uD");
-        UD.setDirection(DcMotor.Direction.FORWARD);
-        UD.setPower(0);
-        UD.setTargetPosition(0);
-        UD.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-         */
         S1 = hardwareMap.get(Servo.class, "servo");
         S2 = hardwareMap.get(Servo.class, "servo2");
         S1.setPosition(1);
         S2.setPosition(1);
+
+        BNO055IMU.Parameters parameters2 = new BNO055IMU.Parameters();
+        parameters2.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters2.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters2.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
+        parameters2.loggingEnabled = true;
+        parameters2.loggingTag = "IMU";
+        parameters2.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+        // and named "imu".
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters2);
+
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+
+        angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        gravity = imu.getGravity();
 
         telemetry.addData("Robot", "Initialized");
         telemetry.update();
@@ -144,22 +172,6 @@ public class teleop extends LinearOpMode {
                 IN1.setPower(gamepad1.right_trigger);
                 IN2.setPower(gamepad1.right_trigger);
             }
-            /**if (gamepad1.x && !xPrev) {
-                UD.setTargetPosition(0);
-                UD.setPower(0.7);
-            } else if (gamepad1.y && !yPrev) {
-                UD.setTargetPosition(60);
-                UD.setPower(0.7);
-            }
-            if (gamepad1.start && !sPrev){
-                UD.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                UD.setPower(0);
-                UD.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                UD.setPower(0.7);
-            }
-            if(UD.getTargetPosition()==UD.getCurrentPosition()){
-                UD.setPower(0);
-            }*/
 
             xPrev = gamepad1.x;
             yPrev = gamepad1.y;
@@ -173,15 +185,12 @@ public class teleop extends LinearOpMode {
             telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
                             "back left (%.1f), back right (%.1f)", (float)FL.getCurrentPosition(), (float)FR.getCurrentPosition(),
                     (float)BL.getCurrentPosition(), (float)BR.getCurrentPosition());
-            //telemetry.addData("Set Arm Power:", armpower);
-            /**telemetry.addData("Current Arm Position:", UD.getCurrentPosition());
-            telemetry.addData("ArmPos", UD.getTargetPosition());
-             */
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Servo1Pos", S1.getPosition());
             telemetry.addData("Servo2Pos", S2.getPosition());
             telemetry.addData("Sound >", sounds[soundIndex]);
             telemetry.addData("INTAKE POWER", IN1.getPower());
+            telemetry.addData("IMU:", getHeading());
             telemetry.update();
 
 
@@ -283,6 +292,10 @@ public class teleop extends LinearOpMode {
                 }
 
 
+    }
+    public double getHeading() {
+        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        return (angles.firstAngle+360)%360;
     }
 }
 

@@ -268,7 +268,7 @@ public class rBauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<6 && working) {
+        while(opModeIsActive()&&fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<6 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
@@ -415,17 +415,27 @@ public class rBauto extends LinearOpMode
                             "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
                     bL.getPower(), bR.getPower());
             telemetry.update();
-            if(Math.abs(ang - vuAng) <= 0.5){
+            if(Math.abs(ang - vuAng) <= 1){
                 fL.setPower(0);
                 fR.setPower(0);
                 bL.setPower(0);
                 bR.setPower(0);
-            }else if (ang-vuAng > 10){
+            }else if(ang>=270&& vuAng<=90){
+                fL.setPower(-0.5 );
+                fR.setPower(0.5 );
+                bL.setPower(-0.5 );
+                bR.setPower(0.5 );
+            }else if(ang<=90&& vuAng>=270){
+                fL.setPower(0.5);
+                fR.setPower(-0.5);
+                bL.setPower(0.5);
+                bR.setPower(-0.5);
+            }else if (ang-vuAng > 25){
                 fL.setPower(0.7 );
                 fR.setPower(-0.7 );
                 bL.setPower(0.7 );
                 bR.setPower(-0.7 );
-            }else if(vuAng - ang > 10){
+            }else if(vuAng - ang > 25){
                 fL.setPower(-0.7 );
                 fR.setPower(0.7 );
                 bL.setPower(-0.7 );
