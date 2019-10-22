@@ -31,6 +31,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -38,6 +39,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -51,6 +53,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
@@ -71,9 +74,9 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 
-@Autonomous(name="BLUE STONE Auto", group="ree")
+@Autonomous(name="RED STONE Auto", group="ree")
 
-public class bBauto extends LinearOpMode
+public class rBauto extends LinearOpMode
 {
     private double FINPERTICK = 1000/23.5;
     private double SINPERTICK = 1000/19.5;
@@ -92,6 +95,7 @@ public class bBauto extends LinearOpMode
     private DcMotor IN1 = null;
     private DcMotor IN2 = null;
     private Servo servo =null;
+    private DistanceSensor sR;
 
     private double voltage = 0.0;
     private double scale = 0.0;
@@ -134,6 +138,12 @@ public class bBauto extends LinearOpMode
         IN2.setDirection(DcMotor.Direction.FORWARD);
         servo = hardwareMap.get(Servo.class, "servo");
         servo.setPosition(1);
+        // you can use this as a regular DistanceSensor.
+        sR = hardwareMap.get(DistanceSensor.class, "boonkRange");
+
+        // you can also cast this to a Rev2mDistanceSensor if you want to use added
+        // methods associated with the Rev2mDistanceSensor class.
+        Rev2mDistanceSensor sensorTimeOfFlight = (Rev2mDistanceSensor)sR;
 
         BNO055IMU.Parameters parameters2 = new BNO055IMU.Parameters();
         parameters2.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -170,15 +180,17 @@ public class bBauto extends LinearOpMode
         telemetry.addData("Position:", pos);
         telemetry.update();
 
-        fL.setTargetPosition(-1250);
-        fR.setTargetPosition(-1250);
-        bL.setTargetPosition(-1250);
-        bR.setTargetPosition(-1250);
+        fL.setTargetPosition(-1100);
+        fR.setTargetPosition(-1100);
+        bL.setTargetPosition(-1100);
+        bR.setTargetPosition(-1100);
         fL.setPower(0.4);
         fR.setPower(0.4);
         bL.setPower(0.4);
         bR.setPower(0.4);
         waitToFinish();
+
+        tarunForHomecomingKing(6);
 
         servoToBlock();
         sleep(300);
@@ -287,7 +299,7 @@ public class bBauto extends LinearOpMode
     }
 
     private void servoToBlock(){
-        servo.setPosition(0.5);
+        servo.setPosition(0.4);
         try {
             wait(100);
         }catch(Exception E){
@@ -301,7 +313,7 @@ public class bBauto extends LinearOpMode
         }
     }
     private void servoToFoun(){
-        servo.setPosition(0.35);
+        servo.setPosition(0.31);
         try {
             wait(100);
         }catch(Exception E){
@@ -372,6 +384,23 @@ public class bBauto extends LinearOpMode
 
     String formatDegrees(double degrees) {
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
+    }
+
+    void tarunForHomecomingKing(int target){
+        while(sR.getDistance(DistanceUnit.CM) > target){
+            fL.setPower(-0.1);
+            fR.setPower(-0.1);
+            bL.setPower(-0.1);
+            bR.setPower(-0.1);
+        }
+        fL.setPower(0);
+        fR.setPower(0);
+        bL.setPower(0);
+        bR.setPower(0);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     void turn(double tun){

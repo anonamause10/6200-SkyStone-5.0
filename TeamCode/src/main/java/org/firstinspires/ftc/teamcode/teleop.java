@@ -115,14 +115,16 @@ public class teleop extends LinearOpMode {
             drive();
 
             if (gamepad1.a) {
-                S1.setPosition(0.5);
+                S1.setPosition(0.4);
                 S2.setPosition(0.6);
             } else if (gamepad1.b) {
-                S1.setPosition(0.35);
-                S2.setPosition(0.3);
+                S1.setPosition(0.31);
+                S2.setPosition(0.28);
             }else if(gamepad1.y){
                 S1.setPosition(1);
                 S2.setPosition(1);
+            }else if(gamepad1.x){
+                S1.setPosition(0.5);
             }
             double INSPEED = 0.4;
             if(gamepad1.left_bumper){
@@ -227,10 +229,10 @@ public class teleop extends LinearOpMode {
 
         double r = Math.hypot(gamepad1.left_stick_x, -gamepad1.left_stick_y);
         double robotAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
-        double rightX = Math.pow(gamepad1.right_stick_x,5);
-        //if(gamepad1.right_stick_x<0){
-          //  rightX *= -1;
-       // }
+        double rightX = Math.pow(gamepad1.right_stick_x,4);
+        if(gamepad1.right_stick_x<0){
+            rightX *= -1;
+        }
         double v1 = r * Math.cos(robotAngle) + rightX;
         double v2 = r * Math.sin(robotAngle) - rightX;
         double v3 = r * Math.sin(robotAngle) + rightX;
