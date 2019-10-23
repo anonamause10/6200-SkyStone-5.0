@@ -114,7 +114,7 @@ public class rBauto extends LinearOpMode
 
     @Override
     public void runOpMode() {
-        SkystoneDetector sky = new SkystoneDetector(hardwareMap, false);
+        SkystoneDetector sky = new SkystoneDetector(hardwareMap, false, true);
         //webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
         fL= hardwareMap.get(DcMotor.class, "fL");
         fR = hardwareMap.get(DcMotor.class, "fR");
