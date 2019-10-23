@@ -244,20 +244,21 @@ public class SkystoneDetector
                 Rect black = skystonepos(workingMat, bestRect);
                 pos = 2;
                 dist = 320.0;
-                if(right){ //if we're looking from the right:
-                    if(black!=null) {
+                if(right) { //if we're looking from the right:
+                    if (black != null) {
                         dist = Math.abs(black.br().x - bestRect.br().x);
                         pos = (int) Math.round((dist) / 160.0);
                     }
+                }
                 else{ //if we're looking from the left:
                     if(black!=null) {
                         dist = Math.abs(bestRect.tl().x - black.tl().x);
                         pos = (int) Math.round((dist) / 160.0);
                     }
-                    }
                 }
-
             }
+
+
             return displayMat;
         }
 
@@ -279,7 +280,8 @@ public class SkystoneDetector
                 sub = new Rect(0,(int)(tr.y),(int)(tr.x),rect.height);
             }
             else{
-                sub = new Rect((int)(rect.tl().x),(int)(rect.tl().y),639 - (int)(rect.tl().x),rect.height);
+                Log.w("Tiggle", rect.toString());
+                sub = new Rect((int)(rect.x),(int)(rect.y),input.width() - (int)(rect.x),rect.height);
             }
             Imgproc.rectangle(displayMat, sub, new Scalar(0, 255, 0), 4);
             Mat submat = input.submat(sub);
@@ -292,7 +294,7 @@ public class SkystoneDetector
             Imgproc.GaussianBlur(colormat,colormat,new Size(3,3),0);
             Core.split(colormat, channels);
             if(channels.size() > 0){
-                Imgproc.threshold(channels.get(0), newMask, 38, 255, Imgproc.THRESH_BINARY_INV);
+                Imgproc.threshold(channels.get(0), newMask, 15, 255, Imgproc.THRESH_BINARY_INV);
             }
             for(int i=0;i<channels.size();i++) {
                 channels.get(i).release();
@@ -301,7 +303,7 @@ public class SkystoneDetector
             colormat.release();
             List<MatOfPoint> contoursBlack = new ArrayList<>();
             Imgproc.findContours(newMask, contoursBlack, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-            Imgproc.drawContours(displayMat,contoursBlack,-1, new Scalar(255,255,255), 2, 1, hierarchy,1,new Point(0,rect.tl().y));
+            Imgproc.drawContours(displayMat,contoursBlack,-1, new Scalar(255,255,255), 2, 1, hierarchy,1,new Point(right?0:rect.x,rect.y));
             Rect bestblack = null;
             double bestDiffblack = Double.MAX_VALUE; // MAX_VALUE since less diffrence = better
             for(MatOfPoint cont : contoursBlack){
@@ -319,8 +321,11 @@ public class SkystoneDetector
 
             if(bestblack != null) {
                 // Show chosen result
-                Imgproc.rectangle(displayMat, bestblack.tl(), bestblack.br(), new Scalar(0, 255, 0), 4);
-
+                Rect drawrect = new Rect((int)bestblack.tl().x+rect.x, (int)bestblack.tl().y+rect.y,bestblack.width, bestblack.height);
+                Imgproc.rectangle(displayMat, drawrect, new Scalar(255, 255, 0), 4);
+                if(!right) {
+                    bestblack = drawrect;
+                }
             }
             return bestblack;
 
@@ -339,7 +344,7 @@ public class SkystoneDetector
             double y = rect.y;
             double w = rect.width;
             double h = rect.height;
-            double right = -225*(rect.x+rect.width);
+            double rightDist = -225*(right?(rect.x+rect.width):(workingMat.width()-rect.x));
 
             double cubeRatio = Math.max(Math.abs(h/w), Math.abs(w/h)); // Get the ratio. We use max in case h and w get swapped??? it happens when u account for rotation
             double ratioDiffrence = Math.abs(cubeRatio - perfectRatio);
@@ -352,7 +357,7 @@ public class SkystoneDetector
             double areascore = -area;
             totalScore += ratioscore;
             totalScore += areascore;
-            totalScore+=right;
+            totalScore+=rightDist;
             return totalScore  ;
 
         }
