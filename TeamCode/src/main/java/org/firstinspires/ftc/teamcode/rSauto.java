@@ -109,7 +109,7 @@ public class rSauto extends LinearOpMode
     // State used for updating telemetry
     Orientation angles;
     Acceleration gravity;
-
+    private int pos;
 
 
     @Override
@@ -176,7 +176,7 @@ public class rSauto extends LinearOpMode
         runtime.reset();
 
         //START AUTO HERE LMAO
-        int pos = runDetect(sky);
+        pos = runDetect(sky);
         telemetry.addData("Position:", pos);
         telemetry.update();
         if(pos == 0) {
@@ -343,6 +343,7 @@ public class rSauto extends LinearOpMode
          telemetry.addData("Status", "Run Time2: " + runtim2.toString());
          telemetry.addData("ServoPos", servo.getPosition());
          telemetry.addData("INTAKE POWER", IN1.getPower());
+         telemetry.addData("Position:", pos);
          telemetry.update();
      }
     String format(OpenGLMatrix transformationMatrix) {

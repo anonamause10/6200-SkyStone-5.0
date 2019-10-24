@@ -209,7 +209,7 @@ public class SkystoneDetector
             Rect bestRect = null;
             double bestDiffrence = Double.MAX_VALUE; // MAX_VALUE since less diffrence = better
             for(MatOfPoint cont : contoursYellow){
-                double score = calculateScore(cont); // Get the diffrence score using the scoring API
+                double score = calculateScore(cont, false); // Get the diffrence score using the scoring API
 
                 // Get bounding rect of contour
                 Rect rect = Imgproc.boundingRect(cont);
@@ -307,7 +307,7 @@ public class SkystoneDetector
             Rect bestblack = null;
             double bestDiffblack = Double.MAX_VALUE; // MAX_VALUE since less diffrence = better
             for(MatOfPoint cont : contoursBlack){
-                double score = calculateScore(cont); // Get the diffrence score using the scoring API
+                double score = calculateScore(cont, true); // Get the diffrence score using the scoring API
 
                 // Get bounding rect of contour
                 Rect recto = Imgproc.boundingRect(cont);
@@ -331,7 +331,7 @@ public class SkystoneDetector
 
         }
 
-        public double calculateScore(Mat input){
+        public double calculateScore(Mat input, boolean black){
             double totalScore = 0;
 
             if(!(input instanceof MatOfPoint)) return Double.MAX_VALUE;
@@ -344,7 +344,7 @@ public class SkystoneDetector
             double y = rect.y;
             double w = rect.width;
             double h = rect.height;
-            double rightDist = -225*(right?(rect.x+rect.width):(workingMat.width()-rect.x));
+            double rightDist = -1*(black?100:225)*(right?(rect.x+rect.width):(workingMat.width()-rect.x));
 
             double cubeRatio = Math.max(Math.abs(h/w), Math.abs(w/h)); // Get the ratio. We use max in case h and w get swapped??? it happens when u account for rotation
             double ratioDiffrence = Math.abs(cubeRatio - perfectRatio);
