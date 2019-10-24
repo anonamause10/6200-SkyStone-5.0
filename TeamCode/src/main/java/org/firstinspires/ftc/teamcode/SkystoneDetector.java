@@ -321,11 +321,11 @@ public class SkystoneDetector
 
             if(bestblack != null) {
                 // Show chosen result
-                Rect drawrect = new Rect((int)bestblack.tl().x+rect.x, (int)bestblack.tl().y+rect.y,bestblack.width, bestblack.height);
-                Imgproc.rectangle(displayMat, drawrect, new Scalar(255, 255, 0), 4);
-                if(!right) {
-                    bestblack = drawrect;
-                }
+                Rect drawblack = new Rect((int)bestblack.tl().x+(right?0:rect.x), (int)bestblack.tl().y+rect.y,bestblack.width, bestblack.height);
+                Imgproc.rectangle(displayMat, drawblack, new Scalar(255, 255, 0), 4);
+
+                bestblack = drawblack;
+
             }
             return bestblack;
 
