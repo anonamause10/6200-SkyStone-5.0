@@ -193,7 +193,7 @@ public class SkystoneDetector
             Imgproc.GaussianBlur(colormat,colormat,new Size(3,3),0);
             Core.split(colormat, channels);
             if(channels.size() > 0){
-                Imgproc.threshold(channels.get(1), mask, 70, 255, Imgproc.THRESH_BINARY_INV);
+                Imgproc.threshold(channels.get(1), mask, 80, 255, Imgproc.THRESH_BINARY_INV);
             }
 
 
