@@ -279,7 +279,7 @@ public class rSauto extends LinearOpMode
         }
     }
     private void servoUp(){
-        servo.setPosition(1);
+        servo.setPosition(0.95);
         try {
             wait(100);
         }catch(Exception E){

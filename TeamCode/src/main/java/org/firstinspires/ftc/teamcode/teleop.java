@@ -110,7 +110,7 @@ public class teleop extends LinearOpMode {
 
         S1 = hardwareMap.get(Servo.class, "servo");
         S2 = hardwareMap.get(Servo.class, "servo2");
-        S1.setPosition(1);
+        S1.setPosition(0.95);
         S2.setPosition(1);
 
         BNO055IMU.Parameters parameters2 = new BNO055IMU.Parameters();
@@ -149,7 +149,7 @@ public class teleop extends LinearOpMode {
                 S1.setPosition(0.31);
                 S2.setPosition(0.28);
             }else if(gamepad1.y){
-                S1.setPosition(1);
+                S1.setPosition(0.95);
                 S2.setPosition(1);
             }else if(gamepad1.x){
                 S1.setPosition(0.5);

@@ -208,9 +208,11 @@ public class rFauto extends LinearOpMode
         turn(180);
 
 
-        go(1830, 0.5);
+        go(1850, 0.5);
 
-        turn(90);
+
+
+        turn(91);
 
 
         go(1250, .5);
@@ -222,7 +224,7 @@ public class rFauto extends LinearOpMode
 
         go(200, 0.7);
 
-        turn(93);
+        turn(91);
 
         go(-2240, 0.7);
 
@@ -260,7 +262,7 @@ public class rFauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<4 && working) {
+        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<=4 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
@@ -298,7 +300,7 @@ public class rFauto extends LinearOpMode
         }
     }
     private void servoUp(){
-        servo.setPosition(1);
+        servo.setPosition(0.95);
         try {
             wait(100);
         }catch(Exception E){
@@ -385,7 +387,7 @@ public class rFauto extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        while(opModeIsActive()&&(sR.getDistance(DistanceUnit.CM) > target)){
+        while(opModeIsActive()&&(sR.getDistance(DistanceUnit.CM) >= target)){
             fL.setPower(-0.25);
             fR.setPower(-0.25);
             bL.setPower(-0.25);
@@ -401,6 +403,7 @@ public class rFauto extends LinearOpMode
         bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
+
 
     void turn(double tun){
         double vuAng = tun;
