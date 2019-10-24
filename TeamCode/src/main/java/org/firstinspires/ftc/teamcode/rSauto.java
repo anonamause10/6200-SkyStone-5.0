@@ -180,12 +180,16 @@ public class rSauto extends LinearOpMode
         telemetry.addData("Position:", pos);
         telemetry.update();
         if(pos == 0) {
-            go(-1000, 0.4);
+            go(-900, 0.6);
             tarunForHomecomingKing(9);
         }else{
             go(-450, 0.4);
-            turn(-90);
-            tarunForHomecomingKing((int)sR.getDistance(DistanceUnit.MM)-pos*203);
+
+            turn(90);
+
+            tarunForHomecomingKing(10*((int)sR.getDistance(DistanceUnit.MM) - pos*203));
+            turn(0);
+            tarunForHomecomingKing(9);
         }
 
         servoToBlock();
@@ -237,7 +241,7 @@ public class rSauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(opModeIsActive()&&fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<6 && working) {
+        while(opModeIsActive()&&fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<3 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
@@ -360,10 +364,10 @@ public class rSauto extends LinearOpMode
 
     void tarunForHomecomingKing(int target){
         while(sR.getDistance(DistanceUnit.CM) > target){
-            fL.setPower(-0.1);
-            fR.setPower(-0.1);
-            bL.setPower(-0.1);
-            bR.setPower(-0.1);
+            fL.setPower(-0.25);
+            fR.setPower(-0.25);
+            bL.setPower(-0.25);
+            bR.setPower(-0.25);
         }
         fL.setPower(0);
         fR.setPower(0);
@@ -402,29 +406,29 @@ public class rSauto extends LinearOpMode
                 fR.setPower(-0.5);
                 bL.setPower(0.5);
                 bR.setPower(-0.5);
-            }else if (ang-vuAng > 25){
+            }else if (ang-vuAng > 35){
                 fL.setPower(0.7 );
                 fR.setPower(-0.7 );
                 bL.setPower(0.7 );
                 bR.setPower(-0.7 );
-            }else if(vuAng - ang > 25){
+            }else if(vuAng - ang > 35){
                 fL.setPower(-0.7 );
                 fR.setPower(0.7 );
                 bL.setPower(-0.7 );
                 bR.setPower(0.7 );
             }else if (ang < vuAng) {
-                fL.setPower(-0.25 );
-                fR.setPower(0.25);
-                bL.setPower(-0.25 );
-                bR.setPower(0.25 );
+                fL.setPower(-0.15 );
+                fR.setPower(0.15);
+                bL.setPower(-0.15 );
+                bR.setPower(0.15 );
             }else if (ang > vuAng) {
-                fL.setPower(0.25 );
-                fR.setPower(-0.25 );
-                bL.setPower(0.25 );
-                bR.setPower(-0.25 );
+                fL.setPower(0.15 );
+                fR.setPower(-0.15 );
+                bL.setPower(0.15 );
+                bR.setPower(-0.15 );
             }
             ang = getHeading();
-            turned = (Math.abs(ang - vuAng) <= 0.5);
+            turned = (Math.abs(ang - vuAng) <= 0.75);
         }
         fL.setPower(0);
         fR.setPower(0);

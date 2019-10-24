@@ -205,10 +205,10 @@ public class rFauto extends LinearOpMode
 
         go(-1250, 0.5);
 
-        turn(0);
+        turn(180);
 
 
-        go(-1800, 0.5);
+        go(1900, 0.5);
 
         turn(90);
 
@@ -259,7 +259,7 @@ public class rFauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<6 && working) {
+        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<3 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
@@ -385,10 +385,10 @@ public class rFauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         while(opModeIsActive()&&(sR.getDistance(DistanceUnit.CM) > target)){
-            fL.setPower(-0.3);
-            fR.setPower(-0.3);
-            bL.setPower(-0.3);
-            bR.setPower(-0.3);
+            fL.setPower(-0.25);
+            fR.setPower(-0.25);
+            bL.setPower(-0.25);
+            bR.setPower(-0.25);
             updateT();
         }
         fL.setPower(0);
@@ -428,26 +428,26 @@ public class rFauto extends LinearOpMode
                 fR.setPower(-0.5);
                 bL.setPower(0.5);
                 bR.setPower(-0.5);
-            }else if (ang-vuAng > 25){
+            }else if (ang-vuAng > 35){
                 fL.setPower(0.7 );
                 fR.setPower(-0.7 );
                 bL.setPower(0.7 );
                 bR.setPower(-0.7 );
-            }else if(vuAng - ang > 25){
+            }else if(vuAng - ang > 35){
                 fL.setPower(-0.7 );
                 fR.setPower(0.7 );
                 bL.setPower(-0.7 );
                 bR.setPower(0.7 );
             }else if (ang < vuAng) {
-                fL.setPower(-0.25 );
-                fR.setPower(0.25);
-                bL.setPower(-0.25 );
-                bR.setPower(0.25 );
+                fL.setPower(-0.15 );
+                fR.setPower(0.15);
+                bL.setPower(-0.15 );
+                bR.setPower(0.15 );
             }else if (ang > vuAng) {
-                fL.setPower(0.25 );
-                fR.setPower(-0.25 );
-                bL.setPower(0.25 );
-                bR.setPower(-0.25 );
+                fL.setPower(0.15 );
+                fR.setPower(-0.15 );
+                bL.setPower(0.15 );
+                bR.setPower(-0.15 );
             }
             ang = getHeading();
             turned = (Math.abs(ang - vuAng) <= 1);

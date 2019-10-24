@@ -56,7 +56,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import java.util.Locale;
 
 
-@Autonomous(name="RED FOUNDATION Auto", group="ree")
+@Autonomous(name="BLUE FOUNDATION Auto", group="ree")
 
 public class bFauto extends LinearOpMode
 {
