@@ -212,7 +212,7 @@ public class rFauto extends LinearOpMode
 
 
 
-        turn(91);
+        turn(93);
 
 
         go(1250, .5);
@@ -417,7 +417,7 @@ public class rFauto extends LinearOpMode
                             "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
                     bL.getPower(), bR.getPower());
             telemetry.update();
-            if(Math.abs(ang - vuAng) <= 0.75){
+            if(Math.abs(ang - vuAng) <= 0.5){
                 fL.setPower(0);
                 fR.setPower(0);
                 bL.setPower(0);
@@ -454,7 +454,7 @@ public class rFauto extends LinearOpMode
                 bR.setPower(-0.15 );
             }
             ang = getHeading();
-            turned = (Math.abs(ang - vuAng) <= 1);
+            turned = (Math.abs(ang - vuAng) <= 0.5);
         }
         fL.setPower(0);
         fR.setPower(0);
