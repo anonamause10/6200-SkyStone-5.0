@@ -208,7 +208,7 @@ public class rFauto extends LinearOpMode
         turn(180);
 
 
-        go(1900, 0.5);
+        go(1830, 0.5);
 
         turn(90);
 
@@ -222,7 +222,8 @@ public class rFauto extends LinearOpMode
 
         go(200, 0.7);
 
-        turn(90);
+        turn(93);
+
         go(-2240, 0.7);
 
         while(opModeIsActive()){
@@ -259,7 +260,7 @@ public class rFauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<3 && working) {
+        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<4 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
