@@ -194,87 +194,36 @@ public class rFauto extends LinearOpMode
         servoToFoun();
         sleep(300);
 
-        fL.setTargetPosition(940);
-        fR.setTargetPosition(940);
-        bL.setTargetPosition(940);
-        bR.setTargetPosition(940);
-        fL.setPower(0.25);
-        fR.setPower(0.25);
-        bL.setPower(0.25);
-        bR.setPower(0.25);
-        waitToFinish();
+
+        go(940, 0.25);
 
         servoUp();
         sleep(300);
         turn(90);
 
 
-        fL.setTargetPosition(-1250);
-        fR.setTargetPosition(-1250);
-        bL.setTargetPosition(-1250);
-        bR.setTargetPosition(-1250);
-        fL.setPower(0.5);
-        fR.setPower(0.5);
-        bL.setPower(0.5);
-        bR.setPower(0.5);
-        waitToFinish();
+
+        go(-1250, 0.5);
 
         turn(0);
 
-        fL.setTargetPosition(-1800);
-        fR.setTargetPosition(-1800);
-        bL.setTargetPosition(-1800);
-        bR.setTargetPosition(-1800);
-        fL.setPower(0.5);
-        fR.setPower(0.5);
-        bL.setPower(0.5);
-        bR.setPower(0.5);
-        waitToFinish();
+
+        go(-1800, 0.5);
 
         turn(90);
 
-        fL.setTargetPosition(1250);
-        fR.setTargetPosition(1250);
-        bL.setTargetPosition(1250);
-        bR.setTargetPosition(1250);
-        fL.setPower(0.5);
-        fR.setPower(0.5);
-        bL.setPower(0.5);
-        bR.setPower(0.5);
-        waitToFinish();
+
+        go(1250, .5);
 
         turn(180);
 
-        fL.setTargetPosition(-1380);
-        fR.setTargetPosition(-1380);
-        bL.setTargetPosition(-1380);
-        bR.setTargetPosition(-1380);
-        fL.setPower(0.7);
-        fR.setPower(0.7);
-        bL.setPower(0.7);
-        bR.setPower(0.7);
-        waitToFinish();
+        go(-1380, 0.7);
 
-        fL.setTargetPosition(200);
-        fR.setTargetPosition(200);
-        bL.setTargetPosition(200);
-        bR.setTargetPosition(200);
-        fL.setPower(0.7);
-        fR.setPower(0.7);
-        bL.setPower(0.7);
-        bR.setPower(0.7);
-        waitToFinish();
+
+        go(200, 0.7);
 
         turn(90);
-        fL.setTargetPosition(-2240);
-        fR.setTargetPosition(-2240);
-        bL.setTargetPosition(-2240);
-        bR.setTargetPosition(-2240);
-        fL.setPower(0.7);
-        fR.setPower(0.7);
-        bL.setPower(0.7);
-        bR.setPower(0.7);
-        waitToFinish();
+        go(-2240, 0.7);
 
         while(opModeIsActive()){
         // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
@@ -294,7 +243,16 @@ public class rFauto extends LinearOpMode
 
     }
 
-    private void waitToFinish(){
+    private void go(int ticks, double power){
+        fL.setTargetPosition(ticks);
+        fR.setTargetPosition(ticks);
+        bL.setTargetPosition(ticks);
+        bR.setTargetPosition(ticks);
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+
         fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);

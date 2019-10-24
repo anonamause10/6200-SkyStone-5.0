@@ -180,19 +180,10 @@ public class rSauto extends LinearOpMode
         telemetry.addData("Position:", pos);
         telemetry.update();
         if(pos == 0) {
-            fL.setTargetPosition(-1100);
-            fR.setTargetPosition(-1100);
-            bL.setTargetPosition(-1100);
-            bR.setTargetPosition(-1100);
-            fL.setPower(0.4);
-            fR.setPower(0.4);
-            bL.setPower(0.4);
-            bR.setPower(0.4);
-            waitToFinish();
-
+            go(-1000, 0.4);
             tarunForHomecomingKing(9);
         }else{
-            drive(-450, 0.4);
+            go(-450, 0.4);
             turn(-90);
             tarunForHomecomingKing((int)sR.getDistance(DistanceUnit.MM)-pos*203);
         }
@@ -200,73 +191,46 @@ public class rSauto extends LinearOpMode
         servoToBlock();
         sleep(300);
 
-        fL.setTargetPosition(650);
-        fR.setTargetPosition(650);
-        bL.setTargetPosition(650);
-        bR.setTargetPosition(650);
-        fL.setPower(0.25);
-        fR.setPower(0.25);
-        bL.setPower(0.25);
-        bR.setPower(0.25);
-        waitToFinish();
-
+        go(650, 0.25);
         servoUp();
 
-        fL.setTargetPosition(300);
-        fR.setTargetPosition(300);
-        bL.setTargetPosition(300);
-        bR.setTargetPosition(300);
-        fL.setPower(0.5);
-        fR.setPower(0.5);
-        bL.setPower(0.5);
-        bR.setPower(0.5);
-        waitToFinish();
+
+        go(300, 0.5);
         turn(180);
         intake();
 
-        fL.setTargetPosition(600);
-        fR.setTargetPosition(600);
-        bL.setTargetPosition(600);
-        bR.setTargetPosition(600);
-        fL.setPower(0.3);
-        fR.setPower(0.3);
-        bL.setPower(0.3);
-        bR.setPower(0.3);
-        waitToFinish();
+
+        go(600, 0.3);
 
         intakeOff();
         turn(90);
 
-        fL.setTargetPosition(1000);
-        fR.setTargetPosition(1000);
-        bL.setTargetPosition(1000);
-        bR.setTargetPosition(1000);
-        fL.setPower(0.7);
-        fR.setPower(0.7);
-        bL.setPower(0.7);
-        bR.setPower(0.7);
-        waitToFinish();
+
+        go(1000, 0.7);
         outtake();
         try{
             wait(500);
         }catch(Exception e){
         }
         intakeOff();
-        fL.setTargetPosition(-600);
-        fR.setTargetPosition(-600);
-        bL.setTargetPosition(-600);
-        bR.setTargetPosition(-600);
-        fL.setPower(0.7);
-        fR.setPower(0.7);
-        bL.setPower(0.7);
-        bR.setPower(0.7);
-        waitToFinish();
+
+        go(-600, .07);
 
 
         turn(215);
     }
 
-    private void waitToFinish(){
+    private void go(int ticks, double power){
+        fL.setTargetPosition(ticks);
+        fR.setTargetPosition(ticks);
+        bL.setTargetPosition(ticks);
+        bR.setTargetPosition(ticks);
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+
+
         fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -367,18 +331,7 @@ public class rSauto extends LinearOpMode
              return result;
      }
 
-     private void drive(int ticks, double power){
 
-         fL.setTargetPosition(ticks);
-         fR.setTargetPosition(ticks);
-         bL.setTargetPosition(ticks);
-         bR.setTargetPosition(ticks);
-         fL.setPower(power);
-         fR.setPower(power);
-         bL.setPower(power);
-         bR.setPower(power);
-         waitToFinish();
-     }
      private void updateT(){
          telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
                          "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
