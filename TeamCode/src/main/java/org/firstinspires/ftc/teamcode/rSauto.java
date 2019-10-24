@@ -76,14 +76,14 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
 @Autonomous(name="RED STONE Auto", group="ree")
 
-public class rBauto extends LinearOpMode
+public class rSauto extends LinearOpMode
 {
     private double FINPERTICK = 1000/23.5;
     private double SINPERTICK = 1000/19.5;
     private double DEGREESPERTICK = 1000/85;
     private double STRAFEERROR = 3/19.5;
 
-    //WebcamName webcamName = null;
+    WebcamName webcamName = null;
 
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime runtim2 = new ElapsedTime();
@@ -114,8 +114,8 @@ public class rBauto extends LinearOpMode
 
     @Override
     public void runOpMode() {
-        SkystoneDetector sky = new SkystoneDetector(hardwareMap, false, true);
-        //webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
+        SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, true);
+        webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
         fL= hardwareMap.get(DcMotor.class, "fL");
         fR = hardwareMap.get(DcMotor.class, "fR");
         bL = hardwareMap.get(DcMotor.class, "bL");
@@ -179,18 +179,23 @@ public class rBauto extends LinearOpMode
         int pos = runDetect(sky);
         telemetry.addData("Position:", pos);
         telemetry.update();
+        if(pos == 0) {
+            fL.setTargetPosition(-1100);
+            fR.setTargetPosition(-1100);
+            bL.setTargetPosition(-1100);
+            bR.setTargetPosition(-1100);
+            fL.setPower(0.4);
+            fR.setPower(0.4);
+            bL.setPower(0.4);
+            bR.setPower(0.4);
+            waitToFinish();
 
-        fL.setTargetPosition(-1100);
-        fR.setTargetPosition(-1100);
-        bL.setTargetPosition(-1100);
-        bR.setTargetPosition(-1100);
-        fL.setPower(0.4);
-        fR.setPower(0.4);
-        bL.setPower(0.4);
-        bR.setPower(0.4);
-        waitToFinish();
-
-        tarunForHomecomingKing(6);
+            tarunForHomecomingKing(9);
+        }else{
+            drive(-450, 0.4);
+            turn(-90);
+            tarunForHomecomingKing((int)sR.getDistance(DistanceUnit.MM)-pos*203);
+        }
 
         servoToBlock();
         sleep(300);
@@ -360,6 +365,19 @@ public class rBauto extends LinearOpMode
              int result = (int) sky.getPos();
              sky.stop();
              return result;
+     }
+
+     private void drive(int ticks, double power){
+
+         fL.setTargetPosition(ticks);
+         fR.setTargetPosition(ticks);
+         bL.setTargetPosition(ticks);
+         bR.setTargetPosition(ticks);
+         fL.setPower(power);
+         fR.setPower(power);
+         bL.setPower(power);
+         bR.setPower(power);
+         waitToFinish();
      }
      private void updateT(){
          telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
