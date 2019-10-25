@@ -77,7 +77,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 
-@Autonomous(name="BLUE FOUNDATION Auto", group="ree")
+@Autonomous(name="BLU FOUNDATION Auto", group="ree")
 
 public class bFauto extends LinearOpMode
 {
@@ -208,19 +208,21 @@ public class bFauto extends LinearOpMode
         turn(180);
 
 
-        go(1830, 0.5);
+        go(1850, 0.3);
+
+
 
         turn(270);
 
 
-        go(1250, .5);
+        go(1250, 0.5);
 
         turn(180);
 
         go(-1380, 0.7);
 
 
-        go(200, 0.7);
+        go(100, 0.4);
 
         turn(270);
 
@@ -260,7 +262,7 @@ public class bFauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<4 && working) {
+        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<=4 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
@@ -402,6 +404,7 @@ public class bFauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
+
     void turn(double tun){
         double vuAng = tun;
         boolean turned = false;
@@ -414,7 +417,7 @@ public class bFauto extends LinearOpMode
                             "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
                     bL.getPower(), bR.getPower());
             telemetry.update();
-            if(Math.abs(ang - vuAng) <= 0.75){
+            if(Math.abs(ang - vuAng) <= 0.5){
                 fL.setPower(0);
                 fR.setPower(0);
                 bL.setPower(0);
@@ -451,7 +454,7 @@ public class bFauto extends LinearOpMode
                 bR.setPower(-0.15 );
             }
             ang = getHeading();
-            turned = (Math.abs(ang - vuAng) <= 1);
+            turned = (Math.abs(ang - vuAng) <= 0.5);
         }
         fL.setPower(0);
         fR.setPower(0);

@@ -189,43 +189,24 @@ public class rFauto extends LinearOpMode
 
         //START AUTO HERE LMAO
 
-        tarunForHomecomingKing(24);
+        tarunForHomecomingKing(25);
 
         servoToFoun();
         sleep(300);
 
-
         go(940, 0.25);
-
         servoUp();
         sleep(300);
         turn(90);
-
-
-
         go(-1250, 0.5);
-
         turn(180);
-
-
-        go(1850, 0.5);
-
-
-
-        turn(93);
-
-
-        go(1250, .5);
-
+        go(1850, 0.3);
+        turn(91);//reee
+        go(1250, 0.5);
         turn(180);
-
         go(-1380, 0.7);
-
-
-        go(200, 0.7);
-
-        turn(91);
-
+        go(100, 0.4);
+        turn(90);
         go(-2240, 0.7);
 
         while(opModeIsActive()){
@@ -387,7 +368,7 @@ public class rFauto extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        while(opModeIsActive()&&(sR.getDistance(DistanceUnit.CM) >= target)){
+        while(opModeIsActive()&&(sR.getDistance(DistanceUnit.CM) > target)){
             fL.setPower(-0.25);
             fR.setPower(-0.25);
             bL.setPower(-0.25);
