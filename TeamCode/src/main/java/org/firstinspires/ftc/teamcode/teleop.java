@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.ftccommon.SoundPlayer;
@@ -18,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
@@ -48,6 +50,7 @@ public class teleop extends LinearOpMode {
     private double armpower = 0.7;
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
+    private DistanceSensor intSens = null;
     // List of available sound resources
     String  sounds[] =  {"ss_alarm", "ss_bb8_down", "ss_bb8_up", "ss_darth_vader", "ss_fly_by",
             "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
@@ -113,6 +116,8 @@ public class teleop extends LinearOpMode {
         S1.setPosition(0.95);
         S2.setPosition(1);
 
+        intSens = hardwareMap.get(DistanceSensor.class, "DS2");
+
         BNO055IMU.Parameters parameters2 = new BNO055IMU.Parameters();
         parameters2.angleUnit = BNO055IMU.AngleUnit.DEGREES;
         parameters2.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
@@ -158,7 +163,7 @@ public class teleop extends LinearOpMode {
             if(gamepad1.left_bumper){
                 IN1.setPower(-INSPEED);
                 IN2.setPower(-INSPEED);
-            }else if(gamepad1.right_bumper){
+            }else if(gamepad1.right_bumper && (intSens.getDistance(DistanceUnit.MM)>70)){
                 IN1.setPower(0.7);
                 IN2.setPower(0.7);
             }else{

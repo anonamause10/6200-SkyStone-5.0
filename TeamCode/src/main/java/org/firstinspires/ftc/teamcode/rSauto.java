@@ -96,6 +96,7 @@ public class rSauto extends LinearOpMode
     private DcMotor IN2 = null;
     private Servo servo =null;
     private DistanceSensor sR;
+    private DistanceSensor intSens;
 
     private double voltage = 0.0;
     private double scale = 0.0;
@@ -140,6 +141,7 @@ public class rSauto extends LinearOpMode
         servo.setPosition(1);
         // you can use this as a regular DistanceSensor.
         sR = hardwareMap.get(DistanceSensor.class, "boonkRange");
+        intSens = hardwareMap.get(DistanceSensor.class, "DS2");
 
         // you can also cast this to a Rev2mDistanceSensor if you want to use added
         // methods associated with the Rev2mDistanceSensor class.
