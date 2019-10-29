@@ -189,7 +189,7 @@ public class rFauto extends LinearOpMode
 
         //START AUTO HERE LMAO
 
-        tarunForHomecomingKing(25);
+        tarunForHomecomingKing(24);
 
         servoToFoun();
         sleep(300);
