@@ -189,10 +189,10 @@ public class bFauto extends LinearOpMode
 
         //START AUTO HERE LMAO
 
-        tarunForHomecomingKing(24);
+        tarunForHomecomingKing(23);
 
         servoToFoun();
-        sleep(300);
+        sleep(600);
 
         go(940, 0.25);
         servoUp();
