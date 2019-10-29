@@ -77,7 +77,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 
-@Autonomous(name="BLU FOUNDATION Auto", group="ree")
+@Autonomous(name="BLUE FOUNDATION Auto", group="ree")
 
 public class bFauto extends LinearOpMode
 {
@@ -189,43 +189,24 @@ public class bFauto extends LinearOpMode
 
         //START AUTO HERE LMAO
 
-        tarunForHomecomingKing(24);
+        tarunForHomecomingKing(25);
 
         servoToFoun();
         sleep(300);
 
-
         go(940, 0.25);
-
         servoUp();
         sleep(300);
         turn(270);
-
-
-
         go(-1250, 0.5);
-
         turn(180);
-
-
         go(1850, 0.3);
-
-
-
-        turn(270);
-
-
+        turn(270);//reee
         go(1250, 0.5);
-
         turn(180);
-
         go(-1380, 0.7);
-
-
         go(100, 0.4);
-
         turn(270);
-
         go(-2240, 0.7);
 
         while(opModeIsActive()){
