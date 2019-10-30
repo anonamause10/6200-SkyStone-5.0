@@ -185,7 +185,7 @@ public class rSauto extends LinearOpMode
         telemetry.update();
         if(pos == 0) {
             //go(-900, 0.6);
-            god(1000, 0.5, -20);
+            god(1000, 0.5, 160);
             tarunForHomecomingKing(9);
         }else{
             go(-450, 0.4);
