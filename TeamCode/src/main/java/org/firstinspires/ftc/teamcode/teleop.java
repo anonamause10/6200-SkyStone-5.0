@@ -101,6 +101,12 @@ public class teleop extends LinearOpMode {
         FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         FL.setPower(0);
         FR.setPower(0);
         BL.setPower(0);
