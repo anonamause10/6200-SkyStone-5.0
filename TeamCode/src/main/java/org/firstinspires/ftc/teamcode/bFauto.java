@@ -197,15 +197,16 @@ public class bFauto extends LinearOpMode
         go(940, 0.25);
         servoUp();
         sleep(300);
-        turn(270);
-        go(-1250, 0.5);
-        turn(180);
-        go(1850, 0.3);
-        turn(270);//reee
-        go(1250, 0.5);
-        turn(180);
-        go(-1380, 0.7);
-        go(100, 0.4);
+
+        strafe(1500, 0.3);
+
+        go(-1900, 0.3);
+
+        strafe(-1500, 0.3);
+
+        go(1300, 0.5);
+
+        go(-100, 0.4);
         turn(270);
         go(-2240, 0.7);
 
@@ -226,7 +227,45 @@ public class bFauto extends LinearOpMode
 
 
     }
+    private void strafe(int ticks, double power){
+        fL.setTargetPosition(ticks);
+        fR.setTargetPosition(-ticks);
+        bL.setTargetPosition(-ticks);
+        bR.setTargetPosition(ticks);
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
 
+        fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runtim2.reset();
+        boolean working = true;
+        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<=4 && working) {
+            updateT();
+            if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
+                    + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
+                    + Math.abs(bL.getCurrentPosition() - bL.getTargetPosition())
+                    + Math.abs(bR.getCurrentPosition() - bR.getTargetPosition())
+                    < 60) {
+                working = false;
+            }
+        }
+        fL.setPower(0);
+        fR.setPower(0);
+        bL.setPower(0);
+        bR.setPower(0);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
     private void go(int ticks, double power){
         fL.setTargetPosition(ticks);
         fR.setTargetPosition(ticks);
