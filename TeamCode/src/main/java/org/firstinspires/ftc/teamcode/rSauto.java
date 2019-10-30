@@ -66,6 +66,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import java.lang.Math;
+
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
@@ -267,6 +269,49 @@ public class rSauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
+    private void god(int ticks, double power, double t){
+        double theta = 45 + t;
+        int vert = (int)(ticks * Math.sin(theta));
+        int horiz = (int)(ticks * Math.cos(theta));
+        fL.setTargetPosition(horiz);
+        fR.setTargetPosition(vert);
+        bL.setTargetPosition(horiz);
+        bR.setTargetPosition(vert);
+        fL.setPower((int)(power*Math.cos(theta)));
+        fR.setPower((int)(power*Math.sin(theta)));
+        bL.setPower((int)(power*Math.cos(theta)));
+        bR.setPower((int)(power*Math.sin(theta)));
+
+
+        fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        runtim2.reset();
+        boolean working = true;
+        while(opModeIsActive()&&fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<3 && working) {
+            updateT();
+            if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
+                    + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
+                    + Math.abs(bL.getCurrentPosition() - bL.getTargetPosition())
+                    + Math.abs(bR.getCurrentPosition() - bR.getTargetPosition())
+                    < 60) {
+                working = false;
+            }
+        }
+        fL.setPower(0);
+        fR.setPower(0);
+        bL.setPower(0);
+        bR.setPower(0);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
 
     public double getHeading() {
         Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
