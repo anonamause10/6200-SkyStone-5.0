@@ -387,6 +387,7 @@ public class rFauto extends LinearOpMode
                 (float)bL.getCurrentPosition(), (float)bR.getCurrentPosition());
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Status", "Run Time2: " + runtim2.toString());
+        telemetry.addData("BackSensor", sR.getDistance(DistanceUnit.CM));
         telemetry.addData("ServoPos", servo.getPosition());
         telemetry.addData("INTAKE POWER", IN1.getPower());
         telemetry.update();
