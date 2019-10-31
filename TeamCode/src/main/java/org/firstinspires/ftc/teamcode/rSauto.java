@@ -305,14 +305,14 @@ public class rSauto extends LinearOpMode
     private void god(int ticks, double power, double t){
         double theta = 45 + t;
         theta = Math.toRadians(theta);
-        fL.setTargetPosition(ticks);
-        fR.setTargetPosition(ticks);
-        bL.setTargetPosition(ticks);
-        bR.setTargetPosition(ticks);
-        fL.setPower((int)(power*Math.cos(theta)));
-        fR.setPower((int)(power*Math.sin(theta)));
-        bL.setPower((int)(power*Math.cos(theta)));
-        bR.setPower((int)(power*Math.sin(theta)));
+        fL.setTargetPosition((int)(ticks*Math.cos(theta)));
+        fR.setTargetPosition((int)(ticks*Math.sin(theta)));
+        bL.setTargetPosition((int)(ticks*Math.cos(theta)));
+        bR.setTargetPosition((int)(ticks*Math.sin(theta)));
+        fL.setPower((power*Math.cos(theta)));
+        fR.setPower((power*Math.sin(theta)));
+        bL.setPower((power*Math.cos(theta)));
+        bR.setPower((power*Math.sin(theta)));
 
 
         fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
