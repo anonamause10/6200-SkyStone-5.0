@@ -189,13 +189,12 @@ public class rSauto extends LinearOpMode
         telemetry.update();
 
 
-        if(pos==1){
-            strafe(367, 0.3);
-        }else if(pos==2){
-            strafe(733, 0.3);
+        if(pos!=0){
+            go(-200, 0.7);
+            strafe(20 + 380*pos, 0.3);
         }
 
-        tarunForHomecomingKing(9);
+        tarunForHomecomingKing(10);
 
         servoToBlock();
         sleep(300);
@@ -208,33 +207,46 @@ public class rSauto extends LinearOpMode
 
         turn(180);
         intBlock();
+
+        tarunForHomecomingKing(35);
+
         turn(90);
 
-
-        go(1000, 0.7);
+        int target = (1800 + pos*300);
+        go(target, 0.7);
 
         outtake();
 
-        sleep(700);
+        sleep(1000);
 
-        while(opModeIsActive()&&intSens.getDistance(DistanceUnit.MM)<70){
+        /**while(opModeIsActive()&&intSens.getDistance(DistanceUnit.MM)<70){
             IN1.setPower(-0.4);
             IN2.setPower(-0.4);
             sleep(300);
-        }
+         }*/
         intakeOff();
-
-        go(-600, .07);
+        target = -800 - pos*300;
+        go(target, 0.7);
 
 
         turn(215);
+        intake();
+        go(2000, 0.7);
+        turn(180);
+        intakeOff();
+        tarunForHomecomingKing(35);
+        turn(90);
+        go(2100+pos*300, 0.7);
+        outtake();
+        sleep(1000);
+        intakeOff();
     }
     private void intBlock(){
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        double power = 0.3;
+        double power = 0.15;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
@@ -483,10 +495,10 @@ public class rSauto extends LinearOpMode
     }
 
     void tarunForHomecomingKing(int target){
-        fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         while(opModeIsActive()&&(sR.getDistance(DistanceUnit.CM) > target)){
             fL.setPower(-0.25);
             fR.setPower(-0.25);
@@ -501,6 +513,10 @@ public class rSauto extends LinearOpMode
         fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     void turn(double tun){

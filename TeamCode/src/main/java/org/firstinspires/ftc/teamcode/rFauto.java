@@ -426,6 +426,10 @@ public class rFauto extends LinearOpMode
         fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
 
