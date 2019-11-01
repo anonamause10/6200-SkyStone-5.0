@@ -257,7 +257,7 @@ public class teleop extends LinearOpMode {
         double v2 = r * Math.sin(robotAngle) - rightX;
         double v3 = r * Math.sin(robotAngle) + rightX;
         double v4 = r * Math.cos(robotAngle) - rightX;
-        if (gamepad1.x) {
+        if (gamepad1.left_stick_button||gamepad1.right_stick_button) {
             v1 *= 2.85;
             v2 *= 2.85;
             v3 *= 2.85;

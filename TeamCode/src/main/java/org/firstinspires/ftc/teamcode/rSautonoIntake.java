@@ -76,9 +76,9 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 
-@Autonomous(name="RED STONE Auto with intake", group="ree")
+@Autonomous(name="RED STONE Auto no Intake", group="ree")
 
-public class rSauto extends LinearOpMode
+public class rSautonoIntake extends LinearOpMode
 {
 
     WebcamName webcamName = null;
@@ -186,7 +186,7 @@ public class rSauto extends LinearOpMode
 
 
         if(pos!=0){
-            go(-200, 1);
+            go(-200, 0.3);
             strafe(20 + 380*pos, 0.4, 1000);
         }
 
@@ -195,57 +195,42 @@ public class rSauto extends LinearOpMode
         servoToBlock();
         sleep(300);
 
-        go(650, 0.8);
+        go(1000, 0.7);
+
+        turn(270);
+
+        int target = (-1800 - pos*400);
+        go(target, 0.7);
+
         servoUp();
 
-
-        go(300, 0.8);
-
-        turn(180);
-        intBlock();
-
-        moveBackwardsWithSensor(35);
+        go(200, 1);
 
         turn(90);
-
-        int target = (1800 + pos*300);
-        go(target, 1);
-
-        outtake();
-
-        sleep(1000);
-
-        /**while(opModeIsActive()&&intSens.getDistance(DistanceUnit.MM)<70){
-            IN1.setPower(-0.4);
-            IN2.setPower(-0.4);
-            sleep(300);
-         }*/
-        intakeOff();
-        target = -2000 - pos*300;
-        go(target, 1);
+        target = -2000 - pos*400;
+        go(target, 0.7);
 
         if(pos==0)
-            moveBackwardsWithSensor(39);
+            moveBackwardsWithSensor(36);
         else
-            moveBackwardsWithSensor(30);
+            moveBackwardsWithSensor(28);
 
         turn(0);
+
         moveBackwardsWithSensor(11);
+
         servoToBlock();
         sleep(300);
-        go(650, 0.8);
+
+        go(1000, 0.8);
+
+        turn(270);
+
+        target = (-2900 - pos*400);
+        go(target, 0.8);
         servoUp();
-        go(300, 0.8);
-        turn(180);
-        intBlock();
-        moveBackwardsWithSensor(35);
-        turn(90);
-        target = (2700 + pos*300);
-        go(target, 1);
-        outtake();
-        sleep(1000);
-        intakeOff();
-        go(-300, 1);
+
+        go(700, 1);
     }
     private void intBlock(){
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -408,7 +393,7 @@ public class rSauto extends LinearOpMode
     }
 
     private void servoToBlock(){
-        servo.setPosition(0.3);
+        servo.setPosition(0.31);
         try {
             wait(100);
         }catch(Exception E){
@@ -416,10 +401,6 @@ public class rSauto extends LinearOpMode
     }
     private void servoUp(){
         servo.setPosition(0.95);
-        try {
-            wait(100);
-        }catch(Exception E){
-        }
     }
     private void servoToFoun(){
         servo.setPosition(0.31);
@@ -453,29 +434,29 @@ public class rSauto extends LinearOpMode
         return result;
     }
 
-     private int runDetect( SkystoneDetector sky){
-             int result = (int) sky.getPos();
-             sky.stop();
-             return result;
-     }
+    private int runDetect( SkystoneDetector sky){
+        int result = (int) sky.getPos();
+        sky.stop();
+        return result;
+    }
 
 
-     private void updateT(){
-         telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
-                         "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
-                 bL.getPower(), bR.getPower());
-         telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
-                         "back left (%.1f), back right (%.1f)", (float)fL.getCurrentPosition(), (float)fR.getCurrentPosition(),
-                 (float)bL.getCurrentPosition(), (float)bR.getCurrentPosition());
-         telemetry.addData("Status", "Run Time: " + runtime.toString());
-         telemetry.addData("Status", "Run Time2: " + runtim2.toString());
-         telemetry.addData("BackSensor", sR.getDistance(DistanceUnit.CM));
-         telemetry.addData("IntakeSensor", intSens.getDistance(DistanceUnit.MM));
-         telemetry.addData("INTAKE POWER", IN1.getPower());
-         telemetry.addData("ServoPos", servo.getPosition());
-         telemetry.addData("Position:", pos);
-         telemetry.update();
-     }
+    private void updateT(){
+        telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
+                        "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
+                bL.getPower(), bR.getPower());
+        telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
+                        "back left (%.1f), back right (%.1f)", (float)fL.getCurrentPosition(), (float)fR.getCurrentPosition(),
+                (float)bL.getCurrentPosition(), (float)bR.getCurrentPosition());
+        telemetry.addData("Status", "Run Time: " + runtime.toString());
+        telemetry.addData("Status", "Run Time2: " + runtim2.toString());
+        telemetry.addData("BackSensor", sR.getDistance(DistanceUnit.CM));
+        telemetry.addData("IntakeSensor", intSens.getDistance(DistanceUnit.MM));
+        telemetry.addData("INTAKE POWER", IN1.getPower());
+        telemetry.addData("ServoPos", servo.getPosition());
+        telemetry.addData("Position:", pos);
+        telemetry.update();
+    }
     String format(OpenGLMatrix transformationMatrix) {
         return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
     }
@@ -541,15 +522,15 @@ public class rSauto extends LinearOpMode
                 bL.setPower(0.5);
                 bR.setPower(-0.5);
             }else if (ang-vuAng > 35){
-                fL.setPower(0.7 );
-                fR.setPower(-0.7 );
-                bL.setPower(0.7 );
-                bR.setPower(-0.7 );
+                fL.setPower(0.4 );
+                fR.setPower(-0.4 );
+                bL.setPower(0.4 );
+                bR.setPower(-0.4 );
             }else if(vuAng - ang > 35){
-                fL.setPower(-0.7 );
-                fR.setPower(0.7 );
-                bL.setPower(-0.7 );
-                bR.setPower(0.7 );
+                fL.setPower(-0.4 );
+                fR.setPower(0.4 );
+                bL.setPower(-0.4 );
+                bR.setPower(0.4 );
             }else if (ang < vuAng) {
                 fL.setPower(-0.15 );
                 fR.setPower(0.15);

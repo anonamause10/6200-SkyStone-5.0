@@ -193,7 +193,7 @@ public class rFauto extends LinearOpMode
 
         //START AUTO HERE LMAO
 
-        tarunForHomecomingKing(24);
+        moveBackWithSens(24);
 
         servoToFoun();
         sleep(600);
@@ -404,7 +404,7 @@ public class rFauto extends LinearOpMode
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
 
-    void tarunForHomecomingKing(int target){
+    void moveBackWithSens(int target){
 
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
