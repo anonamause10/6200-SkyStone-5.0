@@ -225,20 +225,37 @@ public class bSauto extends LinearOpMode
          sleep(300);
          }*/
         intakeOff();
-        target = -600 - pos*300;
+        target = -2300 - pos*300;
+        go(target, 0.7);
+        if(pos==0)
+        tarunForHomecomingKing(39);
+        else
+        tarunForHomecomingKing(19);
+
+        turn(0);
+        tarunForHomecomingKing(10);
+
+        servoToBlock();
+        sleep(300);
+
+        go(650, 0.25);
+        servoUp();
+
+
+        go(300, 0.5);
+
+        turn(180);
+        intBlock();
+
+        tarunForHomecomingKing(35);
+
+        turn(270);
+
+        target = (2300 + pos*300);
         go(target, 0.7);
 
-
-        turn(150);
-        intake();
-        go(2000, 0.7);
-        turn(180);
-        go(180, 0.15);
-        intakeOff();
-        tarunForHomecomingKing(35);
-        turn(270);
-        go(2100+pos*300, 0.7);
         outtake();
+
         sleep(1000);
         intakeOff();
     }
