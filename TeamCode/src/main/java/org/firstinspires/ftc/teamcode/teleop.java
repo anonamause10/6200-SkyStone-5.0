@@ -120,7 +120,7 @@ public class teleop extends LinearOpMode {
         S1 = hardwareMap.get(Servo.class, "servo");
         S2 = hardwareMap.get(Servo.class, "servo2");
         S1.setPosition(0.95);
-        S2.setPosition(1);
+        S2.setPosition(.55);
 
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
 
@@ -153,35 +153,34 @@ public class teleop extends LinearOpMode {
         while (opModeIsActive()) {
             drive();
 
+
             if (gamepad1.a) {
-                S1.setPosition(0.4);
-                S2.setPosition(0.6);
-            } else if (gamepad1.b) {
                 S1.setPosition(0.31);
-                S2.setPosition(0.28);
+                S2.setPosition(.93);
             }else if(gamepad1.y){
                 S1.setPosition(0.95);
-                S2.setPosition(1);
-            }else if(gamepad1.x){
-                S1.setPosition(0.5);
+                S2.setPosition(.55);
+            }else if(gamepad1.b){
+                S1.setPosition(0.85);
+                S2.setPosition(.87);
             }
             double INSPEED = 0.4;
             if(gamepad1.left_bumper){
                 IN1.setPower(-INSPEED);
-                IN2.setPower(-INSPEED);
-            }else if(gamepad1.right_bumper && (intSens.getDistance(DistanceUnit.MM)>70)){
+                IN2.setPower(INSPEED);
+            }else if(gamepad1.right_bumper && (intSens.getDistance(DistanceUnit.MM)>100)){
                 IN1.setPower(0.7);
-                IN2.setPower(0.7);
+                IN2.setPower(-0.7);
             }else{
                 IN1.setPower(0);
                 IN2.setPower(0);
             }
             if(gamepad1.left_trigger!=0){
                 IN1.setPower(-gamepad1.left_trigger);
-                IN2.setPower(-gamepad1.left_trigger);
+                IN2.setPower(gamepad1.left_trigger);
             }else if(gamepad1.right_trigger!=0){
                 IN1.setPower(gamepad1.right_trigger);
-                IN2.setPower(gamepad1.right_trigger);
+                IN2.setPower(-gamepad1.right_trigger);
             }
 
             xPrev = gamepad1.x;
