@@ -33,6 +33,7 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -77,6 +78,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
 
 @Autonomous(name="RED STONE Auto with intake", group="ree")
+@Disabled
 
 public class rSauto extends LinearOpMode
 {
@@ -138,9 +140,9 @@ public class rSauto extends LinearOpMode
         IN1 = hardwareMap.get(DcMotor.class, "IN1");
         IN1.setDirection(DcMotor.Direction.FORWARD);
         IN2 = hardwareMap.get(DcMotor.class,"IN2");
-        IN2.setDirection(DcMotor.Direction.FORWARD);
+        IN2.setDirection(DcMotor.Direction.REVERSE);
         servo = hardwareMap.get(Servo.class, "servo");
-        servo.setPosition(1);
+        servo.setPosition(.55);
         // you can use this as a regular DistanceSensor.
         sR = hardwareMap.get(DistanceSensor.class, "boonkRange");
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
@@ -408,21 +410,21 @@ public class rSauto extends LinearOpMode
     }
 
     private void servoToBlock(){
-        servo.setPosition(0.3);
+        servo.setPosition(.93);
         try {
             wait(100);
         }catch(Exception E){
         }
     }
     private void servoUp(){
-        servo.setPosition(0.95);
+        servo.setPosition(.55);
         try {
             wait(100);
         }catch(Exception E){
         }
     }
     private void servoToFoun(){
-        servo.setPosition(0.31);
+        servo.setPosition(.93);
         try {
             wait(100);
         }catch(Exception E){

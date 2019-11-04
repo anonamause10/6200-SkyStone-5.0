@@ -44,6 +44,8 @@ public class teleop extends LinearOpMode {
     //private DcMotor UD = null;
     private Servo S1 = null;
     private Servo S2 = null;
+    boolean clawClosed = false;
+    private boolean dPadDPrev = false;
     private boolean xPrev = false;
     private boolean yPrev = false;
     private boolean sPrev = false;
@@ -115,12 +117,12 @@ public class teleop extends LinearOpMode {
         IN1 = hardwareMap.get(DcMotor.class, "IN1");
         IN1.setDirection(FORWARD);
         IN2 = hardwareMap.get(DcMotor.class, "IN2");
-        IN2.setDirection(FORWARD);
+        IN2.setDirection(REVERSE);
 
         S1 = hardwareMap.get(Servo.class, "servo");
         S2 = hardwareMap.get(Servo.class, "servo2");
-        S1.setPosition(0.95);
-        S2.setPosition(.55);
+        S1.setPosition(.55);
+        S2.setPosition(0.7);
 
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
 
@@ -155,36 +157,46 @@ public class teleop extends LinearOpMode {
 
 
             if (gamepad1.a) {
-                S1.setPosition(0.31);
-                S2.setPosition(.93);
+                S1.setPosition(.93);
             }else if(gamepad1.y){
-                S1.setPosition(0.95);
-                S2.setPosition(.55);
+                S1.setPosition(.55);
             }else if(gamepad1.b){
-                S1.setPosition(0.85);
-                S2.setPosition(.87);
+                S1.setPosition(.87);
+            }else if(gamepad1.x){
+                S1.setPosition(.75);
             }
+            if(gamepad1.dpad_down && !dPadDPrev){
+
+                if(clawClosed)
+                S2.setPosition(.7);//set to open
+                else
+                S2.setPosition(.35); // set to close
+
+                clawClosed = !clawClosed;
+            }
+
             double INSPEED = 0.4;
             if(gamepad1.left_bumper){
-                IN1.setPower(-INSPEED);
+                IN1.setPower(INSPEED);
                 IN2.setPower(INSPEED);
             }else if(gamepad1.right_bumper && (intSens.getDistance(DistanceUnit.MM)>100)){
                 IN1.setPower(0.7);
-                IN2.setPower(-0.7);
+                IN2.setPower(0.7);
             }else{
                 IN1.setPower(0);
                 IN2.setPower(0);
             }
             if(gamepad1.left_trigger!=0){
-                IN1.setPower(-gamepad1.left_trigger);
+                IN1.setPower(gamepad1.left_trigger);
                 IN2.setPower(gamepad1.left_trigger);
             }else if(gamepad1.right_trigger!=0){
                 IN1.setPower(gamepad1.right_trigger);
-                IN2.setPower(-gamepad1.right_trigger);
+                IN2.setPower(gamepad1.right_trigger);
             }
 
             xPrev = gamepad1.x;
             yPrev = gamepad1.y;
+            dPadDPrev = gamepad1.dpad_down;
             rbumpprev = gamepad1.right_bumper;
             lbumpprev = gamepad1.left_bumper;
 

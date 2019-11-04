@@ -93,6 +93,7 @@ public class rSautonoIntake extends LinearOpMode
     private DcMotor IN1 = null;
     private DcMotor IN2 = null;
     private Servo servo =null;
+    private Servo servo2 = null;
     private DistanceSensor sR;
     private DistanceSensor intSens;
 
@@ -140,7 +141,9 @@ public class rSautonoIntake extends LinearOpMode
         IN2 = hardwareMap.get(DcMotor.class,"IN2");
         IN2.setDirection(DcMotor.Direction.FORWARD);
         servo = hardwareMap.get(Servo.class, "servo");
-        servo.setPosition(1);
+        servo.setPosition(.35);
+        servo2 = hardwareMap.get(Servo.class, "servo2");
+        servo2.setPosition(0.6);
         // you can use this as a regular DistanceSensor.
         sR = hardwareMap.get(DistanceSensor.class, "boonkRange");
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
@@ -393,17 +396,17 @@ public class rSautonoIntake extends LinearOpMode
     }
 
     private void servoToBlock(){
-        servo.setPosition(0.31);
+        servo.setPosition(0.87);
         try {
             wait(100);
         }catch(Exception E){
         }
     }
     private void servoUp(){
-        servo.setPosition(0.95);
+        servo.setPosition(0.55);
     }
     private void servoToFoun(){
-        servo.setPosition(0.31);
+        servo.setPosition(.93);
         try {
             wait(100);
         }catch(Exception E){

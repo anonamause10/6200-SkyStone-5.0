@@ -92,6 +92,7 @@ public class rFauto extends LinearOpMode
     private DcMotor IN1 = null;
     private DcMotor IN2 = null;
     private Servo servo =null;
+    private Servo servo2 = null;
     private DistanceSensor sR;
 
     private double voltage = 0.0;
@@ -151,9 +152,9 @@ public class rFauto extends LinearOpMode
         IN1 = hardwareMap.get(DcMotor.class, "IN1");
         IN1.setDirection(DcMotor.Direction.FORWARD);
         IN2 = hardwareMap.get(DcMotor.class,"IN2");
-        IN2.setDirection(DcMotor.Direction.FORWARD);
+        IN2.setDirection(DcMotor.Direction.REVERSE);
         servo = hardwareMap.get(Servo.class, "servo");
-        servo.setPosition(1);
+        servo.setPosition(.55);
         // you can use this as a regular DistanceSensor.
         sR = hardwareMap.get(DistanceSensor.class, "boonkRange");
 
@@ -316,21 +317,21 @@ public class rFauto extends LinearOpMode
     }
 
     private void servoToBlock(){
-        servo.setPosition(0.4);
+        servo.setPosition(.87);
         try {
             wait(100);
         }catch(Exception E){
         }
     }
     private void servoUp(){
-        servo.setPosition(0.95);
+        servo.setPosition(.55);
         try {
             wait(100);
         }catch(Exception E){
         }
     }
     private void servoToFoun(){
-        servo.setPosition(0.31);
+        servo.setPosition(.93);
         try {
             wait(100);
         }catch(Exception E){
