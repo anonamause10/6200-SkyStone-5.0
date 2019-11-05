@@ -76,7 +76,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 
-@Autonomous(name="RED STONE Auto no Intake", group="ree")
+@Autonomous(name="RED STONE Auto", group="ree")
 
 public class rSautonoIntake extends LinearOpMode
 {
@@ -143,7 +143,7 @@ public class rSautonoIntake extends LinearOpMode
         servo = hardwareMap.get(Servo.class, "servo");
         servo.setPosition(0.55);
         servo2 = hardwareMap.get(Servo.class, "servo2");
-        servo2.setPosition(0.6);
+        servo2.setPosition(0.75);
         // you can use this as a regular DistanceSensor.
         sR = hardwareMap.get(DistanceSensor.class, "boonkRange");
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
@@ -189,11 +189,11 @@ public class rSautonoIntake extends LinearOpMode
 
 
         if(pos!=0){
-            go(-200, 0.3);
+            go(-200, 0.5);
             strafe(20 + 380*pos, 0.4, 1000);
         }
 
-        moveBackwardsWithSensor(13);
+        moveBackwardsWithSensor(7);
 
         servoToBlock();
         sleep(700);
@@ -201,31 +201,33 @@ public class rSautonoIntake extends LinearOpMode
         sleep(300);
         liftClaw();
 
-        go(1000, 0.7);
+        go(930, 0.8);
 
         turn(270);
 
         int target = (-1800 - pos*400);
-        go(target, 0.7);
+        go(target, 0.8);
 
         openClaw();
         sleep(300);
         servoUp();
 
-        go(200, 1);
+        go(200, 0.8);
 
         turn(90);
         target = -2000 - pos*400;
-        go(target, 0.7);
+        go(target, .9);
+
+        turn(90);
 
         if(pos==0)
-            moveBackwardsWithSensor(38);
+            moveBackwardsWithSensor(35);
         else
-            moveBackwardsWithSensor(18);
+            moveBackwardsWithSensor(17);
 
         turn(0);
 
-        moveBackwardsWithSensor(13);
+        moveBackwardsWithSensor(7);
 
         servoToBlock();
         sleep(700);
@@ -233,12 +235,12 @@ public class rSautonoIntake extends LinearOpMode
         sleep(300);
         liftClaw();
 
-        go(1000, 0.8);
+        go(930, 0.8);
 
         turn(270);
 
         target = (-2900 - pos*400);
-        go(target, 0.8);
+        go(target, .8);
         openClaw();
         sleep(300);
         servoUp();
@@ -291,7 +293,7 @@ public class rSautonoIntake extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(opModeIsActive()&&fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<3 && working) {
+        while(opModeIsActive()&&fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.milliseconds()<2500 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
@@ -442,7 +444,7 @@ public class rSautonoIntake extends LinearOpMode
         servo.setPosition(0.75);
     }
     void openClaw(){
-        servo2.setPosition(0.6);
+        servo2.setPosition(0.75);
     }
 
     private double getBatteryVoltage() {
@@ -497,10 +499,17 @@ public class rSautonoIntake extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         while(opModeIsActive()&&(sR.getDistance(DistanceUnit.CM) > target)){
-            fL.setPower(-0.33);
-            fR.setPower(-0.33);
-            bL.setPower(-0.33);
-            bR.setPower(-0.33);
+            if(sR.getDistance(DistanceUnit.CM)-target <= 10){
+                fL.setPower(-0.15);
+                fR.setPower(-0.15);
+                bL.setPower(-0.15);
+                bR.setPower(-0.15);
+            }else{
+                fL.setPower(-0.33);
+                fR.setPower(-0.33);
+                bL.setPower(-0.33);
+                bR.setPower(-0.33);
+            }
         }
         fL.setPower(0);
         fR.setPower(0);

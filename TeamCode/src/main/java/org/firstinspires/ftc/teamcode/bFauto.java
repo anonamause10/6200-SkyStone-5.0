@@ -92,6 +92,7 @@ public class bFauto extends LinearOpMode
     private DcMotor IN1 = null;
     private DcMotor IN2 = null;
     private Servo servo =null;
+    private Servo servo2 = null;
     private DistanceSensor sR;
 
     private double voltage = 0.0;
@@ -144,12 +145,16 @@ public class bFauto extends LinearOpMode
         fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        fR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        bL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        bR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         IN1 = hardwareMap.get(DcMotor.class, "IN1");
         IN1.setDirection(DcMotor.Direction.FORWARD);
         IN2 = hardwareMap.get(DcMotor.class,"IN2");
-        IN2.setDirection(DcMotor.Direction.FORWARD);
+        IN2.setDirection(DcMotor.Direction.REVERSE);
         servo = hardwareMap.get(Servo.class, "servo");
-        servo.setPosition(1);
+        servo.setPosition(.55);
         // you can use this as a regular DistanceSensor.
         sR = hardwareMap.get(DistanceSensor.class, "boonkRange");
 
@@ -189,7 +194,7 @@ public class bFauto extends LinearOpMode
 
         //START AUTO HERE LMAO
 
-        tarunForHomecomingKing(24);
+        moveBackWithSens(23);
 
         servoToFoun();
         sleep(600);
@@ -197,12 +202,13 @@ public class bFauto extends LinearOpMode
         go(940, 0.25);
         servoUp();
         sleep(300);
-
+        turn(0);
         strafe(-1500, 0.4);
-
+        turn(0);
         go(-1900, 0.5);
-
+        turn(0);
         strafe(1500, 0.4);
+        turn(0);
 
         go(1300, 0.6);
 
@@ -227,10 +233,11 @@ public class bFauto extends LinearOpMode
 
 
     }
-    private void strafe(int ticks, double power){
+
+    private void go(int ticks, double power){
         fL.setTargetPosition(ticks);
-        fR.setTargetPosition(-ticks);
-        bL.setTargetPosition(-ticks);
+        fR.setTargetPosition(ticks);
+        bL.setTargetPosition(ticks);
         bR.setTargetPosition(ticks);
         fL.setPower(power);
         fR.setPower(power);
@@ -266,10 +273,10 @@ public class bFauto extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-    private void go(int ticks, double power){
+    private void strafe(int ticks, double power){
         fL.setTargetPosition(ticks);
-        fR.setTargetPosition(ticks);
-        bL.setTargetPosition(ticks);
+        fR.setTargetPosition(-ticks);
+        bL.setTargetPosition(-ticks);
         bR.setTargetPosition(ticks);
         fL.setPower(power);
         fR.setPower(power);
@@ -313,21 +320,21 @@ public class bFauto extends LinearOpMode
     }
 
     private void servoToBlock(){
-        servo.setPosition(0.4);
+        servo.setPosition(.87);
         try {
             wait(100);
         }catch(Exception E){
         }
     }
     private void servoUp(){
-        servo.setPosition(0.95);
+        servo.setPosition(.55);
         try {
             wait(100);
         }catch(Exception E){
         }
     }
     private void servoToFoun(){
-        servo.setPosition(0.31);
+        servo.setPosition(.93);
         try {
             wait(100);
         }catch(Exception E){
@@ -384,6 +391,7 @@ public class bFauto extends LinearOpMode
                 (float)bL.getCurrentPosition(), (float)bR.getCurrentPosition());
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Status", "Run Time2: " + runtim2.toString());
+        telemetry.addData("BackSensor", sR.getDistance(DistanceUnit.CM));
         telemetry.addData("ServoPos", servo.getPosition());
         telemetry.addData("INTAKE POWER", IN1.getPower());
         telemetry.update();
@@ -400,7 +408,7 @@ public class bFauto extends LinearOpMode
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
 
-    void tarunForHomecomingKing(int target){
+    void moveBackWithSens(int target){
 
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -422,6 +430,10 @@ public class bFauto extends LinearOpMode
         fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
 

@@ -80,10 +80,6 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 
 public class bSauto extends LinearOpMode
 {
-    private double FINPERTICK = 1000/23.5;
-    private double SINPERTICK = 1000/19.5;
-    private double DEGREESPERTICK = 1000/85;
-    private double STRAFEERROR = 3/19.5;
 
     WebcamName webcamName = null;
 
@@ -97,6 +93,7 @@ public class bSauto extends LinearOpMode
     private DcMotor IN1 = null;
     private DcMotor IN2 = null;
     private Servo servo =null;
+    private Servo servo2 = null;
     private DistanceSensor sR;
     private DistanceSensor intSens;
 
@@ -144,7 +141,9 @@ public class bSauto extends LinearOpMode
         IN2 = hardwareMap.get(DcMotor.class,"IN2");
         IN2.setDirection(DcMotor.Direction.FORWARD);
         servo = hardwareMap.get(Servo.class, "servo");
-        servo.setPosition(1);
+        servo.setPosition(0.55);
+        servo2 = hardwareMap.get(Servo.class, "servo2");
+        servo2.setPosition(0.75);
         // you can use this as a regular DistanceSensor.
         sR = hardwareMap.get(DistanceSensor.class, "boonkRange");
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
@@ -190,81 +189,70 @@ public class bSauto extends LinearOpMode
 
 
         if(pos!=0){
-            go(-200, 0.7);
-            strafe(-20 - 380*pos, 0.3);
+            go(-200, 0.5);
+            strafe(-(20 + 380*pos), 0.4, 1000);
         }
 
-        tarunForHomecomingKing(10);
+        moveBackwardsWithSensor(7);
 
         servoToBlock();
+        sleep(700);
+        closeClaw();
         sleep(300);
+        liftClaw();
 
-        go(650, 0.25);
+        go(930, 0.8);
+
+        turn(90);
+
+        int target = (-1800 - pos*400);
+        go(target, 0.8);
+
+        openClaw();
+        sleep(300);
         servoUp();
 
+        go(200, 0.8);
 
-        go(300, 0.5);
-
-        turn(180);
-        intBlock();
-
-        tarunForHomecomingKing(35);
+        turn(270);
+        target = -2000 - pos*400;
+        go(target, .9);
 
         turn(270);
 
-        int target = (1800 + pos*300);
-        go(target, 0.7);
-
-        outtake();
-
-        sleep(1000);
-
-        /**while(opModeIsActive()&&intSens.getDistance(DistanceUnit.MM)<70){
-         IN1.setPower(-0.4);
-         IN2.setPower(-0.4);
-         sleep(300);
-         }*/
-        intakeOff();
-        target = -2300 - pos*300;
-        go(target, 0.7);
         if(pos==0)
-        tarunForHomecomingKing(39);
+            moveBackwardsWithSensor(35);
         else
-        tarunForHomecomingKing(19);
+            moveBackwardsWithSensor(17);
 
         turn(0);
-        tarunForHomecomingKing(10);
+
+        moveBackwardsWithSensor(7);
 
         servoToBlock();
+        sleep(700);
+        closeClaw();
         sleep(300);
+        liftClaw();
 
-        go(650, 0.25);
+        go(930, 0.8);
+
+        turn(90);
+
+        target = (-2900 - pos*400);
+        go(target, .8);
+        openClaw();
+        sleep(300);
         servoUp();
 
-
-        go(300, 0.5);
-
-        turn(180);
-        intBlock();
-
-        tarunForHomecomingKing(35);
-
-        turn(270);
-
-        target = (2300 + pos*300);
-        go(target, 0.7);
-
-        outtake();
-
-        sleep(1000);
-        intakeOff();
+        go(700, 1);
     }
     private void intBlock(){
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        double power = 0.15;
+        double power = 0.25;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
@@ -305,7 +293,7 @@ public class bSauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(opModeIsActive()&&fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<3 && working) {
+        while(opModeIsActive()&&fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.milliseconds()<2500 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
@@ -374,7 +362,7 @@ public class bSauto extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-    private void strafe(int ticks, double power){
+    private void strafe(int ticks, double power, int delay){
         fL.setTargetPosition(ticks);
         fR.setTargetPosition(-ticks);
         bL.setTargetPosition(-ticks);
@@ -390,7 +378,7 @@ public class bSauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<=4 && working) {
+        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.milliseconds()<=delay && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
@@ -420,21 +408,17 @@ public class bSauto extends LinearOpMode
     }
 
     private void servoToBlock(){
-        servo.setPosition(0.4);
+        servo.setPosition(0.87);
         try {
             wait(100);
         }catch(Exception E){
         }
     }
     private void servoUp(){
-        servo.setPosition(0.95);
-        try {
-            wait(100);
-        }catch(Exception E){
-        }
+        servo.setPosition(0.55);
     }
     private void servoToFoun(){
-        servo.setPosition(0.31);
+        servo.setPosition(.93);
         try {
             wait(100);
         }catch(Exception E){
@@ -448,18 +432,19 @@ public class bSauto extends LinearOpMode
     private void outtake(){
         IN1.setPower(-0.4);
         IN2.setPower(-0.4);
-        try {
-            wait(100);
-        }catch(Exception E){
-        }
     }
     private void intakeOff(){
         IN1.setPower(0);
         IN2.setPower(0);
-        try {
-            wait(100);
-        }catch(Exception E){
-        }
+    }
+    void closeClaw(){
+        servo2.setPosition(0.35);
+    }
+    void liftClaw(){
+        servo.setPosition(0.75);
+    }
+    void openClaw(){
+        servo2.setPosition(0.75);
     }
 
     private double getBatteryVoltage() {
@@ -508,16 +493,23 @@ public class bSauto extends LinearOpMode
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
 
-    void tarunForHomecomingKing(int target){
+    void moveBackwardsWithSensor(int target){
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         while(opModeIsActive()&&(sR.getDistance(DistanceUnit.CM) > target)){
-            fL.setPower(-0.25);
-            fR.setPower(-0.25);
-            bL.setPower(-0.25);
-            bR.setPower(-0.25);
+            if(sR.getDistance(DistanceUnit.CM)-target <= 10){
+                fL.setPower(-0.15);
+                fR.setPower(-0.15);
+                bL.setPower(-0.15);
+                bR.setPower(-0.15);
+            }else{
+                fL.setPower(-0.33);
+                fR.setPower(-0.33);
+                bL.setPower(-0.33);
+                bR.setPower(-0.33);
+            }
         }
         fL.setPower(0);
         fR.setPower(0);
@@ -561,15 +553,15 @@ public class bSauto extends LinearOpMode
                 bL.setPower(0.5);
                 bR.setPower(-0.5);
             }else if (ang-vuAng > 35){
-                fL.setPower(0.7 );
-                fR.setPower(-0.7 );
-                bL.setPower(0.7 );
-                bR.setPower(-0.7 );
+                fL.setPower(0.4 );
+                fR.setPower(-0.4 );
+                bL.setPower(0.4 );
+                bR.setPower(-0.4 );
             }else if(vuAng - ang > 35){
-                fL.setPower(-0.7 );
-                fR.setPower(0.7 );
-                bL.setPower(-0.7 );
-                bR.setPower(0.7 );
+                fL.setPower(-0.4 );
+                fR.setPower(0.4 );
+                bL.setPower(-0.4 );
+                bR.setPower(0.4 );
             }else if (ang < vuAng) {
                 fL.setPower(-0.15 );
                 fR.setPower(0.15);
