@@ -141,7 +141,7 @@ public class rSautonoIntake extends LinearOpMode
         IN2 = hardwareMap.get(DcMotor.class,"IN2");
         IN2.setDirection(DcMotor.Direction.FORWARD);
         servo = hardwareMap.get(Servo.class, "servo");
-        servo.setPosition(.35);
+        servo.setPosition(0.55);
         servo2 = hardwareMap.get(Servo.class, "servo2");
         servo2.setPosition(0.6);
         // you can use this as a regular DistanceSensor.
@@ -193,10 +193,13 @@ public class rSautonoIntake extends LinearOpMode
             strafe(20 + 380*pos, 0.4, 1000);
         }
 
-        moveBackwardsWithSensor(11);
+        moveBackwardsWithSensor(13);
 
         servoToBlock();
+        sleep(700);
+        closeClaw();
         sleep(300);
+        liftClaw();
 
         go(1000, 0.7);
 
@@ -205,6 +208,8 @@ public class rSautonoIntake extends LinearOpMode
         int target = (-1800 - pos*400);
         go(target, 0.7);
 
+        openClaw();
+        sleep(300);
         servoUp();
 
         go(200, 1);
@@ -214,16 +219,19 @@ public class rSautonoIntake extends LinearOpMode
         go(target, 0.7);
 
         if(pos==0)
-            moveBackwardsWithSensor(36);
+            moveBackwardsWithSensor(38);
         else
-            moveBackwardsWithSensor(28);
+            moveBackwardsWithSensor(18);
 
         turn(0);
 
-        moveBackwardsWithSensor(11);
+        moveBackwardsWithSensor(13);
 
         servoToBlock();
+        sleep(700);
+        closeClaw();
         sleep(300);
+        liftClaw();
 
         go(1000, 0.8);
 
@@ -231,6 +239,8 @@ public class rSautonoIntake extends LinearOpMode
 
         target = (-2900 - pos*400);
         go(target, 0.8);
+        openClaw();
+        sleep(300);
         servoUp();
 
         go(700, 1);
@@ -424,6 +434,15 @@ public class rSautonoIntake extends LinearOpMode
     private void intakeOff(){
         IN1.setPower(0);
         IN2.setPower(0);
+    }
+    void closeClaw(){
+        servo2.setPosition(0.35);
+    }
+    void liftClaw(){
+        servo.setPosition(0.75);
+    }
+    void openClaw(){
+        servo2.setPosition(0.6);
     }
 
     private double getBatteryVoltage() {

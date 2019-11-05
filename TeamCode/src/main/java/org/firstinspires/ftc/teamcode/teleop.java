@@ -161,7 +161,7 @@ public class teleop extends LinearOpMode {
             }else if(gamepad1.y){
                 S1.setPosition(.55);
             }else if(gamepad1.b){
-                S1.setPosition(.87);
+                S1.setPosition(.83);
             }else if(gamepad1.x){
                 S1.setPosition(.75);
             }
@@ -173,9 +173,12 @@ public class teleop extends LinearOpMode {
                 S2.setPosition(.35); // set to close
 
                 clawClosed = !clawClosed;
+            }else if(gamepad1.dpad_left){
+                S2.setPosition(0.2);
             }
 
-            double INSPEED = 0.4;
+
+            double INSPEED = -0.4;
             if(gamepad1.left_bumper){
                 IN1.setPower(INSPEED);
                 IN2.setPower(INSPEED);
@@ -187,8 +190,8 @@ public class teleop extends LinearOpMode {
                 IN2.setPower(0);
             }
             if(gamepad1.left_trigger!=0){
-                IN1.setPower(gamepad1.left_trigger);
-                IN2.setPower(gamepad1.left_trigger);
+                IN1.setPower(-gamepad1.left_trigger);
+                IN2.setPower(-gamepad1.left_trigger);
             }else if(gamepad1.right_trigger!=0){
                 IN1.setPower(gamepad1.right_trigger);
                 IN2.setPower(gamepad1.right_trigger);
