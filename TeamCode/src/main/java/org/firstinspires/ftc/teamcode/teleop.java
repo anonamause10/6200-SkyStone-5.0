@@ -30,7 +30,7 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 /**
  * Created by isong on 10/17/18.
  */
-@TeleOp(name="datOne")
+@TeleOp(name="TeleOp")
 
 public class teleop extends LinearOpMode {
     // Declare OpMode members.
@@ -150,7 +150,11 @@ public class teleop extends LinearOpMode {
 
 
         // Wait for the game to start (driver presses PLAY)
-        waitForStart();
+        //waitForStart();
+        while (!opModeIsActive() && !isStopRequested()) {
+            telemetry.addData("status", "waiting for start command...");
+            telemetry.update();
+        }
         runtime.reset();
         while (opModeIsActive()) {
             drive();

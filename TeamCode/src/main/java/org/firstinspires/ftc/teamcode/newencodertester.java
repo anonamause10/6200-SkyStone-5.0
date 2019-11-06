@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -11,6 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  * Created by ianso on 7/23/2019.
  */
 @TeleOp(name="poot", group="Iterative Opmode")
+@Disabled
 public class newencodertester extends LinearOpMode{
     // Declare OpMode members.
 

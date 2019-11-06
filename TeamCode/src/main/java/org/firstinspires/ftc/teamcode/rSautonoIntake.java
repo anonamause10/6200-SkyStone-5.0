@@ -179,7 +179,12 @@ public class rSautonoIntake extends LinearOpMode
         telemetry.addData("Voltage:", voltage);
         telemetry.addData("Scale", scale);
         telemetry.update();
-        waitForStart();
+        //waitForStart();
+        while (!opModeIsActive() && !isStopRequested()) {
+            telemetry.addData("status", "waiting for start command...");
+            telemetry.addData("Stone Current pos", sky.getPos());
+            telemetry.update();
+        }
         runtime.reset();
 
         //START AUTO HERE LMAO
@@ -193,7 +198,7 @@ public class rSautonoIntake extends LinearOpMode
             strafe(20 + 380*pos, 0.4, 1000);
         }
 
-        moveBackwardsWithSensor(7);
+        moveBackwardsWithSensor(8);
 
         servoToBlock();
         sleep(700);
@@ -227,7 +232,7 @@ public class rSautonoIntake extends LinearOpMode
 
         turn(0);
 
-        moveBackwardsWithSensor(7);
+        moveBackwardsWithSensor(8);
 
         servoToBlock();
         sleep(700);

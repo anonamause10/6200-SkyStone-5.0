@@ -179,7 +179,12 @@ public class bSauto extends LinearOpMode
         telemetry.addData("Voltage:", voltage);
         telemetry.addData("Scale", scale);
         telemetry.update();
-        waitForStart();
+        //waitForStart();
+        while (!opModeIsActive() && !isStopRequested()) {
+            telemetry.addData("status", "waiting for start command...");
+            telemetry.addData("Stone curr pos: ", sky.getPos());
+            telemetry.update();
+        }
         runtime.reset();
 
         //START AUTO HERE LMAO
@@ -193,7 +198,7 @@ public class bSauto extends LinearOpMode
             strafe(-(20 + 380*pos), 0.4, 1000);
         }
 
-        moveBackwardsWithSensor(7);
+        moveBackwardsWithSensor(8);
 
         servoToBlock();
         sleep(700);
@@ -221,13 +226,13 @@ public class bSauto extends LinearOpMode
         turn(270);
 
         if(pos==0)
-            moveBackwardsWithSensor(35);
+            moveBackwardsWithSensor(37);
         else
             moveBackwardsWithSensor(17);
 
         turn(0);
 
-        moveBackwardsWithSensor(7);
+        moveBackwardsWithSensor(8);
 
         servoToBlock();
         sleep(700);

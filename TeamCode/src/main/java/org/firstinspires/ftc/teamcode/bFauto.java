@@ -189,7 +189,11 @@ public class bFauto extends LinearOpMode
         telemetry.addData("Voltage:", voltage);
         telemetry.addData("Scale", scale);
         telemetry.update();
-        waitForStart();
+        //waitForStart();
+        while (!opModeIsActive() && !isStopRequested()) {
+            telemetry.addData("status", "waiting for start command...");
+            telemetry.update();
+        }
         runtime.reset();
 
         //START AUTO HERE LMAO
