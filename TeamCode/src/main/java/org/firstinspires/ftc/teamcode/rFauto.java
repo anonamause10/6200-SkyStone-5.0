@@ -94,6 +94,7 @@ public class rFauto extends LinearOpMode
     private Servo servo =null;
     private Servo servo2 = null;
     private DistanceSensor sR;
+    private DistanceSensor sR2;
 
     private double voltage = 0.0;
     private double scale = 0.0;
@@ -155,8 +156,12 @@ public class rFauto extends LinearOpMode
         IN2.setDirection(DcMotor.Direction.REVERSE);
         servo = hardwareMap.get(Servo.class, "servo");
         servo.setPosition(.55);
+        servo2 = hardwareMap.get(Servo.class, "servo2");
+        servo2.setPosition(1);
+
         // you can use this as a regular DistanceSensor.
         sR = hardwareMap.get(DistanceSensor.class, "boonkRange");
+        sR2 = hardwareMap.get(DistanceSensor.class, "DS2");
 
         // you can also cast this to a Rev2mDistanceSensor if you want to use added
         // methods associated with the Rev2mDistanceSensor class.
@@ -198,27 +203,14 @@ public class rFauto extends LinearOpMode
 
         //START AUTO HERE LMAO
 
-        moveBackWithSens(23);
+        moveBackWithSens(9);
 
         servoToFoun();
         sleep(600);
 
-        go(940, 0.25);
+        moveForwardWithSens(11);
         servoUp();
-        sleep(300);
-        turn(0);
-        strafe(1500, 0.4);
-        turn(0);
-        go(-1900, 0.5);
-        turn(0);
-        strafe(-1500, 0.4);
-        turn(0);
-
-        go(1300, 0.6);
-
-        go(-100, 0.4);
-        turn(90);
-        go(-2240, 0.7);
+        moveForwardWithSens(9);
 
         while(opModeIsActive()){
         // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
@@ -338,7 +330,7 @@ public class rFauto extends LinearOpMode
         }
     }
     private void servoToFoun(){
-        servo.setPosition(.93);
+        servo.setPosition(.91);
         try {
             wait(100);
         }catch(Exception E){
@@ -439,6 +431,33 @@ public class rFauto extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
+    void moveForwardWithSens(int target){
+
+    fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+    while(opModeIsActive()&&(sR2.getDistance(DistanceUnit.CM) > target)){
+        fL.setPower(0.25);
+        fR.setPower(0.25);
+        bL.setPower(0.25);
+        bR.setPower(0.25);
+        updateT();
+    }
+    fL.setPower(0);
+    fR.setPower(0);
+    bL.setPower(0);
+    bR.setPower(0);
+    fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+}
 
 
     void turn(double tun){

@@ -95,7 +95,7 @@ public class bSauto extends LinearOpMode
     private Servo servo =null;
     private Servo servo2 = null;
     private DistanceSensor sR;
-    private DistanceSensor intSens;
+    private DistanceSensor sR2;
 
     private double voltage = 0.0;
     private double scale = 0.0;
@@ -146,7 +146,7 @@ public class bSauto extends LinearOpMode
         servo2.setPosition(0.75);
         // you can use this as a regular DistanceSensor.
         sR = hardwareMap.get(DistanceSensor.class, "boonkRange");
-        intSens = hardwareMap.get(DistanceSensor.class, "DS2");
+        sR2 = hardwareMap.get(DistanceSensor.class, "DS2");
 
         // you can also cast this to a Rev2mDistanceSensor if you want to use added
         // methods associated with the Rev2mDistanceSensor class.
@@ -197,8 +197,9 @@ public class bSauto extends LinearOpMode
             go(-200, 0.5);
             strafe(-(20 + 380*pos), 0.4, 1000);
         }
+        openClaw();
 
-        moveBackwardsWithSensor(8);
+        moveBackwardsWithSensor(15);
 
         servoToBlock();
         sleep(700);
@@ -206,7 +207,8 @@ public class bSauto extends LinearOpMode
         sleep(300);
         liftClaw();
 
-        go(930, 0.8);
+        go(700, 0.8);
+        moveForwardsWithSensor(24);
 
         turn(90);
 
@@ -224,15 +226,17 @@ public class bSauto extends LinearOpMode
         go(target, .9);
 
         turn(270);
+        if(pos==2)
+            pos--;
 
         if(pos==0)
             moveBackwardsWithSensor(37);
         else
-            moveBackwardsWithSensor(17);
+            moveBackwardsWithSensor(18);
 
         turn(0);
 
-        moveBackwardsWithSensor(8);
+        moveBackwardsWithSensor(15);
 
         servoToBlock();
         sleep(700);
@@ -240,7 +244,8 @@ public class bSauto extends LinearOpMode
         sleep(300);
         liftClaw();
 
-        go(930, 0.8);
+        go(700, 0.8);
+        moveForwardsWithSensor(24);
 
         turn(90);
 
@@ -252,35 +257,7 @@ public class bSauto extends LinearOpMode
 
         go(700, 1);
     }
-    private void intBlock(){
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        double power = 0.25;
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
-        intake();
-        runtim2.reset();
-        while(opModeIsActive()&&runtim2.seconds()<5&&intSens.getDistance(DistanceUnit.MM)>70){
-            updateT();
-        }
-        intakeOff();
-        fL.setPower(0);
-        fR.setPower(0);
-        bL.setPower(0);
-        bR.setPower(0);
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    }
+
     private void go(int ticks, double power){
         fL.setTargetPosition(ticks);
         fR.setTargetPosition(ticks);
@@ -307,9 +284,7 @@ public class bSauto extends LinearOpMode
                     < 60) {
                 working = false;
             }
-            if(intSens.getDistance(DistanceUnit.MM)<=70){
-                intakeOff();
-            }
+
         }
         fL.setPower(0);
         fR.setPower(0);
@@ -442,13 +417,13 @@ public class bSauto extends LinearOpMode
         IN1.setPower(0);
         IN2.setPower(0);
     }
-    void closeClaw(){
+    void openClaw(){
         servo2.setPosition(0.35);
     }
     void liftClaw(){
         servo.setPosition(0.75);
     }
-    void openClaw(){
+    void closeClaw(){
         servo2.setPosition(0.75);
     }
 
@@ -480,7 +455,7 @@ public class bSauto extends LinearOpMode
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Status", "Run Time2: " + runtim2.toString());
         telemetry.addData("BackSensor", sR.getDistance(DistanceUnit.CM));
-        telemetry.addData("IntakeSensor", intSens.getDistance(DistanceUnit.MM));
+        telemetry.addData("ForwardSensor", sR2.getDistance(DistanceUnit.MM));
         telemetry.addData("INTAKE POWER", IN1.getPower());
         telemetry.addData("ServoPos", servo.getPosition());
         telemetry.addData("Position:", pos);
@@ -514,6 +489,37 @@ public class bSauto extends LinearOpMode
                 fR.setPower(-0.33);
                 bL.setPower(-0.33);
                 bR.setPower(-0.33);
+            }
+        }
+        fL.setPower(0);
+        fR.setPower(0);
+        bL.setPower(0);
+        bR.setPower(0);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+    void moveForwardsWithSensor(int target){
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        while(opModeIsActive()&&(sR2.getDistance(DistanceUnit.CM) > target)){
+            if(sR2.getDistance(DistanceUnit.CM)-target <= 10){
+                fL.setPower(0.15);
+                fR.setPower(0.15);
+                bL.setPower(0.15);
+                bR.setPower(0.15);
+            }else{
+                fL.setPower(0.33);
+                fR.setPower(0.33);
+                bL.setPower(0.33);
+                bR.setPower(0.33);
             }
         }
         fL.setPower(0);

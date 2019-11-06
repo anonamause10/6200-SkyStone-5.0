@@ -247,6 +247,7 @@ public class rSauto extends LinearOpMode
         intBlock();
         moveBackwardsWithSensor(35);
         turn(90);
+
         target = (2700 + pos*300);
         go(target, 1);
         outtake();
