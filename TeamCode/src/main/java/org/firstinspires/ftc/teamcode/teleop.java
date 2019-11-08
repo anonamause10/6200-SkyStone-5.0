@@ -165,7 +165,7 @@ public class teleop extends LinearOpMode {
             }else if(gamepad1.y){
                 S1.setPosition(.55);
             }else if(gamepad1.b){
-                S1.setPosition(.85);
+                S1.setPosition(.87);
             }else if(gamepad1.x){
                 S1.setPosition(.75);
             }

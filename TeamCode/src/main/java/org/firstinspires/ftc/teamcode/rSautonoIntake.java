@@ -195,24 +195,25 @@ public class rSautonoIntake extends LinearOpMode
 
         if(pos!=0){
             go(-200, 0.5);
-            strafe(20 + 380*pos, 0.4, 1000);
+            strafe(40 + 380*pos, 0.4, 1000);
         }
         openClaw();
-        moveBackwardsWithSensor(15);
+        moveBackwardsWithSensor(18);
+        go(-50, 0.2);
 
         servoToBlock();
-        sleep(700);
+        sleep(900);
         closeClaw();
         sleep(300);
         liftClaw();
 
-        go(700, 0.8);
-        moveForwardsWithSensor(24);
+        go(400, 0.8);
+        moveForwardsWithSensor(27);
 
         turn(270);
 
         int target = (-1800 - pos*400);
-        go(target, 0.8);
+        go(target, 0.7);
 
         openClaw();
         sleep(300);
@@ -220,40 +221,43 @@ public class rSautonoIntake extends LinearOpMode
 
         go(200, 0.8);
 
-        turn(90);
-        target = -2000 - pos*400;
-        go(target, .9);
+        turn(270);
 
-        turn(90);
+        target = 2000 + pos*400;
+        go(target, .7);
+
+        turn(270);
 
         if(pos==2)
             pos--;
 
         if(pos==0)
-            moveBackwardsWithSensor(35);
+            moveForwardsWithSensor(32);
         else
-            moveBackwardsWithSensor(18);
+            moveForwardsWithSensor(15);
 
         turn(0);
 
-        moveBackwardsWithSensor(15);
+        moveBackwardsWithSensor(18);
+        go(-50, 0.2);
 
         servoToBlock();
-        sleep(700);
+        sleep(900);
         closeClaw();
         sleep(300);
         liftClaw();
 
-        go(700, 0.8);
-        moveForwardsWithSensor(24);
+        go(400, 0.8);
+        moveForwardsWithSensor(27);
 
         turn(270);
 
         target = (-2900 - pos*400);
-        go(target, .8);
+        go(target, .7);
         openClaw();
         sleep(300);
         servoUp();
+        turn(270);
 
         go(700, 1);
     }
@@ -387,7 +391,7 @@ public class rSautonoIntake extends LinearOpMode
     }
 
     private void servoToBlock(){
-        servo.setPosition(0.87);
+        servo.setPosition(0.91);
         try {
             wait(100);
         }catch(Exception E){
@@ -478,7 +482,7 @@ public class rSautonoIntake extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         while(opModeIsActive()&&(sR.getDistance(DistanceUnit.CM) > target)){
-            if(sR.getDistance(DistanceUnit.CM)-target <= 10){
+            if(sR.getDistance(DistanceUnit.CM)-target <= 15){
                 fL.setPower(-0.15);
                 fR.setPower(-0.15);
                 bL.setPower(-0.15);

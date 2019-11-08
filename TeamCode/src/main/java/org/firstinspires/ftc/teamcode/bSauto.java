@@ -199,7 +199,7 @@ public class bSauto extends LinearOpMode
         }
         openClaw();
 
-        moveBackwardsWithSensor(15);
+        moveBackwardsWithSensor(17);
 
         servoToBlock();
         sleep(700);
@@ -245,7 +245,7 @@ public class bSauto extends LinearOpMode
         liftClaw();
 
         go(700, 0.8);
-        moveForwardsWithSensor(24);
+        moveForwardsWithSensor(27);
 
         turn(90);
 
