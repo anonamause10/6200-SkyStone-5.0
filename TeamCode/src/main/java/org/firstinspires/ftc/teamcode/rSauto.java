@@ -228,6 +228,7 @@ public class rSauto extends LinearOpMode
             sleep(300);
          }*/
         intakeOff();
+
         target = -2000 - pos*300;
         go(target, 1);
 

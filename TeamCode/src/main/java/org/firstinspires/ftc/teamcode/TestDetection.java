@@ -65,7 +65,7 @@ public class TestDetection extends LinearOpMode
     @Override
     public void runOpMode()
     {
-        detector = new SkystoneDetector(hardwareMap, true, false);
+        detector = new SkystoneDetector(hardwareMap, true, true);
         /*
          * Wait for the user to press start on the Driver Station
          */
