@@ -182,7 +182,7 @@ public class bSauto extends LinearOpMode
         //waitForStart();
         while (!opModeIsActive() && !isStopRequested()) {
             telemetry.addData("status", "waiting for start command...");
-            telemetry.addData("Stone curr pos: ", sky.getPos());
+            telemetry.addData("Stone Current pos", sky.getPos());
             telemetry.update();
         }
         runtime.reset();
@@ -194,66 +194,74 @@ public class bSauto extends LinearOpMode
 
 
         if(pos!=0){
-            go(-200, 0.5);
-            strafe(-(20 + 380*pos), 0.4, 1000);
+            go(-200, 0.7);
+            strafe(-40 - 380*pos, 0.4, 1000);
         }
         openClaw();
-
-        moveBackwardsWithSensor(17);
-
+        moveBackwardsWithSensor(20);
         servoToBlock();
-        sleep(700);
+        sleep(900);
+        go(-100, 0.3);
+        servo.setPosition(0.93);
         closeClaw();
         sleep(300);
         liftClaw();
 
-        go(700, 0.8);
-        moveForwardsWithSensor(24);
+        go(400, 0.8);
+        moveForwardsWithSensor(31);
 
         turn(90);
 
         int target = (-1800 - pos*400);
-        go(target, 0.8);
+        go(target, .7);
 
         openClaw();
         sleep(300);
         servoUp();
+        closeClaw();
 
         go(200, 0.8);
 
-        turn(270);
-        target = -2000 - pos*400;
-        go(target, .9);
+        turn(90);
 
-        turn(270);
+        target = 2000 + pos*400;
+        go(target, .7);
+
+        turn(90);
+
         if(pos==2)
             pos--;
 
         if(pos==0)
-            moveBackwardsWithSensor(37);
+            moveForwardsWithSensor(45);
         else
-            moveBackwardsWithSensor(18);
+            moveForwardsWithSensor(25);
 
         turn(0);
+        openClaw();
 
-        moveBackwardsWithSensor(15);
+        moveBackwardsWithSensor(20);
+
 
         servoToBlock();
-        sleep(700);
+        sleep(900);
+        go(-100, 0.3);
         closeClaw();
-        sleep(300);
+        servo.setPosition(0.93);
+        sleep(500);
         liftClaw();
 
-        go(700, 0.8);
-        moveForwardsWithSensor(27);
+        go(400, 0.8);
+        moveForwardsWithSensor(31);
 
         turn(90);
 
         target = (-2900 - pos*400);
-        go(target, .8);
+        go(target, .7);
         openClaw();
-        sleep(300);
+        sleep(500);
         servoUp();
+        turn(90);
 
         go(700, 1);
     }
@@ -284,7 +292,6 @@ public class bSauto extends LinearOpMode
                     < 60) {
                 working = false;
             }
-
         }
         fL.setPower(0);
         fR.setPower(0);
@@ -388,7 +395,7 @@ public class bSauto extends LinearOpMode
     }
 
     private void servoToBlock(){
-        servo.setPosition(0.87);
+        servo.setPosition(0.91);
         try {
             wait(100);
         }catch(Exception E){
@@ -455,7 +462,7 @@ public class bSauto extends LinearOpMode
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Status", "Run Time2: " + runtim2.toString());
         telemetry.addData("BackSensor", sR.getDistance(DistanceUnit.CM));
-        telemetry.addData("ForwardSensor", sR2.getDistance(DistanceUnit.MM));
+        telemetry.addData("ForwardSensor", sR2.getDistance(DistanceUnit.CM));
         telemetry.addData("INTAKE POWER", IN1.getPower());
         telemetry.addData("ServoPos", servo.getPosition());
         telemetry.addData("Position:", pos);
@@ -479,16 +486,16 @@ public class bSauto extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         while(opModeIsActive()&&(sR.getDistance(DistanceUnit.CM) > target)){
-            if(sR.getDistance(DistanceUnit.CM)-target <= 10){
+            if(sR.getDistance(DistanceUnit.CM)-target <= 15){
                 fL.setPower(-0.15);
                 fR.setPower(-0.15);
                 bL.setPower(-0.15);
                 bR.setPower(-0.15);
             }else{
-                fL.setPower(-0.33);
-                fR.setPower(-0.33);
-                bL.setPower(-0.33);
-                bR.setPower(-0.33);
+                fL.setPower(-0.43);
+                fR.setPower(-0.43);
+                bL.setPower(-0.43);
+                bR.setPower(-0.43);
             }
         }
         fL.setPower(0);
@@ -516,10 +523,10 @@ public class bSauto extends LinearOpMode
                 bL.setPower(0.15);
                 bR.setPower(0.15);
             }else{
-                fL.setPower(0.33);
-                fR.setPower(0.33);
-                bL.setPower(0.33);
-                bR.setPower(0.33);
+                fL.setPower(0.43);
+                fR.setPower(0.43);
+                bL.setPower(0.43);
+                bR.setPower(0.43);
             }
         }
         fL.setPower(0);
@@ -553,7 +560,7 @@ public class bSauto extends LinearOpMode
                 fR.setPower(0);
                 bL.setPower(0);
                 bR.setPower(0);
-            }else if(ang>=270&& vuAng<=90){
+            }else if(ang>=260&& vuAng<=90){
                 fL.setPower(-0.5);
                 fR.setPower(0.5);
                 bL.setPower(-0.5);
@@ -564,15 +571,15 @@ public class bSauto extends LinearOpMode
                 bL.setPower(0.5);
                 bR.setPower(-0.5);
             }else if (ang-vuAng > 35){
-                fL.setPower(0.4 );
-                fR.setPower(-0.4 );
-                bL.setPower(0.4 );
-                bR.setPower(-0.4 );
+                fL.setPower(0.5 );
+                fR.setPower(-0.5 );
+                bL.setPower(0.5 );
+                bR.setPower(-0.5 );
             }else if(vuAng - ang > 35){
-                fL.setPower(-0.4 );
-                fR.setPower(0.4 );
-                bL.setPower(-0.4 );
-                bR.setPower(0.4 );
+                fL.setPower(-0.5 );
+                fR.setPower(0.5 );
+                bL.setPower(-0.5 );
+                bR.setPower(0.5 );
             }else if (ang < vuAng) {
                 fL.setPower(-0.15 );
                 fR.setPower(0.15);

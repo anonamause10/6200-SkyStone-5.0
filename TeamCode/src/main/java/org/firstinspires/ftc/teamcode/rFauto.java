@@ -77,7 +77,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocaliz
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
 
-@Autonomous(name="RED FOUNDATION Auto", group="ree")
+@Autonomous(name="RED FOUNDATION Autov (no strafing)", group="ree")
 
 public class rFauto extends LinearOpMode
 {
@@ -202,15 +202,16 @@ public class rFauto extends LinearOpMode
         runtime.reset();
 
         //START AUTO HERE LMAO
+        strafe(-600, 0.5);
 
         moveBackWithSens(9);
 
         servoToFoun();
         sleep(600);
 
-        moveForwardWithSens(11);
+        moveForwardWithSens(16);
         servoUp();
-        moveForwardWithSens(9);
+        moveForwardWithSens(14);
 
         while(opModeIsActive()){
         // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
@@ -330,7 +331,7 @@ public class rFauto extends LinearOpMode
         }
     }
     private void servoToFoun(){
-        servo.setPosition(.91);
+        servo.setPosition(.93);
         try {
             wait(100);
         }catch(Exception E){

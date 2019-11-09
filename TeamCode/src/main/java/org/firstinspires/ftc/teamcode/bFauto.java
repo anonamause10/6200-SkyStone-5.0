@@ -202,19 +202,17 @@ public class bFauto extends LinearOpMode
         runtime.reset();
 
         //START AUTO HERE LMAO
+        strafe(200, 0.5);
 
         moveBackWithSens(9);
 
         servoToFoun();
         sleep(600);
 
-        moveForwardWithSens(12);
+        moveForwardWithSens(16);
         servoUp();
-        while(runtime.seconds()<22&&opModeIsActive()){
-        }
-        strafe(-2500, 0.4);
-        go(-1200, 0.7);
-
+        moveForwardWithSens(14);
+        strafe(-1500, 0.4);
         while(opModeIsActive()){
             // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
             if ((soundID = myApp.getResources().getIdentifier(sounds[soundIndex], "raw", myApp.getPackageName())) != 0){
@@ -333,7 +331,7 @@ public class bFauto extends LinearOpMode
         }
     }
     private void servoToFoun(){
-        servo.setPosition(.91);
+        servo.setPosition(.93);
         try {
             wait(100);
         }catch(Exception E){

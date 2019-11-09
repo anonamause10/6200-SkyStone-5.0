@@ -194,15 +194,15 @@ public class rSautonoIntake extends LinearOpMode
 
 
         if(pos!=0){
-            go(-200, 0.5);
+            go(-200, 0.7);
             strafe(40 + 380*pos, 0.4, 1000);
         }
         openClaw();
-        moveBackwardsWithSensor(18);
-
+        moveBackwardsWithSensor(19);
         servoToBlock();
         sleep(900);
-        go(-30, 0.2);
+        go(-75, 0.3);
+        servo.setPosition(0.93);
         closeClaw();
         sleep(300);
         liftClaw();
@@ -213,36 +213,40 @@ public class rSautonoIntake extends LinearOpMode
         turn(270);
 
         int target = (-1800 - pos*400);
-        go(target, 0.7);
+        go(target, 0.9);
 
         openClaw();
         sleep(300);
         servoUp();
-        servo2.setPosition(0.7);
+        closeClaw();
+
         go(200, 0.8);
 
-        //turn(270);
+        turn(270);
 
         target = 2000 + pos*400;
-        go(target, .7);
+        go(target, .9);
 
-        //turn(270);
+        turn(270);
 
         if(pos==2)
             pos--;
 
         if(pos==0)
-            moveForwardsWithSensor(25);
+            moveForwardsWithSensor(45);
         else
-            moveForwardsWithSensor(15);
+            moveForwardsWithSensor(25);
 
         turn(0);
+        openClaw();
 
-        moveBackwardsWithSensor(18);
-        go(-30, 0.2);
+        moveBackwardsWithSensor(19);
+
 
         servoToBlock();
         sleep(900);
+        go(-75, 0.3);
+        servo.setPosition(0.93);
         closeClaw();
         sleep(300);
         liftClaw();
@@ -253,7 +257,7 @@ public class rSautonoIntake extends LinearOpMode
         turn(270);
 
         target = (-2900 - pos*400);
-        go(target, .7);
+        go(target, .9);
         openClaw();
         sleep(300);
         servoUp();
@@ -488,10 +492,10 @@ public class rSautonoIntake extends LinearOpMode
                 bL.setPower(-0.15);
                 bR.setPower(-0.15);
             }else{
-                fL.setPower(-0.33);
-                fR.setPower(-0.33);
-                bL.setPower(-0.33);
-                bR.setPower(-0.33);
+                fL.setPower(-0.43);
+                fR.setPower(-0.43);
+                bL.setPower(-0.43);
+                bR.setPower(-0.43);
             }
         }
         fL.setPower(0);
@@ -519,10 +523,10 @@ public class rSautonoIntake extends LinearOpMode
                 bL.setPower(0.15);
                 bR.setPower(0.15);
             }else{
-                fL.setPower(0.33);
-                fR.setPower(0.33);
-                bL.setPower(0.33);
-                bR.setPower(0.33);
+                fL.setPower(0.43);
+                fR.setPower(0.43);
+                bL.setPower(0.43);
+                bR.setPower(0.43);
             }
         }
         fL.setPower(0);
@@ -556,7 +560,7 @@ public class rSautonoIntake extends LinearOpMode
                 fR.setPower(0);
                 bL.setPower(0);
                 bR.setPower(0);
-            }else if(ang>=270&& vuAng<=90){
+            }else if(ang>=260&& vuAng<=90){
                 fL.setPower(-0.5);
                 fR.setPower(0.5);
                 bL.setPower(-0.5);
@@ -567,15 +571,15 @@ public class rSautonoIntake extends LinearOpMode
                 bL.setPower(0.5);
                 bR.setPower(-0.5);
             }else if (ang-vuAng > 35){
-                fL.setPower(0.4 );
-                fR.setPower(-0.4 );
-                bL.setPower(0.4 );
-                bR.setPower(-0.4 );
+                fL.setPower(0.5 );
+                fR.setPower(-0.5 );
+                bL.setPower(0.5 );
+                bR.setPower(-0.5 );
             }else if(vuAng - ang > 35){
-                fL.setPower(-0.4 );
-                fR.setPower(0.4 );
-                bL.setPower(-0.4 );
-                bR.setPower(0.4 );
+                fL.setPower(-0.5 );
+                fR.setPower(0.5);
+                bL.setPower(-0.5 );
+                bR.setPower(0.5 );
             }else if (ang < vuAng) {
                 fL.setPower(-0.15 );
                 fR.setPower(0.15);
