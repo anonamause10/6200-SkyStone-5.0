@@ -196,24 +196,25 @@ public class rSautonoIntake extends LinearOpMode
         if(pos!=0){
             go(-200, 0.7);
             strafe(40 + 380*pos, 0.4, 1000);
+            turn(0);
         }
         openClaw();
-        moveBackwardsWithSensor(19);
+        moveBackwardsWithSensor(22);
         servoToBlock();
         sleep(900);
-        go(-75, 0.3);
+        go(-100, 0.3);
         servo.setPosition(0.93);
         closeClaw();
         sleep(300);
         liftClaw();
 
-        go(400, 0.8);
-        moveForwardsWithSensor(27);
+        go(300, 0.8);
+        moveForwardsWithSensor(68);
 
         turn(270);
 
         int target = (-1800 - pos*400);
-        go(target, 0.9);
+        go(target, 0.7);
 
         openClaw();
         sleep(300);
@@ -225,7 +226,7 @@ public class rSautonoIntake extends LinearOpMode
         turn(270);
 
         target = 2000 + pos*400;
-        go(target, .9);
+        go(target, .7);
 
         turn(270);
 
@@ -240,27 +241,28 @@ public class rSautonoIntake extends LinearOpMode
         turn(0);
         openClaw();
 
-        moveBackwardsWithSensor(19);
+        moveBackwardsWithSensor(22);
 
 
         servoToBlock();
         sleep(900);
-        go(-75, 0.3);
+        go(-100, 0.3);
         servo.setPosition(0.93);
         closeClaw();
-        sleep(300);
+        sleep(500);
         liftClaw();
 
         go(400, 0.8);
-        moveForwardsWithSensor(27);
+        moveForwardsWithSensor(68);
 
         turn(270);
 
         target = (-2900 - pos*400);
-        go(target, .9);
+        go(target, .7);
         openClaw();
-        sleep(300);
+        sleep(500);
         servoUp();
+        closeClaw();
         turn(270);
 
         go(700, 1);

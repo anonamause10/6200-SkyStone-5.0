@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.hardware.rev.RevBlinkinLedDriver;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -12,9 +13,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.ftccommon.SoundPlayer;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.SampleRevBlinkinLedDriver;
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -23,6 +27,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
 import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.FORWARD;
 import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
@@ -34,6 +39,7 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 
 public class teleop extends LinearOpMode {
     // Declare OpMode members.
+    private int[] positions = {0, 1000, 2000, 3000, 4000};
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor FL = null;
     private DcMotor FR = null;
@@ -41,9 +47,10 @@ public class teleop extends LinearOpMode {
     private DcMotor BR = null;
     private DcMotor IN1 = null;
     private DcMotor IN2 = null;
-    //private DcMotor UD = null;
-    private Servo S1 = null;
-    private Servo S2 = null;
+    private DcMotor UD = null;
+    private Servo rotateServo = null;
+    private Servo clawServo = null;
+    RevBlinkinLedDriver blinkinLedDriver;
     boolean clawClosed = false;
     private boolean dPadDPrev = false;
     private boolean xPrev = false;
@@ -53,6 +60,7 @@ public class teleop extends LinearOpMode {
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
     private DistanceSensor intSens = null;
+    private TouchSensor touchyboyxd = null;
     // List of available sound resources
     String  sounds[] =  {"ss_alarm", "ss_bb8_down", "ss_bb8_up", "ss_darth_vader", "ss_fly_by",
             "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
@@ -79,50 +87,42 @@ public class teleop extends LinearOpMode {
         int     soundID         = -1;
         boolean was_dpad_up     = false;
         boolean was_dpad_down   = false;
+        double posIn = 0;
+        double posOut = 200;
 
         Context myApp = hardwareMap.appContext;
 
         // create a sound parameter that holds the desired player parameters.
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
-
+        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blink");
         params.loopControl = 0;
         params.waitForNonLoopingSoundsToFinish = true;
         FL = hardwareMap.get(DcMotor.class, "fL");
         FR = hardwareMap.get(DcMotor.class, "fR");
         BL = hardwareMap.get(DcMotor.class, "bL");
         BR = hardwareMap.get(DcMotor.class, "bR");
-        FL.setDirection(REVERSE);
-        BL.setDirection(REVERSE);
-        FR.setDirection(FORWARD);
-        BR.setDirection(FORWARD);
-        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FL.setDirection(REVERSE);BL.setDirection(REVERSE);
+        FR.setDirection(FORWARD);BR.setDirection(FORWARD);
+        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         FL.setPower(0);
         FR.setPower(0);
         BL.setPower(0);
         BR.setPower(0);
+
+        UD = hardwareMap.get(DcMotor.class, "LIFT");
+        UD.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        UD.setPower(0);
 
         IN1 = hardwareMap.get(DcMotor.class, "IN1");
         IN1.setDirection(FORWARD);
         IN2 = hardwareMap.get(DcMotor.class, "IN2");
         IN2.setDirection(REVERSE);
 
-        S1 = hardwareMap.get(Servo.class, "servo");
-        S2 = hardwareMap.get(Servo.class, "servo2");
-        S1.setPosition(.55);
-        S2.setPosition(0.7);
+        rotateServo= hardwareMap.get(Servo.class, "ROTATE"); clawServo= hardwareMap.get(Servo.class, "servo2"); rotateServo.setPosition(.55); clawServo.setPosition(0.7);
 
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
 
@@ -160,27 +160,17 @@ public class teleop extends LinearOpMode {
             drive();
 
 
-            if (gamepad1.a) {
-                S1.setPosition(.93);
-            }else if(gamepad1.y){
-                S1.setPosition(.55);
-            }else if(gamepad1.b){
-                S1.setPosition(.87);
-            }else if(gamepad1.x){
-                S1.setPosition(.75);
+            if (gamepad2.a) { rotateServo.setPosition(posIn);
+            }else if(gamepad2.b){ rotateServo.setPosition(posOut);
             }
-            if(gamepad1.dpad_down && !dPadDPrev){
+            if(gamepad2.dpad_down && !dPadDPrev){
 
-                if(!clawClosed)
-                S2.setPosition(.7);//set to closed
-                else
-                S2.setPosition(.35); // set to open
+                if(!clawClosed) clawServo.setPosition(.7);//set to closed
+                else clawServo.setPosition(.35); // set to open
 
                 clawClosed = !clawClosed;
-            }else if(gamepad1.dpad_left){
-                S2.setPosition(0.6);
-            }else if(gamepad1.dpad_right){
-                S2.setPosition(1);
+            }else if(gamepad1.dpad_left){ clawServo.setPosition(0.6);
+            }else if(gamepad1.dpad_right){ clawServo.setPosition(1);
             }
 
 
@@ -217,8 +207,9 @@ public class teleop extends LinearOpMode {
                             "back left (%.1f), back right (%.1f)", (float)FL.getCurrentPosition(), (float)FR.getCurrentPosition(),
                     (float)BL.getCurrentPosition(), (float)BR.getCurrentPosition());
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Servo1Pos", S1.getPosition());
-            telemetry.addData("Servo2Pos", S2.getPosition());
+            telemetry.addData("Lift Power", UD.getPower());
+            telemetry.addData("Rotating Servo Pos", rotateServo.getPosition());
+            telemetry.addData("Claw Poition", clawServo.getPosition());
             telemetry.addData("Sound >", sounds[soundIndex]);
             telemetry.addData("INTAKE POWER", IN1.getPower());
             telemetry.addData("IMU:", getHeading());
@@ -282,6 +273,11 @@ public class teleop extends LinearOpMode {
             v2 *= 2.85;
             v3 *= 2.85;
             v4 *= 2.85;
+        }
+        if(v1 < 0 && v2 < 0 && v3 < 0 && v4 <0){
+            blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_RED);
+        }else{
+            blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_SINELON);
         }
         FL.setPower(v1);
         FR.setPower(v2);

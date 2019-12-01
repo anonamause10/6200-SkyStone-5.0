@@ -202,17 +202,17 @@ public class bFauto extends LinearOpMode
         runtime.reset();
 
         //START AUTO HERE LMAO
-        strafe(200, 0.5);
+        strafe(600, 0.5);
 
         moveBackWithSens(9);
 
         servoToFoun();
-        sleep(600);
+        sleep(500);
 
         moveForwardWithSens(16);
         servoUp();
         moveForwardWithSens(14);
-        strafe(-1500, 0.4);
+        strafe(-2500, 0.4);
         while(opModeIsActive()){
             // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
             if ((soundID = myApp.getResources().getIdentifier(sounds[soundIndex], "raw", myApp.getPackageName())) != 0){
@@ -331,7 +331,7 @@ public class bFauto extends LinearOpMode
         }
     }
     private void servoToFoun(){
-        servo.setPosition(.93);
+        servo.setPosition(.95);
         try {
             wait(100);
         }catch(Exception E){
@@ -411,8 +411,8 @@ public class bFauto extends LinearOpMode
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        while(opModeIsActive()&&(sR.getDistance(DistanceUnit.CM) > target)){
+        runtim2.reset();
+        while(opModeIsActive()&&(sR.getDistance(DistanceUnit.CM) > target)&&runtim2.seconds()<5){
             fL.setPower(-0.25);
             fR.setPower(-0.25);
             bL.setPower(-0.25);
@@ -438,12 +438,18 @@ public class bFauto extends LinearOpMode
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        runtim2.reset();
 
-        while(opModeIsActive()&&(sR2.getDistance(DistanceUnit.CM) > target)){
-            fL.setPower(0.25);
-            fR.setPower(0.25);
-            bL.setPower(0.25);
-            bR.setPower(0.25);
+        while(opModeIsActive()&&(sR2.getDistance(DistanceUnit.CM) > target)&&runtim2.seconds()<5){
+            fL.setPower(0.35);
+            fR.setPower(0.35);
+            bL.setPower(0.35);
+            bR.setPower(0.35);
+            Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+            double ang = angles.firstAngle;
+            if(Math.abs(ang)>0.5){
+                turn(0);
+            }
             updateT();
         }
         fL.setPower(0);
