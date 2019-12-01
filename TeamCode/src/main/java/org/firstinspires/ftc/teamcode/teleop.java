@@ -114,7 +114,7 @@ public class teleop extends LinearOpMode {
         BR.setPower(0);
 
         UD = hardwareMap.get(DcMotor.class, "LIFT");
-        UD.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        UD.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         UD.setPower(0);
 
         IN1 = hardwareMap.get(DcMotor.class, "IN1");
@@ -122,7 +122,9 @@ public class teleop extends LinearOpMode {
         IN2 = hardwareMap.get(DcMotor.class, "IN2");
         IN2.setDirection(REVERSE);
 
-        rotateServo= hardwareMap.get(Servo.class, "ROTATE"); clawServo= hardwareMap.get(Servo.class, "servo2"); rotateServo.setPosition(.55); clawServo.setPosition(0.7);
+        rotateServo= hardwareMap.get(Servo.class, "ROTATE");
+        clawServo= hardwareMap.get(Servo.class, "CLAW");
+        rotateServo.setPosition(0); clawServo.setPosition(0);
 
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
 
@@ -172,6 +174,9 @@ public class teleop extends LinearOpMode {
             }else if(gamepad1.dpad_left){ clawServo.setPosition(0.6);
             }else if(gamepad1.dpad_right){ clawServo.setPosition(1);
             }
+
+
+            UD.setPower(-gamepad2.left_stick_y);
 
 
             double INSPEED = -0.4;
