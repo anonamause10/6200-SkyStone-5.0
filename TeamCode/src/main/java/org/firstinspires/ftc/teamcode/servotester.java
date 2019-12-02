@@ -29,12 +29,15 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 /**
  * Created by isong on 10/17/18.
  */
-@TeleOp(name="one motor")
+@TeleOp(name="one servo")
 
 public class servotester extends LinearOpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor S1 = null;
+    private Servo S1 = null;
+    private boolean aPrev = false;
+    private boolean bPrev = false;
+    private double pos = 0;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -42,10 +45,8 @@ public class servotester extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        S1 = hardwareMap.get(DcMotor.class, "LIFT");
-        S1.setPower(0);
-        S1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        S1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        S1 = hardwareMap.get(Servo.class, "servo");
+        S1.setPosition(0);
         telemetry.addData("Robot", "Initialized");
         telemetry.update();
 
@@ -59,11 +60,17 @@ public class servotester extends LinearOpMode {
         runtime.reset();
         while (opModeIsActive()) {
 
+            if(pos<1 && gamepad1.a && !aPrev){
+                pos+=0.05;
+                S1.setPosition(pos);
+            }else if(pos>0 && gamepad1.b && !bPrev){
+                pos-=0.05;
+                S1.setPosition(pos);
+            }
+            aPrev = gamepad1.a;
+            bPrev = gamepad1.b;
 
-            S1.setPower(-gamepad1.left_stick_y);
-
-            telemetry.addData("Power:", S1.getPower());
-            telemetry.addData("Position:", S1.getCurrentPosition());
+            telemetry.addData("Position:", S1.getPosition());
             telemetry.addData("Time", runtime.seconds());
             telemetry.update();
         }

@@ -39,7 +39,6 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 
 public class teleop extends LinearOpMode {
     // Declare OpMode members.
-    private int[] positions = {0, 1000, 2000, 3000, 4000};
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor FL = null;
     private DcMotor FR = null;
@@ -47,20 +46,27 @@ public class teleop extends LinearOpMode {
     private DcMotor BR = null;
     private DcMotor IN1 = null;
     private DcMotor IN2 = null;
-    private DcMotor UD = null;
+    private DcMotor LIFT = null;
     private Servo rotateServo = null;
     private Servo clawServo = null;
     RevBlinkinLedDriver blinkinLedDriver;
+    private String pattern = "";
+
     boolean clawClosed = false;
+
     private boolean dPadDPrev = false;
+    private boolean dPadUPrev = false;
+    private boolean dPadLPrev = false;
+    private boolean dPadRPrev = false;
     private boolean xPrev = false;
     private boolean yPrev = false;
     private boolean sPrev = false;
+
     private double armpower = 0.7;
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
     private DistanceSensor intSens = null;
-    private TouchSensor touchyboyxd = null;
+    private TouchSensor touchSens1 = null;
     // List of available sound resources
     String  sounds[] =  {"ss_alarm", "ss_bb8_down", "ss_bb8_up", "ss_darth_vader", "ss_fly_by",
             "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
@@ -85,10 +91,16 @@ public class teleop extends LinearOpMode {
         // Variables for choosing from the available sounds
         int     soundIndex      = 0;
         int     soundID         = -1;
-        boolean was_dpad_up     = false;
-        boolean was_dpad_down   = false;
-        double posIn = 0;
-        double posOut = 200;
+        boolean was_y_up     = false;
+        boolean was_x_down   = false;
+
+        double posIn = 0.69;
+        double posOut = 0.025;
+        double posClosed = 0.025;
+        double posOpen = .15;
+        int[] positions = {0, 300, 700, 1200, 1700};
+
+        int currLiftPos = 0;
 
         Context myApp = hardwareMap.appContext;
 
@@ -113,9 +125,12 @@ public class teleop extends LinearOpMode {
         BL.setPower(0);
         BR.setPower(0);
 
-        UD = hardwareMap.get(DcMotor.class, "LIFT");
-        UD.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        UD.setPower(0);
+        LIFT = hardwareMap.get(DcMotor.class, "LIFT");
+        LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LIFT.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LIFT.setPower(0);
+        LIFT.setTargetPosition(LIFT.getCurrentPosition());
 
         IN1 = hardwareMap.get(DcMotor.class, "IN1");
         IN1.setDirection(FORWARD);
@@ -124,9 +139,10 @@ public class teleop extends LinearOpMode {
 
         rotateServo= hardwareMap.get(Servo.class, "ROTATE");
         clawServo= hardwareMap.get(Servo.class, "CLAW");
-        rotateServo.setPosition(0); clawServo.setPosition(0);
+        rotateServo.setPosition(posIn); clawServo.setPosition(posOpen);
 
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
+        touchSens1 = hardwareMap.get(TouchSensor.class, "TOUCH1");
 
         BNO055IMU.Parameters parameters2 = new BNO055IMU.Parameters();
         parameters2.angleUnit = BNO055IMU.AngleUnit.DEGREES;
@@ -159,33 +175,61 @@ public class teleop extends LinearOpMode {
         }
         runtime.reset();
         while (opModeIsActive()) {
-            drive();
+            drive(myApp, params);
 
+            //CLAW STUFF
 
-            if (gamepad2.a) { rotateServo.setPosition(posIn);
-            }else if(gamepad2.b){ rotateServo.setPosition(posOut);
+            if (gamepad2.a) {
+                rotateServo.setPosition(posIn);
+            }else if(gamepad2.b){
+                rotateServo.setPosition(posOut);
             }
-            if(gamepad2.dpad_down && !dPadDPrev){
 
-                if(!clawClosed) clawServo.setPosition(.7);//set to closed
-                else clawServo.setPosition(.35); // set to open
+            if(gamepad2.right_bumper && !rbumpprev){
 
+                if(!clawClosed) clawServo.setPosition(posClosed);//set to closed
+                else clawServo.setPosition(posOpen); // set to open
                 clawClosed = !clawClosed;
-            }else if(gamepad1.dpad_left){ clawServo.setPosition(0.6);
-            }else if(gamepad1.dpad_right){ clawServo.setPosition(1);
             }
 
+            //ARM STUFF
 
-            UD.setPower(-gamepad2.left_stick_y);
+            if(gamepad2.left_stick_y != 0.0 || gamepad2.right_stick_y != 0.0) {
+                LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                if (LIFT.getCurrentPosition() > 0)
+                    LIFT.setPower(-gamepad2.left_stick_y + -gamepad2.right_stick_y*0.2);
+                else if ((-gamepad2.left_stick_y) > 0)
+                    LIFT.setPower(-gamepad2.left_stick_y);
+                else
+                    LIFT.setPower(0);
+            }else{
+                /**if(gamepad2.dpad_up) {
+                    currLiftPos++;
+                    LIFT.setTargetPosition(positions[currLiftPos]);
+                }else if(gamepad2.dpad_down){
+                    currLiftPos--;
+                    LIFT.setTargetPosition(positions[currLiftPos]);
+                }else if(gamepad2.dpad_left){
+                    currLiftPos = 0;
+                    LIFT.setTargetPosition(positions[currLiftPos]);
+                }else if(gamepad2.dpad_right){
+                    LIFT.setTargetPosition(positions[currLiftPos]);
+                }else*/
+                LIFT.setTargetPosition(LIFT.getCurrentPosition());
+                LIFT.setPower(0.3);
+                LIFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            }
 
+            //INTAKE STUFF
 
             double INSPEED = -0.4;
-            if(gamepad1.left_bumper){
+            double OUTSPEED = 0.7;
+            if(gamepad1.left_bumper && intSens.getDistance(DistanceUnit.MM)>70){
                 IN1.setPower(INSPEED);
                 IN2.setPower(INSPEED);
             }else if(gamepad1.right_bumper){
-                IN1.setPower(0.7);
-                IN2.setPower(0.7);
+                IN1.setPower(OUTSPEED);
+                IN2.setPower(OUTSPEED);
             }else{
                 IN1.setPower(0);
                 IN2.setPower(0);
@@ -198,26 +242,30 @@ public class teleop extends LinearOpMode {
                 IN2.setPower(gamepad1.right_trigger);
             }
 
+            //VARIABLE CHECKS
+
             xPrev = gamepad1.x;
             yPrev = gamepad1.y;
-            dPadDPrev = gamepad1.dpad_down;
-            rbumpprev = gamepad1.right_bumper;
-            lbumpprev = gamepad1.left_bumper;
+
+            rbumpprev = gamepad2.right_bumper;
+            lbumpprev = gamepad2.left_bumper;
+            dPadDPrev = gamepad2.dpad_down;
+            dPadUPrev = gamepad2.dpad_up;
+            dPadLPrev = gamepad2.dpad_left;
+            dPadRPrev = gamepad2.dpad_right;
 
 
             telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
                             "back left (%.2f), back right (%.2f)", FL.getPower(), FR.getPower(),
                     BL.getPower(), BR.getPower());
-            telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
-                            "back left (%.1f), back right (%.1f)", (float)FL.getCurrentPosition(), (float)FR.getCurrentPosition(),
-                    (float)BL.getCurrentPosition(), (float)BR.getCurrentPosition());
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Lift Power", UD.getPower());
+            telemetry.addData("Lift:", "power (%.2f), real position (%.2f), currentLiftPos (%.2f)", LIFT.getPower(), LIFT.getCurrentPosition(), currLiftPos);
             telemetry.addData("Rotating Servo Pos", rotateServo.getPosition());
             telemetry.addData("Claw Poition", clawServo.getPosition());
             telemetry.addData("Sound >", sounds[soundIndex]);
+            telemetry.addData("LED pattern", pattern);
             telemetry.addData("INTAKE POWER", IN1.getPower());
             telemetry.addData("IMU:", getHeading());
+            telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();
 
 
@@ -225,19 +273,19 @@ public class teleop extends LinearOpMode {
 
 
             // Look for DPAD presses to change the selection
-            if (gamepad2.dpad_down && !was_dpad_down) {
+            if (gamepad2.x && !was_x_down) {
                 // Go to next sound (with list wrap) and display it
                 soundIndex = (soundIndex + 1) % sounds.length;
             }
 
-            if (gamepad2.dpad_up && !was_dpad_up) {
+            if (gamepad2.y && !was_y_up) {
                 // Go to previous sound (with list wrap) and display it
                 soundIndex = (soundIndex + sounds.length - 1) % sounds.length;
             }
 
             // Look for trigger to see if we should play sound
             // Only start a new sound if we are currently not playing one.
-            if (gamepad2.right_bumper && !soundPlaying) {
+            if (gamepad2.left_bumper && !soundPlaying) {
 
                 // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
                 if ((soundID = myApp.getResources().getIdentifier(sounds[soundIndex], "raw", myApp.getPackageName())) != 0){
@@ -254,13 +302,13 @@ public class teleop extends LinearOpMode {
                 }
             }
 
-            was_dpad_up     = gamepad2.dpad_up;
-            was_dpad_down   = gamepad2.dpad_down;
+            was_y_up     = gamepad2.y;
+            was_x_down   = gamepad2.x;
         }
     }
 
 
-    private void drive(){
+    private void drive(Context myApp, SoundPlayer.PlaySoundParams params){
         //DONT TOUCH THIS
 
         double r = Math.hypot(gamepad1.left_stick_x, -gamepad1.left_stick_y);
@@ -279,9 +327,32 @@ public class teleop extends LinearOpMode {
             v3 *= 2.85;
             v4 *= 2.85;
         }
-        if(v1 < 0 && v2 < 0 && v3 < 0 && v4 <0){
+
+        if(intSens.getDistance(DistanceUnit.MM)<70) {
+            pattern = "CONFETTI";
+            blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CONFETTI);
+        }else if(v1 < 0 && v2 < 0 && v3 < 0 && v4 <0){
+            pattern = "STROBE_RED";
             blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_RED);
+
+            /**int soundID  = -1;
+            if(!soundPlaying){
+                // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
+                if ((soundID = myApp.getResources().getIdentifier(sounds[0], "raw", myApp.getPackageName())) != 0){
+
+                    // Signal that the sound is now playing.
+                    soundPlaying = true;
+
+                    // Start playing, and also Create a callback that will clear the playing flag when the sound is complete.
+                    SoundPlayer.getInstance().startPlaying(myApp, soundID, params, null,
+                            new Runnable() {
+                                public void run() {
+                                    soundPlaying = false;
+                                }} );
+                }
+            }*/
         }else{
+            pattern = "CP1_2_SINELON";
             blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_SINELON);
         }
         FL.setPower(v1);
@@ -290,41 +361,7 @@ public class teleop extends LinearOpMode {
         BR.setPower(v4);
         //OK YOU GOOD NOW
     }
-    private void sounds(int soundIndex, boolean was_dpad_down, boolean was_dpad_up, int soundID, Context myApp, SoundPlayer.PlaySoundParams params){
 
-
-                // Look for DPAD presses to change the selection
-                if (gamepad2.dpad_down && !was_dpad_down) {
-                    // Go to next sound (with list wrap) and display it
-                    soundIndex = (soundIndex + 1) % sounds.length;
-                }
-
-                if (gamepad2.dpad_up && !was_dpad_up) {
-                    // Go to previous sound (with list wrap) and display it
-                    soundIndex = (soundIndex + sounds.length - 1) % sounds.length;
-                }
-
-                // Look for trigger to see if we should play sound
-                // Only start a new sound if we are currently not playing one.
-                if (gamepad2.right_bumper && !soundPlaying) {
-
-                    // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
-                    if ((soundID = myApp.getResources().getIdentifier(sounds[soundIndex], "raw", myApp.getPackageName())) != 0){
-
-                        // Signal that the sound is now playing.
-                        soundPlaying = true;
-
-                        // Start playing, and also Create a callback that will clear the playing flag when the sound is complete.
-                        SoundPlayer.getInstance().startPlaying(myApp, soundID, params, null,
-                                new Runnable() {
-                                    public void run() {
-                                        soundPlaying = false;
-                                    }} );
-                    }
-                }
-
-
-    }
     public double getHeading() {
         Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return (angles.firstAngle+360)%360;
