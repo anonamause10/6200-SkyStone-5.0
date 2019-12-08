@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import android.content.Context;
+import android.text.method.Touch;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
@@ -49,7 +50,9 @@ public class teleop extends LinearOpMode {
     private DcMotor LIFT = null;
     private Servo rotateServo = null;
     private Servo clawServo = null;
-    RevBlinkinLedDriver blinkinLedDriver;
+    private Servo foundServL = null;
+    private Servo foundServR = null;
+    //RevBlinkinLedDriver blinkinLedDriver;
     private String pattern = "";
 
     boolean clawClosed = false;
@@ -64,7 +67,7 @@ public class teleop extends LinearOpMode {
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
     private DistanceSensor intSens = null;
-    private TouchSensor touchSens1 = null;
+    private TouchSensor touch = null;
     // List of available sound resources
     String  sounds[] =  {"ss_alarm", "ss_bb8_down", "ss_bb8_up", "ss_darth_vader", "ss_fly_by",
             "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
@@ -96,7 +99,7 @@ public class teleop extends LinearOpMode {
         params.loopControl = 0;
         params.waitForNonLoopingSoundsToFinish = true;
 
-        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blink");
+        //blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blink");
 
         FL = hardwareMap.get(DcMotor.class, "fL");FR = hardwareMap.get(DcMotor.class, "fR");
         BL = hardwareMap.get(DcMotor.class, "bL");BR = hardwareMap.get(DcMotor.class, "bR");
@@ -127,8 +130,13 @@ public class teleop extends LinearOpMode {
         clawServo= hardwareMap.get(Servo.class, "CLAW");
         rotateServo.setPosition(0.69); clawServo.setPosition(0.15);
 
+        foundServL = hardwareMap.get(Servo.class, "left");
+        foundServR = hardwareMap.get(Servo.class, "right");
+        foundServL.setPosition(.7);
+        foundServR.setPosition(.3);
+
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
-        touchSens1 = hardwareMap.get(TouchSensor.class, "TOUCH1");
+        touch = hardwareMap.get(TouchSensor.class, "touch");
 
         //initIMU();
         telemetry.addData("Robot", "Initialized");
@@ -145,16 +153,22 @@ public class teleop extends LinearOpMode {
         while (opModeIsActive()) {
 
             //DRIVE + MAYBE LED + PROBABLY NOT SOUND STUFF
-            drive(myApp, params);
+            drive();
 
             //CLAW STUFF
             if (gamepad2.a) {
                 rotateServo.setPosition(0.69);
             }else if(gamepad2.b){
                 rotateServo.setPosition(0.025);
+            }else if(LIFT.getCurrentPosition()>=430 && clawServo.getPosition()<0.1){
+                rotateServo.setPosition(0.025);
+            }else if(gamepad2.x){
+                rotateServo.setPosition(0.34);
             }
 
-            if(gamepad2.right_bumper){
+            if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<10)
+                clawServo.setPosition(0);
+            else if(gamepad2.right_bumper){
                 clawServo.setPosition(0);
             }else if(gamepad2.left_bumper){
                 clawServo.setPosition(0.15);
@@ -162,22 +176,22 @@ public class teleop extends LinearOpMode {
 
             //ARM STUFF
 
-            if(gamepad2.left_stick_y != 0 || gamepad2.right_stick_y != 0) {
-
+            if(gamepad2.start && gamepad2.back){
+                LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                if (LIFT.getCurrentPosition() > 0){
+            }
+
+            if(gamepad2.left_stick_y != 0 || gamepad2.right_stick_y != 0) {
+                if(touch.isPressed()){
+                    LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    liftRunning = false;
+                    LIFT.setPower(0);
+                }else{
+                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     LIFT.setPower(-0.5 * gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25);
                     liftRunning = false;
-
-                }else if ((-gamepad2.left_stick_y) >= 0) {
-                    LIFT.setPower(-gamepad2.left_stick_y * 0.5);
-                    liftRunning = false;
-
-                }else {
-                    LIFT.setPower(0);
-                    liftRunning = false;
                 }
-
             }else{
                 if(gamepad2.dpad_up && !dPadUPrev) {
                     currLiftPos++;
@@ -191,23 +205,23 @@ public class teleop extends LinearOpMode {
                     currLiftPos = 0;
                     LIFT.setTargetPosition(positions[currLiftPos]);
                     liftRunning = true;
-
+                    LIFT.setPower(0.7);
                 }else if(gamepad2.dpad_right){
                     LIFT.setTargetPosition(positions[currLiftPos]);
                     liftRunning = true;
-
-                }else if(!liftRunning){
-                    LIFT.setTargetPosition(LIFT.getCurrentPosition());
+                    LIFT.setPower(0.5);
+                }else if(!liftRunning && LIFT.getCurrentPosition()>30){
+                    LIFT.setTargetPosition(LIFT.getCurrentPosition()); //STALL
+                    LIFT.setPower(0.25);
                 }else{
                     if(Math.abs(LIFT.getTargetPosition()-LIFT.getCurrentPosition())<=20){
                         liftRunning = false;
                     }
                 }
-                if(LIFT.getCurrentPosition()<=30&&!liftRunning) {
+                if(LIFT.getCurrentPosition()<=30 && !liftRunning) {
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     LIFT.setPower(0);
                 }else{
-                    LIFT.setPower(0.7);
                     LIFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 }
             }
@@ -216,14 +230,12 @@ public class teleop extends LinearOpMode {
 
             //INTAKE STUFF
 
-            double INSPEED = -0.4;
-            double OUTSPEED = 0.7;
-            if(gamepad1.left_bumper && intSens.getDistance(DistanceUnit.MM)>70){
-                IN1.setPower(INSPEED);
-                IN2.setPower(INSPEED);
-            }else if(gamepad1.right_bumper){
-                IN1.setPower(OUTSPEED);
-                IN2.setPower(OUTSPEED);
+            if(gamepad1.left_bumper){
+                IN1.setPower(-0.4);
+                IN2.setPower(-0.4);
+            }else if(gamepad1.right_bumper && intSens.getDistance(DistanceUnit.MM)>70){
+                IN1.setPower(0.7);
+                IN2.setPower(0.7);
             }else{
                 IN1.setPower(0);
                 IN2.setPower(0);
@@ -234,6 +246,16 @@ public class teleop extends LinearOpMode {
             }else if(gamepad1.right_trigger != 0){
                 IN1.setPower(gamepad1.right_trigger);
                 IN2.setPower(gamepad1.right_trigger);
+            }
+
+            //FOUNDATION
+
+            if(gamepad1.dpad_up){
+                foundServL.setPosition(0.5);
+                foundServR.setPosition(0.5);
+            }else if(gamepad1.dpad_down){
+                foundServL.setPosition(0.7);
+                foundServR.setPosition(0.3);
             }
 
             //VARIABLE CHECKS
@@ -248,22 +270,15 @@ public class teleop extends LinearOpMode {
                     BL.getPower(), BR.getPower());
             telemetry.addData("Lift:", LIFT.getPower());
             telemetry.addData("Lif2:",LIFT.getCurrentPosition());
-            telemetry.addData("Lif3:", currLiftPos);
-            //telemetry.addData("Rotating Servo Pos", rotateServo.getPosition());
-            //telemetry.addData("Claw Poition", clawServo.getPosition());
-            telemetry.addData("LED pattern", pattern);
-            telemetry.addData("INTAKE POWER", IN1.getPower());
-            //telemetry.addData("IMU:", getHeading());
+            telemetry.addData("DISTANCE", intSens.getDistance(DistanceUnit.MM));
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("DS2 (mm)", intSens.getDistance(DistanceUnit.MM));
-            telemetry.addData("TOUCH1 is touched?", touchSens1.isPressed());
             telemetry.update();
 
         }
     }
 
 
-    private void drive(Context myApp, SoundPlayer.PlaySoundParams params){
+    private void drive(){
 
         double r = Math.hypot(gamepad1.left_stick_x, -gamepad1.left_stick_y);
         double robotAngle = Math.atan2(-gamepad1.left_stick_y, gamepad1.left_stick_x) - Math.PI / 4;
@@ -281,24 +296,12 @@ public class teleop extends LinearOpMode {
             v3 *= 2.85;
             v4 *= 2.85;
         }
-        if(gamepad1.b){
+        if(gamepad1.left_stick_button || gamepad1.right_stick_button){
             v1 *= .5;
             v2 *= .5;
             v3 *= .5;
             v4 *= .5;
         }
-
-        if(intSens.getDistance(DistanceUnit.MM)<70 && !pattern.equals("CONFETTI")) {
-            pattern = "CONFETTI";
-            blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CONFETTI);
-        }else if(v1 < 0 && v2 < 0 && v3 < 0 && v4 <0 && !pattern.equals("STROBE_RED")){
-            pattern = "STROBE_RED";
-            blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.STROBE_RED);
-        }else if(!pattern.equals("CP1_2_SINELON")){
-            pattern = "CP1_2_SINELON";
-            blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_SINELON);
-        }
-
         FL.setPower(v1);
         FR.setPower(v2);
         BL.setPower(v3);

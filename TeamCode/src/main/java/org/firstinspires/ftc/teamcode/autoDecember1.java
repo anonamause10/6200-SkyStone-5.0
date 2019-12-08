@@ -67,9 +67,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-@Autonomous(name="BLUE FOUNDATION", group="ree")
+@Autonomous(name="yeet bois xD", group="ree")
 
-public class bFauto extends LinearOpMode
+public class autoDecember1 extends LinearOpMode
 {
 
     private ElapsedTime runtime = new ElapsedTime();
@@ -176,9 +176,9 @@ public class bFauto extends LinearOpMode
         parameters2.loggingTag = "IMU";
         parameters2.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
-        // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
-        // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
-        // and named "imu".
+    // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
+    // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
+    // and named "imu".
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters2);
 
@@ -208,7 +208,8 @@ public class bFauto extends LinearOpMode
                 LIFT.setTargetPosition(0);
                 LIFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 LIFT.setPower(-0.5);
-                while(LIFT.getCurrentPosition()>1){
+                runtim2.reset();
+                while(LIFT.getCurrentPosition()>5 && runtim2.seconds()<=2){
                 }
                 LIFT.setPower(0);
                 LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -216,13 +217,32 @@ public class bFauto extends LinearOpMode
         t.run();
 
 
-        //START AUTO HERE LMao
-        moveWithRightSensor(340, 0.3);
-        moveWithBackSensor(80,0.3);
-        servosDown();
-        moveWithForwardSensor(80, 0.5);
-        servosUp();
-        strafe(-1750, 0.5);
+        //START AUTO HERE LMAO
+        moveWithForwardSensor(210, 0.5);
+        turn(90);
+        go(-300, 0.3);
+
+        strafe(300, 0.5);
+        goUntilBlock(0.5);
+        strafe(-110, 0.5);
+
+        go(-2000, 0.7);
+        turn(90);
+        outtake();
+        go(-1000, 0.7);
+        intakeOff();
+        go(-1300, 0.7);
+        moveWithForwardSensor(410, 0.5);
+
+        strafe(110, 0.5);
+        goUntilBlock(0.5);
+        strafe(-110, 0.5);
+
+        go(-2500, 0.7);
+        turn(90);
+        outtake();
+        go(-300, 0.7);
+        intakeOff();
 
     }
 
@@ -334,22 +354,22 @@ public class bFauto extends LinearOpMode
                     bR.setPower(power);
                 }
             }else{
-                if(getHeading()-startAngle>0.25){
-                    fL.setPower(fL.getPower()-0.05);
-                    fR.setPower(fR.getPower()+0.05);
-                    bL.setPower(bL.getPower()-0.05);
-                    bR.setPower(bR.getPower()+0.05);
-                }else if((getHeading()-startAngle<0.25)){
-                    fL.setPower(fL.getPower()+0.05);
-                    fR.setPower(fR.getPower()-0.05);
-                    bL.setPower(bL.getPower()+0.05);
-                    bR.setPower(bR.getPower()-0.05);
-                }else{
-                    fL.setPower(power);
-                    fR.setPower(power);
-                    bL.setPower(power);
-                    bR.setPower(power);
-                }
+            if(getHeading()-startAngle>0.25){
+                fL.setPower(fL.getPower()-0.05);
+                fR.setPower(fR.getPower()+0.05);
+                bL.setPower(bL.getPower()-0.05);
+                bR.setPower(bR.getPower()+0.05);
+            }else if((getHeading()-startAngle<0.25)){
+                fL.setPower(fL.getPower()+0.05);
+                fR.setPower(fR.getPower()-0.05);
+                bL.setPower(bL.getPower()+0.05);
+                bR.setPower(bR.getPower()-0.05);
+            }else{
+                fL.setPower(power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(power);
+            }
             }
         }
         fL.setPower(0);
@@ -462,13 +482,13 @@ public class bFauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         runtim2.reset();
         if(sR.getDistance(DistanceUnit.MM)>target){
-            while(opModeIsActive()&&(sR.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
-                fL.setPower(-power);
-                fR.setPower(-power);
-                bL.setPower(-power);
-                bR.setPower(-power);
-                updateT();
-            }}else{
+        while(opModeIsActive()&&(sR.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
+            fL.setPower(-power);
+            fR.setPower(-power);
+            bL.setPower(-power);
+            bR.setPower(-power);
+            updateT();
+        }}else{
             while(opModeIsActive()&&(sR.getDistance(DistanceUnit.MM) < target)&&runtim2.seconds()<5){
                 fL.setPower(power);
                 fR.setPower(power);
@@ -499,17 +519,17 @@ public class bFauto extends LinearOpMode
         runtim2.reset();
         if(sRF.getDistance(DistanceUnit.MM)>target){
             while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
-                fL.setPower(-power);
-                fR.setPower(-power);
-                bL.setPower(-power);
-                bR.setPower(-power);
-                updateT();
-            }}else{
-            while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
                 fL.setPower(power);
                 fR.setPower(power);
                 bL.setPower(power);
                 bR.setPower(power);
+                updateT();
+        }}else{
+            while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
+                fL.setPower(-power);
+                fR.setPower(-power);
+                bL.setPower(-power);
+                bR.setPower(-power);
                 updateT();
             }
         }
@@ -526,7 +546,7 @@ public class bFauto extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
-    void moveWithRightSensor(int target, double power){
+    void moveWithLeftSensor(int target, double power){
 
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -534,8 +554,8 @@ public class bFauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         runtim2.reset();
         double startAngle = getHeading();
-        if(sRR.getDistance(DistanceUnit.MM)<target){
-            while(opModeIsActive()&&(sRR.getDistance(DistanceUnit.MM) < target)&&runtim2.seconds()<5){
+        if(sRL.getDistance(DistanceUnit.MM)>target){
+            while(opModeIsActive()&&(sRL.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
                 fL.setPower(-power);
                 fR.setPower(power);
                 bL.setPower(power);
@@ -568,7 +588,7 @@ public class bFauto extends LinearOpMode
                 }
                 updateT();
             }}else{
-            while(opModeIsActive()&&(sRR.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
+            while(opModeIsActive()&&(sRL.getDistance(DistanceUnit.MM) < target)&&runtim2.seconds()<5){
                 fL.setPower(power);
                 fR.setPower(-power);
                 bL.setPower(-power);
