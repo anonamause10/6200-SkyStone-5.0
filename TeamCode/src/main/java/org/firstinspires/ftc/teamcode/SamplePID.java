@@ -138,10 +138,10 @@ public class SamplePID extends LinearOpMode
             {
 
                 // turn 90 degrees right.
-                if (aButton) rotate(-120, power);
+                if (aButton) rotate(-90, power);
 
                 // turn 90 degrees left.
-                if (bButton) rotate(120, power);
+                if (bButton) rotate(90, power);
             }
         }
 
