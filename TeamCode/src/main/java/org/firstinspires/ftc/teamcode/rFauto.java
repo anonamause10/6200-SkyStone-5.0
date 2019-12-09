@@ -205,6 +205,7 @@ public class rFauto extends LinearOpMode
 
         //START AUTO HERE LMAO
         servoUp();
+        go(-200, 0.5);
         moveWithLeftSensor(400, 0.4);
         moveWithBackSensor(80, 0.4);
         servoToFoun();

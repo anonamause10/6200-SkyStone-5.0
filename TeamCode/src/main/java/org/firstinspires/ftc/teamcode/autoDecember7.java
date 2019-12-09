@@ -734,14 +734,16 @@ public class autoDecember7 extends LinearOpMode
      */
     private void rotate(int degrees, double power)
     {
+        int sign = degrees>0 ? 1: -1;
+        degrees = (int)(getHeading() - degrees)%360;
+        degrees *=sign;
 
-        degrees = (int)(getHeading() - degrees);
 
         // restart imu angle tracking.
         resetAngle();
 
         // if degrees > 359 we cap at 359 with same sign as original degrees.
-        //if (Math.abs(degrees) > 359) degrees = (int) Math.copySign(359, degrees);
+        if (Math.abs(degrees) > 359) degrees = (int) Math.copySign(359, degrees);
 
         // start pid controller. PID controller will monitor the turn angle with respect to the
         // target angle and reduce power as we approach the target angle. This is to prevent the
