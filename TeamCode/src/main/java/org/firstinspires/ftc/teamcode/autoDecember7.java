@@ -95,8 +95,8 @@ public class autoDecember7 extends LinearOpMode
 
     private double voltage = 0.0;
     private double scale = 0.0;
-    private int blockPos = 0;
-    PIDController           pidRotate, pidDrive;
+    private int blockPos = 2;
+    PIDController           pidRotate;
     Orientation             lastAngles = new Orientation();
     double globalAngle, rotation;
 
@@ -126,6 +126,7 @@ public class autoDecember7 extends LinearOpMode
 
         // create a sound parameter that holds the desired player parameters.
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
+        pidRotate = new PIDController(.003, .00003, 0);
 
         params.loopControl = 0;
         params.waitForNonLoopingSoundsToFinish = true;
@@ -226,7 +227,7 @@ public class autoDecember7 extends LinearOpMode
         moveWithForwardSensor(150, 0.4);
 
         if(blockPos == 0){
-        turn(335);
+        rotate(335,0.2);
         }else if(blockPos == 1){
             strafe(400, 0.5);
             rotate(25,0.2);
@@ -733,13 +734,14 @@ public class autoDecember7 extends LinearOpMode
      */
     private void rotate(int degrees, double power)
     {
+
         degrees = (int)(getHeading() - degrees);
 
         // restart imu angle tracking.
         resetAngle();
 
         // if degrees > 359 we cap at 359 with same sign as original degrees.
-        if (Math.abs(degrees) > 359) degrees = (int) Math.copySign(359, degrees);
+        //if (Math.abs(degrees) > 359) degrees = (int) Math.copySign(359, degrees);
 
         // start pid controller. PID controller will monitor the turn angle with respect to the
         // target angle and reduce power as we approach the target angle. This is to prevent the
