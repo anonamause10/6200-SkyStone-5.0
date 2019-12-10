@@ -249,6 +249,7 @@ public class autoDecember7 extends LinearOpMode
         go(2100, 0.7);
         turn(270);
         outtake();
+        moveWithLeftSensor(700, 0.4);
         go(-2200, 0.8);
         turn(270);
         intakeOff();
@@ -613,12 +614,12 @@ public class autoDecember7 extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         runtim2.reset();
         double startAngle = getHeading();
-        if(sRL.getDistance(DistanceUnit.MM)>target){
-            while(opModeIsActive()&&(sRL.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
-                fL.setPower(-power);
-                fR.setPower(power);
-                bL.setPower(power);
-                bR.setPower(-power);
+        if(sRR.getDistance(DistanceUnit.MM)>target){
+            while(opModeIsActive()&&(sRR.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
+                fL.setPower(power);
+                fR.setPower(-power);
+                bL.setPower(-power);
+                bR.setPower(power);
 
                 if(startAngle==0) {
                     if(imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - startAngle>0.25){
@@ -647,11 +648,11 @@ public class autoDecember7 extends LinearOpMode
                 }
                 updateT();
             }}else{
-            while(opModeIsActive()&&(sRL.getDistance(DistanceUnit.MM) < target)&&runtim2.seconds()<5){
-                fL.setPower(power);
-                fR.setPower(-power);
-                bL.setPower(-power);
-                bR.setPower(power);
+            while(opModeIsActive()&&(sRR.getDistance(DistanceUnit.MM) < target)&&runtim2.seconds()<5){
+                fL.setPower(-power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(-power);
                 if(startAngle==0) {
                     if(imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - startAngle>0.25){
                         fL.setPower(fL.getPower()-0.02);
