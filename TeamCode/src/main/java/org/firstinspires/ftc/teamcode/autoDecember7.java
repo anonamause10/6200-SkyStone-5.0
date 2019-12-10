@@ -227,12 +227,12 @@ public class autoDecember7 extends LinearOpMode
         moveWithForwardSensor(150, 0.4);
 
         if(blockPos == 0){
-        rotate(335,0.2);
+        turn(335);
         }else if(blockPos == 1){
             strafe(400, 0.5);
-            rotate(25,0.2);
+            turn(25);
         }else
-        rotate(25,0.2);
+        turn(25);
 
 
         goUntilBlock(0.25);
@@ -243,12 +243,14 @@ public class autoDecember7 extends LinearOpMode
         intakeOff();
 
 
-        rotate(270,0.5);
+
+
+        turn(270);
         go(2100, 0.7);
-        rotate(270,0.5);
+        turn(270);
         outtake();
         go(-2200, 0.8);
-        rotate(270,0.5);
+        turn(270);
         intakeOff();
         if(blockPos == 0)
         moveWithBackSensor(465, 0.3);
@@ -257,15 +259,15 @@ public class autoDecember7 extends LinearOpMode
         else
         moveWithBackSensor(375, 0.3);
 
-        rotate(40,0.3);
+        turn(40);
 
         goUntilBlock(0.25);
 
-        rotate(270,0.5);
+        turn(270);
 
         moveWithBackSensor(445, 0.7);
         go(2470,0.7);
-        rotate(270,0.3);
+        turn(270);
         outtake();
         go(-470,0.7);
         intakeOff();
