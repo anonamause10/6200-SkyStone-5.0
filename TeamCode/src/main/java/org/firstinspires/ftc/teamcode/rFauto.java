@@ -210,7 +210,7 @@ public class rFauto extends LinearOpMode
         moveWithBackSensor(80, 0.4);
         servoToFoun();
         sleep(300);
-        moveWithForwardSensor(490, 0.4);
+        moveWithForwardSensor(430, 0.4);
         strafeToAngle(330, 0.4);
         turn(270);
         go(-750, 0.5);
@@ -231,7 +231,7 @@ public class rFauto extends LinearOpMode
         LIFT.setPower(0);
         LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        go(1300, 0.5);
+        go(1400, 0.5);
 
         while(opModeIsActive()){
         // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
@@ -336,7 +336,18 @@ public class rFauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         runtim2.reset();
         boolean working = true;
-        if(angle > getHeading()) {
+        if(getHeading() < 30 && angle > 300){
+            fL.setPower(power);
+            fR.setPower(-power);
+            bL.setPower(-power);
+            bR.setPower(power);
+            while (opModeIsActive() && runtim2.seconds() <= 4 && working) {
+                updateT();
+                if (getHeading() < angle && getHeading() > (angle - 10)) {
+                    working = false;
+                }
+            }
+        }else if(angle > getHeading()) {
             fL.setPower(-power);
             fR.setPower(power);
             bL.setPower(power);
