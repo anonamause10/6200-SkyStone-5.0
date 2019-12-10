@@ -728,22 +728,32 @@ public class autoDecember7 extends LinearOpMode
         return globalAngle;
     }
 
+
     /**
      * Rotate left or right the number of degrees. Does not support turning more than 359 degrees.
      * @param degrees Degrees to turn, + is left - is right
      */
     private void rotate(int degrees, double power)
     {
-        int sign = degrees>0 ? 1: -1;
-        degrees = (int)(getHeading() - degrees)%360;
-        degrees *=sign;
+        /*double currheading = getHeading();
+        if(currheading>180) {
+            currheading = -1 * (360 - currheading);
+        }
 
+
+        degrees = (int)(currheading - degrees);*/
+        double currheading = getHeading();
+        double deltaang = Math.abs(degrees- currheading);
+        double r = (int)(deltaang >180? (360-deltaang):deltaang);
+        int sign = (degrees - currheading >= 0 && degrees - currheading <= 180) || (degrees - currheading <=-180 && degrees- currheading>= -360) ? 1 : -1;
+        degrees = Math.round((long)(r*sign));
 
         // restart imu angle tracking.
         resetAngle();
 
         // if degrees > 359 we cap at 359 with same sign as original degrees.
         if (Math.abs(degrees) > 359) degrees = (int) Math.copySign(359, degrees);
+
 
         // start pid controller. PID controller will monitor the turn angle with respect to the
         // target angle and reduce power as we approach the target angle. This is to prevent the
