@@ -735,16 +735,10 @@ public class autoDecember7 extends LinearOpMode
      */
     private void rotate(int degrees, double power)
     {
-        /*double currheading = getHeading();
-        if(currheading>180) {
-            currheading = -1 * (360 - currheading);
-        }
 
-
-        degrees = (int)(currheading - degrees);*/
         double currheading = getHeading();
         double deltaang = Math.abs(degrees- currheading);
-        double r = (int)(deltaang >180? (360-deltaang):deltaang);
+        double r = (deltaang >180? (360-deltaang):deltaang);
         int sign = (degrees - currheading >= 0 && degrees - currheading <= 180) || (degrees - currheading <=-180 && degrees- currheading>= -360) ? 1 : -1;
         degrees = Math.round((long)(r*sign));
 
