@@ -76,10 +76,12 @@ public class SkystoneDetector
     private SamplePipeline pipeline;
     public double downscale = 0.5;
     public boolean right;
+    public boolean whole;
 
-    public SkystoneDetector(HardwareMap hardwareMap, boolean webcam, boolean right)
+    public SkystoneDetector(HardwareMap hardwareMap, boolean webcam, boolean right, boolean whole)
     {
         this.right = right;
+        this.whole = whole;
         /*
          * Instantiate an OpenCvCamera object for the camera we'll be using.
          * In this sample, we're using the phone's internal camera. We pass it a
@@ -244,7 +246,10 @@ public class SkystoneDetector
                 Rect black = skystonepos(workingMat, bestRect);
                 pos = 2;
                 dist = 320.0;
-                if(right) { //if we're looking from the right:
+                if(whole){
+                    dist = Math.abs(black.br().x - input.width());
+                }
+                else if(right) { //if we're looking from the right:
                     if (black != null) {
                         dist = Math.abs(black.br().x - bestRect.br().x);
                         pos = (int) Math.round((dist) / 160.0);
@@ -275,7 +280,10 @@ public class SkystoneDetector
             Mat newMask = new Mat();
             int height = rect.height;
             Rect sub = null;
-            if(right){
+            if(whole){
+                sub = new Rect(0,(int)(rect.y),input.width(),rect.height);
+            }
+            else if(right){
                 Point tr = new Point(rect.br().x,rect.tl().y);
                 sub = new Rect(0,(int)(tr.y),(int)(tr.x),rect.height);
             }
