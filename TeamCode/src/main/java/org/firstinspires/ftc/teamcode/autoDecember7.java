@@ -89,13 +89,12 @@ public class autoDecember7 extends LinearOpMode
     private DistanceSensor sR;
     private DistanceSensor sR2;
     private DistanceSensor sRF;
-    private DistanceSensor sRL;
     private DistanceSensor sRR;
     private TouchSensor touch;
 
     private double voltage = 0.0;
     private double scale = 0.0;
-    private int blockPos = 2;
+    private int blockPos = 1;
     PIDController           pidRotate;
     Orientation             lastAngles = new Orientation();
     double globalAngle, rotation;
@@ -113,6 +112,7 @@ public class autoDecember7 extends LinearOpMode
     boolean soundPlaying = false;
 
 
+    //for right with camera: pos 0 is 0, pos 1 is 114, pos 2 is 284
 
     @Override
     public void runOpMode() {
@@ -168,7 +168,6 @@ public class autoDecember7 extends LinearOpMode
 
         sR = hardwareMap.get(DistanceSensor.class, "DSB");
         sR2 = hardwareMap.get(DistanceSensor.class, "DS2");
-        sRL = hardwareMap.get(DistanceSensor.class, "DSL");
         sRR = hardwareMap.get(DistanceSensor.class, "DSR");
         sRF = hardwareMap.get(DistanceSensor.class, "DSF");
         touch = hardwareMap.get(TouchSensor.class, "touch");
@@ -204,6 +203,14 @@ public class autoDecember7 extends LinearOpMode
         //waitForStart();
         while (!opModeIsActive() && !isStopRequested()) {
             telemetry.addData("status", "waiting for start command...");
+            if(gamepad1.a){
+                blockPos = 1;
+            }else if(gamepad1.b){
+                blockPos = 2;
+            }else if(gamepad1.x){
+                blockPos = 0;
+            }
+            telemetry.addData("blockPos", blockPos);
             telemetry.update();
         }
         runtime.reset();
@@ -214,7 +221,7 @@ public class autoDecember7 extends LinearOpMode
         LIFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LIFT.setPower(-0.5);
         runtim2.reset();
-        while((!touch.isPressed() || LIFT.getCurrentPosition() < -5) && runtim2.seconds()<0.75){
+        while(opModeIsActive()&&(!touch.isPressed() || LIFT.getCurrentPosition() < -5) && runtim2.seconds()<0.7){
         }
         LIFT.setPower(0);
         LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -223,12 +230,12 @@ public class autoDecember7 extends LinearOpMode
 
 
         //START AUTO HERE LMAO
-        moveWithForwardSensor(150, 0.4);
+        moveWithForwardSensor(180, 0.4);
 
         if(blockPos == 0){
             turn(335);
         }else if(blockPos == 1){
-            strafe(400, 0.5);
+            strafe(450, 0.5);
             turn(25);
         }else
             turn(25);
@@ -236,35 +243,39 @@ public class autoDecember7 extends LinearOpMode
 
         goUntilBlock(0.25);
         if(blockPos == 1){
-            strafe(-400, 0.5);
+            strafe(-450, 0.5);
         }
 
         intakeOff();
-        turn(270);
+        turn(269);
 
-        if(sRR.getDistance(DistanceUnit.MM)<655)
-            moveWithRightSensor(670, 0.24);
-        else if (sRR.getDistance(DistanceUnit.MM)>710)
-            moveWithRightSensor(710, 0.24);
+        if(sRR.getDistance(DistanceUnit.MM)<640)
+            moveWithRightSensor(650, 0.24);
+        else if (sRR.getDistance(DistanceUnit.MM)>680)
+            moveWithRightSensor(665, 0.24);
 
-        go(2100, 0.7);
-        turn(270);
+        go(2100, 0.6);
+        turn(268);
 
-        if(sRR.getDistance(DistanceUnit.MM)<655) {
-            moveWithRightSensor(670, 0.24);
-        }else if (sRR.getDistance(DistanceUnit.MM)>710)
-            moveWithRightSensor(710, 0.24);{
+        if(sRR.getDistance(DistanceUnit.MM)<640) {
+            moveWithRightSensor(650, 0.24);
+        }else if (sRR.getDistance(DistanceUnit.MM)>680)
+            moveWithRightSensor(665, 0.24);{
         }
 
         outtake();
-        go(-2200, 0.8);
-        turn(270);
+        go(-2200, 0.6);
+
+        if (sRR.getDistance(DistanceUnit.MM)>680)
+            moveWithRightSensor(660, 0.24);
+
+        turn(269);
         intakeOff();
 
-        if(sRR.getDistance(DistanceUnit.MM)<655)
-            moveWithRightSensor(670, 0.24);
-        else if (sRR.getDistance(DistanceUnit.MM)>710)
-            moveWithRightSensor(710, 0.24);
+        if(sRR.getDistance(DistanceUnit.MM)<640)
+            moveWithRightSensor(650, 0.24);
+        else if (sRR.getDistance(DistanceUnit.MM)>680)
+            moveWithRightSensor(665, 0.24);
 
         if(blockPos == 0)
         moveWithBackSensor(650, 0.25);
@@ -279,24 +290,25 @@ public class autoDecember7 extends LinearOpMode
 
         turn(270);
 
-        moveWithBackSensor(445, 0.24);
-
-        if(sRR.getDistance(DistanceUnit.MM)<655)
-            moveWithRightSensor(670, 0.24);
-        else if (sRR.getDistance(DistanceUnit.MM)>710)
-            moveWithRightSensor(710, 0.24);
+        moveWithBackSensor(545, 0.24);
 
 
-        go(2520,0.7);
-        turn(270);
+        if(sRR.getDistance(DistanceUnit.MM)<630)
+            moveWithRightSensor(645, 0.24);
+        else if (sRR.getDistance(DistanceUnit.MM)>680)
+            moveWithRightSensor(660, 0.24);
 
-        if(sRR.getDistance(DistanceUnit.MM)<655)
-            moveWithRightSensor(670, 0.24);
-        else if (sRR.getDistance(DistanceUnit.MM)>710)
-            moveWithRightSensor(710, 0.24);
+        turn(268);
+        go(2540,0.6);
+        turn(268);
+
+        if(sRR.getDistance(DistanceUnit.MM)<640)
+            moveWithRightSensor(650, 0.24);
+        else if (sRR.getDistance(DistanceUnit.MM)>680)
+            moveWithRightSensor(665, 0.24);
 
         outtake();
-        go(-610,0.7);
+        go(-680,0.8);
         intakeOff();
 
     }
@@ -412,7 +424,7 @@ public class autoDecember7 extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<=4 && working) {
+        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<2.5 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
@@ -474,8 +486,8 @@ public class autoDecember7 extends LinearOpMode
         IN2.setPower(0.7);
     }
     private void outtake(){
-        IN1.setPower(-0.4);
-        IN2.setPower(-0.4);
+        IN1.setPower(-0.6);
+        IN2.setPower(-0.6);
     }
     private void intakeOff(){
         IN1.setPower(0);
@@ -508,7 +520,7 @@ public class autoDecember7 extends LinearOpMode
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Status", "Run Time2: " + runtim2.toString());
         telemetry.addData("BackSensor", sR.getDistance(DistanceUnit.CM));
-        telemetry.addData("ServoPos", servo.getPosition());
+        telemetry.addData("BlockPos", blockPos);
         telemetry.addData("INTAKE POWER", IN1.getPower());
         telemetry.update();
     }
@@ -832,36 +844,36 @@ public class autoDecember7 extends LinearOpMode
                 fR.setPower(0);
                 bL.setPower(0);
                 bR.setPower(0);
-            }else if(ang>=270&& vuAng<=90){
-                fL.setPower(-0.5);
-                fR.setPower(0.5);
-                bL.setPower(-0.5);
-                bR.setPower(0.5);
-            }else if(ang<=90&& vuAng>=270){
-                fL.setPower(0.5);
-                fR.setPower(-0.5);
-                bL.setPower(0.5);
-                bR.setPower(-0.5);
+            }else if(ang>=260&& vuAng<=90){
+                fL.setPower(-0.3);
+                fR.setPower(0.3);
+                bL.setPower(-0.3);
+                bR.setPower(0.3);
+            }else if(ang<=90&& vuAng>=260){
+                fL.setPower(0.3);
+                fR.setPower(-0.3);
+                bL.setPower(0.3);
+                bR.setPower(-0.3);
             }else if (ang-vuAng > 35){
-                fL.setPower(0.7 );
-                fR.setPower(-0.7 );
-                bL.setPower(0.7 );
-                bR.setPower(-0.7 );
+                fL.setPower(0.5 );
+                fR.setPower(-0.5 );
+                bL.setPower(0.5 );
+                bR.setPower(-0.5);
             }else if(vuAng - ang > 35){
-                fL.setPower(-0.7 );
-                fR.setPower(0.7 );
-                bL.setPower(-0.7 );
-                bR.setPower(0.7 );
+                fL.setPower(-0.5 );
+                fR.setPower(0.5 );
+                bL.setPower(-0.5 );
+                bR.setPower(0.5 );
             }else if (ang < vuAng) {
-                fL.setPower(-0.2 );
-                fR.setPower(0.2);
-                bL.setPower(-0.2 );
-                bR.setPower(0.2 );
+                fL.setPower(-0.19 );
+                fR.setPower(0.19);
+                bL.setPower(-0.19 );
+                bR.setPower(0.19 );
             }else if (ang > vuAng) {
-                fL.setPower(0.2 );
-                fR.setPower(-0.2 );
-                bL.setPower(0.2 );
-                bR.setPower(-0.2 );
+                fL.setPower(0.19 );
+                fR.setPower(-0.19 );
+                bL.setPower(0.19 );
+                bR.setPower(-0.19 );
             }
             ang = getHeading();
             turned = (Math.abs(ang - vuAng) <= 0.5);

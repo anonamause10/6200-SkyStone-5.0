@@ -213,7 +213,7 @@ public class rFauto extends LinearOpMode
         moveWithForwardSensor(430, 0.4);
         strafeToAngle(330, 0.4);
         turn(270);
-        go(-750, 0.5);
+        go(-650, 0.4);
         turn(270);
         servoUp();
         go(200,0.5);

@@ -115,7 +115,7 @@ public class rSauto extends LinearOpMode
 
     @Override
     public void runOpMode() {
-        SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, true);
+        SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, true, true);
         webcamName = hardwareMap.get(WebcamName.class, "Webcam 1");
         fL= hardwareMap.get(DcMotor.class, "fL");
         fR = hardwareMap.get(DcMotor.class, "fR");
