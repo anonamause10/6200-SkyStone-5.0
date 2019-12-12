@@ -243,23 +243,31 @@ public class autoDecember7 extends LinearOpMode
         }
 
         intakeOff();
-
-
-
-
         turn(270);
-        if(sRR.getDistance(DistanceUnit.MM)<655 || sRR.getDistance(DistanceUnit.MM)>710)
-            moveWithRightSensor(690, 0.24);
+
+        if(sRR.getDistance(DistanceUnit.MM)<655)
+            moveWithRightSensor(680, 0.24);
+        else if (sRR.getDistance(DistanceUnit.MM)>710)
+            moveWithRightSensor(700, 0.25);
+
         go(2100, 0.7);
         turn(270);
-        if(sRR.getDistance(DistanceUnit.MM)<655 || sRR.getDistance(DistanceUnit.MM)>710)
-            moveWithRightSensor(690, 0.24);
+
+        if(sRR.getDistance(DistanceUnit.MM)<655)
+            moveWithRightSensor(680, 0.24);
+        else if (sRR.getDistance(DistanceUnit.MM)>710)
+            moveWithRightSensor(700, 0.25);
+
         outtake();
         go(-2200, 0.8);
         turn(270);
         intakeOff();
-        if(sRR.getDistance(DistanceUnit.MM)<655 || sRR.getDistance(DistanceUnit.MM)>710)
-            moveWithRightSensor(690, 0.24);
+
+        if(sRR.getDistance(DistanceUnit.MM)<655)
+            moveWithRightSensor(680, 0.24);
+        else if (sRR.getDistance(DistanceUnit.MM)>710)
+            moveWithRightSensor(700, 0.25);
+
         if(blockPos == 0)
         moveWithBackSensor(700, 0.3);
         else if(blockPos == 1)
@@ -272,13 +280,21 @@ public class autoDecember7 extends LinearOpMode
         goUntilBlock(0.25);
 
         turn(270);
-        if(sRR.getDistance(DistanceUnit.MM)<680 || sRR.getDistance(DistanceUnit.MM)>710)
-            moveWithRightSensor(690, 0.24);
+
+        if(sRR.getDistance(DistanceUnit.MM)<655)
+            moveWithRightSensor(680, 0.24);
+        else if (sRR.getDistance(DistanceUnit.MM)>710)
+            moveWithRightSensor(700, 0.25);
+
         moveWithBackSensor(445, 0.24);
         go(2470,0.7);
         turn(270);
-        if(sRR.getDistance(DistanceUnit.MM)<680 || sRR.getDistance(DistanceUnit.MM)>710)
-            moveWithRightSensor(690, 0.24);
+
+        if(sRR.getDistance(DistanceUnit.MM)<655)
+            moveWithRightSensor(680, 0.24);
+        else if (sRR.getDistance(DistanceUnit.MM)>710)
+            moveWithRightSensor(700, 0.25);
+
         outtake();
         go(-530,0.7);
         intakeOff();
