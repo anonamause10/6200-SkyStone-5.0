@@ -247,7 +247,12 @@ public class SkystoneDetector
                 pos = 2;
                 dist = 320.0;
                 if(whole){
-                    dist = Math.abs(black.br().x - input.width());
+                    if(right){
+                        dist = Math.abs(black.br().x - input.width());
+                    }
+                    else{
+                        dist = Math.abs(black.br().x);
+                    }
                 }
                 else if(right) { //if we're looking from the right:
                     if (black != null) {
