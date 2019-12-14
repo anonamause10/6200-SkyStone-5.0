@@ -166,6 +166,8 @@ public class autoDecember7 extends LinearOpMode
         servo.setPosition(.7);
         servo2.setPosition(.3);
 
+        SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, false, false);
+
         sR = hardwareMap.get(DistanceSensor.class, "DSB");
         sR2 = hardwareMap.get(DistanceSensor.class, "DS2");
         sRR = hardwareMap.get(DistanceSensor.class, "DSR");
@@ -200,17 +202,13 @@ public class autoDecember7 extends LinearOpMode
         telemetry.addData("Voltage:", voltage);
         telemetry.addData("Scale", scale);
         telemetry.update();
+
         //waitForStart();
         while (!opModeIsActive() && !isStopRequested()) {
             telemetry.addData("status", "waiting for start command...");
-            if(gamepad1.a){
-                blockPos = 1;
-            }else if(gamepad1.b){
-                blockPos = 2;
-            }else if(gamepad1.x){
-                blockPos = 0;
-            }
-            telemetry.addData("blockPos", blockPos);
+            telemetry.addData("status", "waiting for start command...");
+            telemetry.addData("Stone curr dist: ", sky.getDist());
+            telemetry.addData("Stone Current pos", rundetect(sky));
             telemetry.update();
         }
         runtime.reset();
@@ -231,6 +229,8 @@ public class autoDecember7 extends LinearOpMode
 
         //START AUTO HERE LMAO
         moveWithForwardSensor(180, 0.4);
+        blockPos = rundetect(sky);
+        sky.stop();
 
         if(blockPos == 0){
             turn(335);
@@ -505,11 +505,6 @@ public class autoDecember7 extends LinearOpMode
         return result;
     }
 
-    private int runDetect( SkystoneDetector sky){
-        int result = (int) sky.getPos();
-        sky.stop();
-        return result;
-    }
     private void updateT(){
         telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
                         "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
@@ -890,6 +885,19 @@ public class autoDecember7 extends LinearOpMode
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    public int rundetect(SkystoneDetector sky){
+        double dist = sky.getDist();
+        int position = 0;
+        if(dist > 350){
+            position = 0;
+        }else if(dist > 180){
+            position = 1;
+        }else{
+            position = 2;
+        }
+        return position;
     }
 
 
