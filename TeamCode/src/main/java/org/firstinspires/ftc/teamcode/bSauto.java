@@ -166,6 +166,8 @@ public class bSauto extends LinearOpMode
         servo.setPosition(.7);
         servo2.setPosition(.3);
 
+        SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, true, false);
+
         sR = hardwareMap.get(DistanceSensor.class, "DSB");
         sR2 = hardwareMap.get(DistanceSensor.class, "DS2");
         sRL = hardwareMap.get(DistanceSensor.class, "DSL");
@@ -203,14 +205,9 @@ public class bSauto extends LinearOpMode
         //waitForStart();
         while (!opModeIsActive() && !isStopRequested()) {
             telemetry.addData("status", "waiting for start command...");
-            if(gamepad1.a){
-                blockPos = 1;
-            }else if(gamepad1.b){
-                blockPos = 2;
-            }else if(gamepad1.x){
-                blockPos = 0;
-            }
-            telemetry.addData("blockPos", blockPos);
+            telemetry.addData("status", "waiting for start command...");
+            telemetry.addData("Stone curr dist: ", sky.getDist());
+            telemetry.addData("Stone Current pos", rundetect(sky));
             telemetry.update();
         }
         runtime.reset();
@@ -230,15 +227,11 @@ public class bSauto extends LinearOpMode
 
 
         //START AUTO HERE LMAO
+        blockPos = rundetect(sky);
+        sky.stop();
         moveWithForwardSensor(210, 0.35);
 
-        if(blockPos == 0){
-            turn(25);
-        }else if(blockPos == 1){
-            strafe(-450, 0.7);
-            turn(335);
-        }else
-            turn(335);
+
 
 
         goUntilBlock(0.3);
@@ -890,6 +883,19 @@ public class bSauto extends LinearOpMode
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    public int rundetect(SkystoneDetector sky){
+        double dist = sky.getDist();
+        int position = 0;
+        if(dist < 150){
+            position = 0;
+        }else if(dist < 320){
+            position = 1;
+        }else{
+            position = 2;
+        }
+        return position;
     }
 
 

@@ -67,7 +67,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-@Autonomous(name="RED STOnE", group="ree")
+@Autonomous(name="Red Stone auto with intake", group="ree")
 
 public class rSauto extends LinearOpMode
 {
@@ -98,6 +98,7 @@ public class rSauto extends LinearOpMode
     PIDController           pidRotate;
     Orientation             lastAngles = new Orientation();
     double globalAngle, rotation;
+
 
     // The IMU sensor object
     BNO055IMU imu;
@@ -165,6 +166,8 @@ public class rSauto extends LinearOpMode
         servo.setPosition(.7);
         servo2.setPosition(.3);
 
+        SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, false, false);
+
         sR = hardwareMap.get(DistanceSensor.class, "DSB");
         sR2 = hardwareMap.get(DistanceSensor.class, "DS2");
         sRR = hardwareMap.get(DistanceSensor.class, "DSR");
@@ -199,23 +202,19 @@ public class rSauto extends LinearOpMode
         telemetry.addData("Voltage:", voltage);
         telemetry.addData("Scale", scale);
         telemetry.update();
+
         //waitForStart();
         while (!opModeIsActive() && !isStopRequested()) {
             telemetry.addData("status", "waiting for start command...");
-            if(gamepad1.a){
-                blockPos = 1;
-            }else if(gamepad1.b){
-                blockPos = 2;
-            }else if(gamepad1.x){
-                blockPos = 0;
-            }
-            telemetry.addData("blockPos", blockPos);
+            telemetry.addData("status", "waiting for start command...");
+            telemetry.addData("Stone curr dist: ", sky.getDist());
+            telemetry.addData("Stone Current pos", rundetect(sky));
             telemetry.update();
         }
         runtime.reset();
 
         LIFT.setPower(0.7);
-        sleep(400);
+        sleep(300);
         LIFT.setTargetPosition(0);
         LIFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LIFT.setPower(-0.5);
@@ -229,85 +228,88 @@ public class rSauto extends LinearOpMode
 
 
         //START AUTO HERE LMAO
-        moveWithForwardSensor(210, 0.35);
+        blockPos = rundetect(sky);
+        sky.stop();
+        moveWithForwardSensor(180, 0.4);
+
 
         if(blockPos == 0){
             turn(335);
         }else if(blockPos == 1){
-            strafe(450, 0.7);
+            strafe(450, 0.5);
             turn(25);
         }else
             turn(25);
 
 
-        goUntilBlock(0.3);
+        goUntilBlock(0.25);
         if(blockPos == 1){
-            strafe(-450, 0.7);
+            strafe(-450, 0.5);
         }
 
         intakeOff();
-        turn(267);
+        turn(269);
 
-        if(sRR.getDistance(DistanceUnit.MM)<635) {
-            moveWithRightSensor(655, 0.35);
-        }else if (sRR.getDistance(DistanceUnit.MM)>670)
-            moveWithRightSensor(655, 0.4);{
-        }
+        if(sRR.getDistance(DistanceUnit.MM)<640)
+            moveWithRightSensor(650, 0.24);
+        else if (sRR.getDistance(DistanceUnit.MM)>680)
+            moveWithRightSensor(665, 0.24);
 
         go(2100, 0.6);
         turn(268);
-        outtake();
 
-        if(sRR.getDistance(DistanceUnit.MM)<635) {
-            moveWithRightSensor(655, 0.35);
-        }else if (sRR.getDistance(DistanceUnit.MM)>670)
-            moveWithRightSensor(655, 0.4);{
+        if(sRR.getDistance(DistanceUnit.MM)<640) {
+            moveWithRightSensor(650, 0.24);
+        }else if (sRR.getDistance(DistanceUnit.MM)>680)
+            moveWithRightSensor(665, 0.24);{
         }
 
+        outtake();
         go(-2200, 0.6);
+
+        if (sRR.getDistance(DistanceUnit.MM)>680)
+            moveWithRightSensor(660, 0.24);
 
         turn(269);
         intakeOff();
 
-        if(sRR.getDistance(DistanceUnit.MM)<630) {
-            moveWithRightSensor(655, 0.3);
-        }else if (sRR.getDistance(DistanceUnit.MM)>670)
-            moveWithRightSensor(655, 0.3);{
-        }
+        if(sRR.getDistance(DistanceUnit.MM)<640)
+            moveWithRightSensor(650, 0.24);
+        else if (sRR.getDistance(DistanceUnit.MM)>680)
+            moveWithRightSensor(665, 0.24);
 
         if(blockPos == 0)
-            moveWithBackSensor(650, 0.4);
+            moveWithBackSensor(650, 0.25);
         else if(blockPos == 1)
-            moveWithBackSensor(580, 0.4);
+            moveWithBackSensor(580, 0.25);
         else
-            moveWithBackSensor(400, 0.4);
+            moveWithBackSensor(400, 0.25);
 
         turn(40);
 
-        goUntilBlock(0.4);
+        goUntilBlock(0.25);
 
         turn(270);
-        moveWithBackSensor(645, 0.5);
+
+        moveWithBackSensor(545, 0.24);
 
 
-        if(sRR.getDistance(DistanceUnit.MM)<640) {
-            moveWithRightSensor(655, 0.35);
-        }else if (sRR.getDistance(DistanceUnit.MM)>670)
-            moveWithRightSensor(655, 0.4);{
-        }
+        if(sRR.getDistance(DistanceUnit.MM)<630)
+            moveWithRightSensor(645, 0.24);
+        else if (sRR.getDistance(DistanceUnit.MM)>680)
+            moveWithRightSensor(660, 0.24);
 
         turn(268);
-        go(1900,0.6);
+        go(2540,0.6);
         turn(268);
 
-        if(sRR.getDistance(DistanceUnit.MM)<640) {
-            moveWithRightSensor(655, 0.5);
-        }else if (sRR.getDistance(DistanceUnit.MM)>670)
-            moveWithRightSensor(655, 0.5);{
-        }
+        if(sRR.getDistance(DistanceUnit.MM)<640)
+            moveWithRightSensor(650, 0.24);
+        else if (sRR.getDistance(DistanceUnit.MM)>680)
+            moveWithRightSensor(665, 0.24);
 
         outtake();
-        go(-780,0.8);
+        go(-680,0.8);
         intakeOff();
 
     }
@@ -328,7 +330,7 @@ public class rSauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<3 && working) {
+        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<=4 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
@@ -367,7 +369,7 @@ public class rSauto extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         runtim2.reset();
-        while(opModeIsActive()&& runtim2.seconds()<2.5 && sR2.getDistance(DistanceUnit.MM)>70) {
+        while(opModeIsActive()&& runtim2.seconds()<3 && sR2.getDistance(DistanceUnit.MM)>70) {
             updateT();
         }
         intakeOff();
@@ -384,7 +386,7 @@ public class rSauto extends LinearOpMode
         bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<=2.5 && working) {
+        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<=4 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
@@ -423,13 +425,13 @@ public class rSauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<1 && working) {
+        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<2.5 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
                     + Math.abs(bL.getCurrentPosition() - bL.getTargetPosition())
                     + Math.abs(bR.getCurrentPosition() - bR.getTargetPosition())
-                    < 80) {
+                    < 60) {
                 working = false;
             }
         }
@@ -504,11 +506,6 @@ public class rSauto extends LinearOpMode
         return result;
     }
 
-    private int runDetect( SkystoneDetector sky){
-        int result = (int) sky.getPos();
-        sky.stop();
-        return result;
-    }
     private void updateT(){
         telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
                         "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
@@ -616,7 +613,7 @@ public class rSauto extends LinearOpMode
         runtim2.reset();
         double startAngle = getHeading();
         if(sRR.getDistance(DistanceUnit.MM)<target){
-            while(opModeIsActive()&&(sRR.getDistance(DistanceUnit.MM) < target)&&runtim2.seconds()<1){
+            while(opModeIsActive()&&(sRR.getDistance(DistanceUnit.MM) < target)&&runtim2.seconds()<5){
                 fL.setPower(-power);
                 fR.setPower(power);
                 bL.setPower(power);
@@ -649,7 +646,7 @@ public class rSauto extends LinearOpMode
                 }
                 updateT();
             }}else{
-            while(opModeIsActive()&&(sRR.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<1){
+            while(opModeIsActive()&&(sRR.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
                 fL.setPower(power);
                 fR.setPower(-power);
                 bL.setPower(-power);
@@ -864,15 +861,15 @@ public class rSauto extends LinearOpMode
                 bL.setPower(-0.5 );
                 bR.setPower(0.5 );
             }else if (ang < vuAng) {
-                fL.setPower(-0.25 );
-                fR.setPower(0.25);
-                bL.setPower(-0.25 );
-                bR.setPower(0.25 );
+                fL.setPower(-0.19 );
+                fR.setPower(0.19);
+                bL.setPower(-0.19 );
+                bR.setPower(0.19 );
             }else if (ang > vuAng) {
-                fL.setPower(0.25 );
-                fR.setPower(-0.25 );
-                bL.setPower(0.25);
-                bR.setPower(-0.25);
+                fL.setPower(0.19 );
+                fR.setPower(-0.19 );
+                bL.setPower(0.19 );
+                bR.setPower(-0.19 );
             }
             ang = getHeading();
             turned = (Math.abs(ang - vuAng) <= 0.5);
@@ -889,6 +886,19 @@ public class rSauto extends LinearOpMode
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    public int rundetect(SkystoneDetector sky){
+        double dist = sky.getDist();
+        int position = 0;
+        if(dist > 350){
+            position = 0;
+        }else if(dist > 180){
+            position = 1;
+        }else{
+            position = 2;
+        }
+        return position;
     }
 
 
