@@ -498,11 +498,6 @@ public class bSauto extends LinearOpMode
         return result;
     }
 
-    private int runDetect( SkystoneDetector sky){
-        int result = (int) sky.getPos();
-        sky.stop();
-        return result;
-    }
     private void updateT(){
         telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
                         "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
@@ -888,12 +883,12 @@ public class bSauto extends LinearOpMode
     public int rundetect(SkystoneDetector sky){
         double dist = sky.getDist();
         int position = 0;
-        if(dist < 150){
+        if(dist < 150||dist > 380){
             position = 0;
         }else if(dist < 320){
             position = 1;
         }else{
-            position = 2;
+            position = 0;
         }
         return position;
     }
