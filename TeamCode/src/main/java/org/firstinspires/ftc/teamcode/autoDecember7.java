@@ -99,7 +99,6 @@ public class autoDecember7 extends LinearOpMode
     Orientation             lastAngles = new Orientation();
     double globalAngle, rotation;
 
-
     // The IMU sensor object
     BNO055IMU imu;
 

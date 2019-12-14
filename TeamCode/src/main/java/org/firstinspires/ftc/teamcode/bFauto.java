@@ -226,7 +226,7 @@ public class bFauto extends LinearOpMode
         LIFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LIFT.setPower(-0.5);
         runtim2.reset();
-        while(LIFT.getCurrentPosition()>5 && runtim2.seconds()<=0.75){
+        while(opModeIsActive() && LIFT.getCurrentPosition()>5 && runtim2.seconds()<=0.75){
         }
         LIFT.setPower(0);
         LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -633,7 +633,7 @@ public class bFauto extends LinearOpMode
     void turn(double tun){
         double vuAng = tun;
         boolean turned = false;
-        while (!turned && opModeIsActive()) {
+        while (opModeIsActive() && !turned){
             double ang = getHeading();
 
             telemetry.addData("Angle", ang);
