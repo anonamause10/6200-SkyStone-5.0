@@ -213,7 +213,7 @@ public class rFauto extends LinearOpMode
         moveWithForwardSensor(430, 0.4);
         strafeToAngle(330, 0.4);
         turn(270);
-        go(-650, 0.4);
+        go(-710, 0.4);
         turn(270);
         servoUp();
         go(200,0.5);
@@ -226,7 +226,7 @@ public class rFauto extends LinearOpMode
         LIFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LIFT.setPower(-0.5);
         runtim2.reset();
-        while(LIFT.getCurrentPosition()>5 && runtim2.seconds()<=2){
+        while(LIFT.getCurrentPosition()>5 && runtim2.seconds()<=0.75){
         }
         LIFT.setPower(0);
         LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

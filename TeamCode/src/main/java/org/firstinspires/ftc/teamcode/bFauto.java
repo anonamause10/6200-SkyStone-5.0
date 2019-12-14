@@ -213,7 +213,7 @@ public class bFauto extends LinearOpMode
         moveWithForwardSensor(430, 0.4);
         strafeToAngle(30, 0.4);
         turn(90);
-        go(-750, 0.5);
+        go(-710, 0.4);
         turn(90);
         servoUp();
         go(200,0.5);
@@ -226,7 +226,7 @@ public class bFauto extends LinearOpMode
         LIFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         LIFT.setPower(-0.5);
         runtim2.reset();
-        while(LIFT.getCurrentPosition()>5 && runtim2.seconds()<=2){
+        while(LIFT.getCurrentPosition()>5 && runtim2.seconds()<=0.75){
         }
         LIFT.setPower(0);
         LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -336,7 +336,7 @@ public class bFauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         runtim2.reset();
         boolean working = true;
-        if(getHeading() > 300 && angle < 30){
+        if(angle > 300 && getHeading() < 30){
             fL.setPower(-power);
             fR.setPower(power);
             bL.setPower(power);
