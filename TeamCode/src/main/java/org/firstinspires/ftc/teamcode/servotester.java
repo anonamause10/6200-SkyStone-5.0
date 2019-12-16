@@ -29,6 +29,7 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 /**
  * Created by isong on 10/17/18.
  */
+@Disabled
 @TeleOp(name="one servo")
 
 public class servotester extends LinearOpMode {

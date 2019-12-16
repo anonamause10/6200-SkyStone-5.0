@@ -207,7 +207,7 @@ public class bFauto extends LinearOpMode
         servoUp();
         go(-200, 0.5);
         moveWithRightSensor(400, 0.4);
-        moveWithBackSensor(80, 0.4);
+        moveWithBackSensor(87, 0.4);
         servoToFoun();
         sleep(300);
         moveWithForwardSensor(430, 0.4);
@@ -336,7 +336,7 @@ public class bFauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         runtim2.reset();
         boolean working = true;
-        if(angle > 300 && getHeading() < 30){
+        if(getHeading() > 300 && angle < 30){
             fL.setPower(-power);
             fR.setPower(power);
             bL.setPower(power);
@@ -633,7 +633,7 @@ public class bFauto extends LinearOpMode
     void turn(double tun){
         double vuAng = tun;
         boolean turned = false;
-        while (opModeIsActive() && !turned){
+        while (opModeIsActive() && !turned) {
             double ang = getHeading();
 
             telemetry.addData("Angle", ang);

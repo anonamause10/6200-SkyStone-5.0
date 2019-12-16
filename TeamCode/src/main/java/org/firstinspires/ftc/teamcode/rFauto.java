@@ -207,7 +207,7 @@ public class rFauto extends LinearOpMode
         servoUp();
         go(-200, 0.5);
         moveWithLeftSensor(400, 0.4);
-        moveWithBackSensor(80, 0.4);
+        moveWithBackSensor(87, 0.4);
         servoToFoun();
         sleep(300);
         moveWithForwardSensor(430, 0.4);
@@ -475,14 +475,14 @@ public class rFauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         runtim2.reset();
         if(sRB.getDistance(DistanceUnit.MM)>target){
-            while(opModeIsActive()&&(sRB.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
+            while(opModeIsActive()&&(sRB.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<3){
                 fL.setPower(-power);
                 fR.setPower(-power);
                 bL.setPower(-power);
                 bR.setPower(-power);
                 updateT();
             }}else{
-            while(opModeIsActive()&&(sRB.getDistance(DistanceUnit.MM) < target)&&runtim2.seconds()<5){
+            while(opModeIsActive()&&(sRB.getDistance(DistanceUnit.MM) < target)&&runtim2.seconds()<3){
                 fL.setPower(power);
                 fR.setPower(power);
                 bL.setPower(power);
