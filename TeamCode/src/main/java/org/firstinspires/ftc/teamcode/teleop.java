@@ -160,18 +160,14 @@ public class teleop extends LinearOpMode {
                 rotateServo.setPosition(0.69);
             }else if(gamepad2.b){
                 rotateServo.setPosition(0.025);
-            }else if(LIFT.getCurrentPosition()>=430 && clawServo.getPosition()<0.1){
-                rotateServo.setPosition(0.025);
-            }else if(gamepad2.x){
-                rotateServo.setPosition(0.34);
             }
 
-            if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<10)
-                clawServo.setPosition(0);
-            else if(gamepad2.right_bumper){
-                clawServo.setPosition(0);
-            }else if(gamepad2.left_bumper){
+            if(gamepad2.left_bumper) {
                 clawServo.setPosition(0.15);
+            }else if(gamepad2.right_bumper){
+                clawServo.setPosition(0);
+            }else if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<10){
+                clawServo.setPosition(0);
             }
 
             //ARM STUFF
