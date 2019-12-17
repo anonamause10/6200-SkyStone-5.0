@@ -181,44 +181,20 @@ public class teleop extends LinearOpMode {
                 if(touch.isPressed()){
                     LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    liftRunning = false;
                     LIFT.setPower(0);
+                }else if (-gamepad2.left_stick_y>=0 && -gamepad2.right_stick_y>=0){
+                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    LIFT.setPower(-0.8 * gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25);
                 }else{
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     LIFT.setPower(-0.5 * gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25);
-                    liftRunning = false;
                 }
             }else{
-                if(gamepad2.dpad_up && !dPadUPrev) {
-                    currLiftPos++;
-                    if(currLiftPos>8)
-                        currLiftPos = 0;
-                }else if(gamepad2.dpad_down && !dPadDPrev){
-                    currLiftPos--;
-                    if(currLiftPos<0)
-                        currLiftPos = 8;
-                }else if(gamepad2.dpad_left){
-                    currLiftPos = 0;
-                    LIFT.setTargetPosition(positions[currLiftPos]);
-                    liftRunning = true;
-                    LIFT.setPower(0.7);
-                }else if(gamepad2.dpad_right){
-                    LIFT.setTargetPosition(positions[currLiftPos]);
-                    liftRunning = true;
-                    LIFT.setPower(0.5);
-                }else if(!liftRunning && LIFT.getCurrentPosition()>30){
+                if(LIFT.getCurrentPosition()>30){
                     LIFT.setTargetPosition(LIFT.getCurrentPosition()); //STALL
-                    LIFT.setPower(0.25);
-                }else{
-                    if(Math.abs(LIFT.getTargetPosition()-LIFT.getCurrentPosition())<=20){
-                        liftRunning = false;
-                    }
-                }
-                if(LIFT.getCurrentPosition()<=30 && !liftRunning) {
+                    LIFT.setPower(0.35);
+                }else if(LIFT.getCurrentPosition()<=30 && LIFT.getMode()==DcMotor.RunMode.RUN_TO_POSITION){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    LIFT.setPower(0);
-                }else{
-                    LIFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 }
             }
             dPadDPrev = gamepad2.dpad_down; dPadUPrev = gamepad2.dpad_up;
@@ -236,13 +212,14 @@ public class teleop extends LinearOpMode {
                 IN1.setPower(0);
                 IN2.setPower(0);
             }
-            if(gamepad1.left_trigger != 0){
+
+            /**if(gamepad1.left_trigger != 0){
                 IN1.setPower(-gamepad1.left_trigger);
                 IN2.setPower(-gamepad1.left_trigger);
             }else if(gamepad1.right_trigger != 0){
                 IN1.setPower(gamepad1.right_trigger);
                 IN2.setPower(gamepad1.right_trigger);
-            }
+            }*/
 
             //FOUNDATION
 
@@ -292,7 +269,7 @@ public class teleop extends LinearOpMode {
             v3 *= 2.85;
             v4 *= 2.85;
         }
-        if(gamepad1.left_stick_button || gamepad1.right_stick_button){
+        if(gamepad1.left_stick_button || gamepad1.right_stick_button || gamepad1.left_trigger!=0 || gamepad1.right_trigger!=0){
             v1 *= .5;
             v2 *= .5;
             v3 *= .5;
