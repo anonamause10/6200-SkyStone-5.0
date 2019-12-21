@@ -91,6 +91,7 @@ public class autoDecember7 extends LinearOpMode
     private DistanceSensor sRF;
     private DistanceSensor sRR;
     private TouchSensor touch;
+    private boolean intakeDeployed = false;
 
     private double voltage = 0.0;
     private double scale = 0.0;
@@ -159,13 +160,13 @@ public class autoDecember7 extends LinearOpMode
         CLAW = hardwareMap.get(Servo.class, "CLAW");
         CLAW.setPosition(.25);
         ROTATE = hardwareMap.get(Servo.class, "ROTATE");
-        ROTATE.setPosition(.67);
+        ROTATE.setPosition(.69);
         servo = hardwareMap.get(Servo.class, "left");
         servo2 = hardwareMap.get(Servo.class, "right");
         servo.setPosition(.7);
         servo2.setPosition(.3);
 
-        SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, false, false);
+        //SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, false, false);
 
         sR = hardwareMap.get(DistanceSensor.class, "DSB");
         sR2 = hardwareMap.get(DistanceSensor.class, "DS2");
@@ -196,123 +197,102 @@ public class autoDecember7 extends LinearOpMode
         double ang = Double.parseDouble(angle);
 
         telemetry.addData("Robot", "Initialized");
-        voltage = getBatteryVoltage();
-        scale = 12.7 / voltage;
-        telemetry.addData("Voltage:", voltage);
-        telemetry.addData("Scale", scale);
-        telemetry.update();
+        int blockPos = 0;
 
         //waitForStart();
         while (!opModeIsActive() && !isStopRequested()) {
             telemetry.addData("status", "waiting for start command...");
-            telemetry.addData("status", "waiting for start command...");
-            telemetry.addData("Stone curr dist: ", sky.getDist());
-            telemetry.addData("Stone Current pos", rundetect(sky));
+            telemetry.addData("blockpos", blockPos);
+            if(gamepad1.x){
+                blockPos = 0;
+            }else if(gamepad1.b){
+                blockPos = 2;
+            }else if(gamepad1.a){
+                blockPos = 1;
+            }
             telemetry.update();
         }
         runtime.reset();
 
-        LIFT.setPower(0.7);
-        sleep(300);
-        LIFT.setTargetPosition(0);
-        LIFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        LIFT.setPower(-0.5);
-        runtim2.reset();
-        while(opModeIsActive()&&(!touch.isPressed() || LIFT.getCurrentPosition() < -5) && runtim2.seconds()<0.7){
-        }
-        LIFT.setPower(0);
-        LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        ROTATE.setPosition(0.69);
-        CLAW.setPosition(0.15);
-
-
-        //START AUTO HERE LMAO
-        moveWithForwardSensor(180, 0.4);
-        blockPos = rundetect(sky);
-        sky.stop();
+        double[] array1 = {0.2, 0.6, 0.2, 0.6};
 
         if(blockPos == 0){
-            turn(335);
-        }else if(blockPos == 1){
-            strafe(450, 0.5);
-            turn(25);
-        }else
-            turn(25);
-
-
-        goUntilBlock(0.25);
-        if(blockPos == 1){
-            strafe(-450, 0.5);
+            double[] array2 = {0.8, 0.2, 0.8, 0.2};
+            array1 = array2;
+        }else if(blockPos == 2){
+            double[] array2 = {0.2, 0.8, 0.2, 0.8};
+            array1 = array2;
         }
-
-        intakeOff();
-        turn(269);
-
-        if(sRR.getDistance(DistanceUnit.MM)<640)
-            moveWithRightSensor(650, 0.24);
-        else if (sRR.getDistance(DistanceUnit.MM)>680)
-            moveWithRightSensor(665, 0.24);
-
-        go(2100, 0.6);
-        turn(268);
-
-        if(sRR.getDistance(DistanceUnit.MM)<640) {
-            moveWithRightSensor(650, 0.24);
-        }else if (sRR.getDistance(DistanceUnit.MM)>680)
-            moveWithRightSensor(665, 0.24);{
-        }
-
-        outtake();
-        go(-2200, 0.6);
-
-        if (sRR.getDistance(DistanceUnit.MM)>680)
-            moveWithRightSensor(660, 0.24);
-
-        turn(269);
-        intakeOff();
-
-        if(sRR.getDistance(DistanceUnit.MM)<640)
-            moveWithRightSensor(650, 0.24);
-        else if (sRR.getDistance(DistanceUnit.MM)>680)
-            moveWithRightSensor(665, 0.24);
-
-        if(blockPos == 0)
-        moveWithBackSensor(650, 0.25);
-        else if(blockPos == 1)
-        moveWithBackSensor(580, 0.25);
+        if(blockPos == 2)
+            goV2(520, 0.5, array1);
         else
-        moveWithBackSensor(400, 0.25);
-
-        turn(40);
-
-        goUntilBlock(0.25);
-
-        turn(270);
-
-        moveWithBackSensor(545, 0.24);
-
-
-        if(sRR.getDistance(DistanceUnit.MM)<630)
-            moveWithRightSensor(645, 0.24);
-        else if (sRR.getDistance(DistanceUnit.MM)>680)
-            moveWithRightSensor(660, 0.24);
-
-        turn(268);
-        go(2540,0.6);
-        turn(268);
-
-        if(sRR.getDistance(DistanceUnit.MM)<640)
-            moveWithRightSensor(650, 0.24);
-        else if (sRR.getDistance(DistanceUnit.MM)>680)
-            moveWithRightSensor(665, 0.24);
-
-        outtake();
-        go(-680,0.8);
+            goV2(800, 0.5, array1);
+        intake();
+        sleep(400);
+        double power = 0.3;
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        sleep(700);
+        power = -0.5;
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        sleep(100);
         intakeOff();
-
+        closeClaw();
+        if(blockPos == 2)
+            sleep(400);
+        else if(blockPos == 1)
+            sleep(600);
+        else
+            sleep(650);
+        turn(270);
     }
 
     private void go(int ticks, double power){
+        double[] array = {0,0,0,0};
+        go(ticks, power, array);
+    }
+    private void goV2(int ticks, double power, double[] endPowers){
+        boolean phase2 = false;
+        resetEncoders();
+        if(!intakeDeployed){
+            LIFT.setPower(0.5);
+        }
+        if(ticks < 0){
+            fL.setPower(-power);
+            fR.setPower(-power);
+            bL.setPower(-power);
+            bR.setPower(-power);
+            while(opModeIsActive()&&averageTicks()>ticks){
+                updateT();
+            }
+        }else{
+            fL.setPower(power);
+            fR.setPower(power);
+            bL.setPower(power);
+            bR.setPower(power);
+            while(opModeIsActive()&&averageTicks()<ticks){
+                if(!intakeDeployed && LIFT.getCurrentPosition()>250){
+                    LIFT.setPower(-0.5);
+                    phase2 = true;
+                }
+                if(phase2 && (touch.isPressed() || LIFT.getCurrentPosition() < -40)){
+                    LIFT.setPower(0);
+                    intakeDeployed = true;
+                }
+                updateT();
+            }
+        }
+        fL.setPower(endPowers[0]);
+        fR.setPower(endPowers[1]);
+        bL.setPower(endPowers[2]);
+        bR.setPower(endPowers[3]);
+    }
+    private void go(int ticks, double power, double[] endPowers){
         fL.setTargetPosition(ticks);
         fR.setTargetPosition(ticks);
         bL.setTargetPosition(ticks);
@@ -328,28 +308,25 @@ public class autoDecember7 extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         runtim2.reset();
         boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<=4 && working) {
+        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<2.5 && working) {
             updateT();
             if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
                     + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
                     + Math.abs(bL.getCurrentPosition() - bL.getTargetPosition())
                     + Math.abs(bR.getCurrentPosition() - bR.getTargetPosition())
-                    < 60) {
+                    < 80) {
                 working = false;
             }
         }
-        fL.setPower(0);
-        fR.setPower(0);
-        bL.setPower(0);
-        bR.setPower(0);
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fL.setPower(endPowers[0]);
+        fR.setPower(endPowers[1]);
+        bL.setPower(endPowers[2]);
+        bR.setPower(endPowers[3]);
     }
     private void goUntilBlock(double power){
         fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -394,18 +371,11 @@ public class autoDecember7 extends LinearOpMode
                 working = false;
             }
         }
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fL.setPower(0);
         fR.setPower(0);
         bL.setPower(0);
         bR.setPower(0);
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        resetEncoders();
     }
     private void strafe(int ticks, double power){
         fL.setTargetPosition(ticks);
@@ -557,14 +527,7 @@ public class autoDecember7 extends LinearOpMode
         fR.setPower(0);
         bL.setPower(0);
         bR.setPower(0);
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        resetEncoders();
     }
     void moveWithForwardSensor(int target, double power){
 
@@ -593,14 +556,7 @@ public class autoDecember7 extends LinearOpMode
         fR.setPower(0);
         bL.setPower(0);
         bR.setPower(0);
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        resetEncoders();
     }
     void moveWithRightSensor(int target, double power){
 
@@ -682,14 +638,7 @@ public class autoDecember7 extends LinearOpMode
         fR.setPower(0);
         bL.setPower(0);
         bR.setPower(0);
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        resetEncoders();
     }
 
 
@@ -897,6 +846,25 @@ public class autoDecember7 extends LinearOpMode
             position = 2;
         }
         return position;
+    }
+    private void resetEncoders(){
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+    private void motorsOff(){
+        fL.setPower(0);
+        fR.setPower(0);
+        bL.setPower(0);
+        bR.setPower(0);
+    }
+    private double averageTicks(){
+        return (fL.getCurrentPosition()+fR.getCurrentPosition()+bL.getCurrentPosition()+bR.getCurrentPosition())/4;
     }
 
 

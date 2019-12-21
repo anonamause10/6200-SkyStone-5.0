@@ -91,9 +91,9 @@ public class distanceSensorTest extends LinearOpMode{
                 IN2.setPower(gamepad1.right_trigger);
             }
             drive();
-            telemetry.addData("Wheel position", "front left (%d), front right(%d), " +
-                            "back left (%d), back right(%d) ", FL.getCurrentPosition(), FR.getCurrentPosition(),
-                    BL.getCurrentPosition(), BR.getCurrentPosition());
+            telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
+                            "back left (%.1f), back right (%.1f)", (float)FL.getCurrentPosition(), (float)FR.getCurrentPosition(),
+                    (float)BL.getCurrentPosition(), (float)BR.getCurrentPosition());
             telemetry.addData("backSensor", sR.getDistance(DistanceUnit.MM));
             telemetry.addData("leftSensor", sRL.getDistance(DistanceUnit.MM));
             telemetry.addData("rightSensor", sRR.getDistance(DistanceUnit.MM));
