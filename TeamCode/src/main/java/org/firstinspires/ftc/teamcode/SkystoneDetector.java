@@ -195,7 +195,7 @@ public class SkystoneDetector
             Imgproc.GaussianBlur(colormat,colormat,new Size(3,3),0);
             Core.split(colormat, channels);
             if(channels.size() > 0){
-                Imgproc.threshold(channels.get(1), mask, 100, 255, Imgproc.THRESH_BINARY_INV);
+                Imgproc.threshold(channels.get(1), mask, 90, 255, Imgproc.THRESH_BINARY_INV);
             }
 
 
@@ -248,10 +248,14 @@ public class SkystoneDetector
                 dist = 320.0;
                 if(whole){
                     if(right){
-                        dist = Math.abs(black.br().x - input.width());
+                        if (black != null) {
+                            dist = Math.abs(black.br().x - input.width());
+                        }
                     }
                     else{
-                        dist = Math.abs(black.br().x);
+                        if (black != null) {
+                            dist = Math.abs(black.tl().x);
+                        }
                     }
                 }
                 else if(right) { //if we're looking from the right:
@@ -357,7 +361,7 @@ public class SkystoneDetector
             double y = rect.y;
             double w = rect.width;
             double h = rect.height;
-            double rightDist = -1*(black?100:225)*(right?(rect.x+rect.width):(workingMat.width()-rect.x));
+            double rightDist = -1*(black?0:225)*(right?(rect.x+rect.width):(workingMat.width()-rect.x));
 
             double cubeRatio = Math.max(Math.abs(h/w), Math.abs(w/h)); // Get the ratio. We use max in case h and w get swapped??? it happens when u account for rotation
             double ratioDiffrence = Math.abs(cubeRatio - perfectRatio);
