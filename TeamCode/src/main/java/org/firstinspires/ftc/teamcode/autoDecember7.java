@@ -280,6 +280,8 @@ public class autoDecember7 extends LinearOpMode
 
         goV2(1500, 0.5, new double[]{0.5,0.5,0.5,0.5}, true);
         array1 = new double[]{1, 0.25, 1, 0.25};
+        moveWithLeftSensor(650, 0.5);
+        turn(90, new double[]{0.5,0.5,0.5,0.5});
 
         if(blockPos == 2)
             moveWithForwardSensor(620, 0.5);
@@ -309,7 +311,7 @@ public class autoDecember7 extends LinearOpMode
         intakeOff();
         closeClaw();
         turn(90, new double[]{-0.5,-0.5,-0.5,-0.5});
-        sleep(1500);
+        sleep(2500);
         power = -0.3;
         fL.setPower(power);
         fR.setPower(power);
@@ -579,7 +581,7 @@ public class autoDecember7 extends LinearOpMode
         if(sRF.getDistance(DistanceUnit.MM)>target){
             while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
                 if(sR.getDistance(DistanceUnit.MM)<100){
-                    placeBlock();
+                    placeBlock(false);
                 }
                 fL.setPower(power);
                 fR.setPower(power);
@@ -890,7 +892,7 @@ public class autoDecember7 extends LinearOpMode
         while (!turned && opModeIsActive() && runtim2.seconds() < 3) {
             double ang = getHeading();
             if(sR.getDistance(DistanceUnit.MM)<100){
-                placeBlock();
+                placeBlock(true);
             }
 
             telemetry.addData("Angle", ang);
@@ -1049,7 +1051,7 @@ public class autoDecember7 extends LinearOpMode
             bR.setPower(power);
             while (opModeIsActive() && runtim2.seconds() <= 4 && working) {
                 if(sR.getDistance(DistanceUnit.MM)<100){
-                    placeBlock();
+                    placeBlock(true);
                 }
                 updateT();
                 if (getHeading() < angle) {
@@ -1058,7 +1060,7 @@ public class autoDecember7 extends LinearOpMode
             }
         }
     }
-    private void placeBlock(){
+    private void placeBlock(boolean readyToPlace){
 
         if(CLAW.getPosition()>=0.1 && LIFT.getCurrentPosition()>0) {
             if(ROTATE.getPosition()>=0.5 && obligitoryCounter2 >= 5)
@@ -1080,7 +1082,7 @@ public class autoDecember7 extends LinearOpMode
         }else{
             LIFT.setPower(0);
         }
-        if(ROTATE.getPosition()==0.025){
+        if(ROTATE.getPosition()==0.025 && readyToPlace){
             if(obligitoryCounter > -1 && obligitoryCounter<10 && CLAW.getPosition() < 0.1){
                 obligitoryCounter++;
             }else{
