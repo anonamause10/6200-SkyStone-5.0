@@ -220,7 +220,7 @@ public class autoDecember7 extends LinearOpMode
         double[] array1 = {0.2, 0.6, 0.2, 0.6};
 
         if(blockPos == 0){
-            double[] array2 = {0.8, 0.2, 0.8, 0.2};
+            double[] array2 = {1, 0.15, 1, 0.15};
             array1 = array2;
         }else if(blockPos == 2){
             double[] array2 = {0.2, 0.8, 0.2, 0.8};
@@ -276,15 +276,16 @@ public class autoDecember7 extends LinearOpMode
         bR.setPower(power);
         sleep(400);
         turn(90, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=90);
-        moveWithLeftSensor(680, 0.3);
+
+        moveWithLeftSensor(650, 0.3);
 
         goV2(1500, 0.5, new double[]{0.5,0.5,0.5,0.5}, true);
         array1 = new double[]{1, 0.25, 1, 0.25};
 
         turn(90, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=90);
 
-        if(sRL.getDistance(DistanceUnit.MM)<650)
-            moveWithLeftSensor(650, 0.5);
+        if(sRL.getDistance(DistanceUnit.MM)<635)
+            moveWithLeftSensor(640, 0.5);
 
         if(blockPos == 2)
             moveWithForwardSensor(670, 0.5);
@@ -315,7 +316,8 @@ public class autoDecember7 extends LinearOpMode
         closeClaw();
 
         turn(90, new double[]{-0.5,-0.5,-0.5,-0.5}, getHeading()<=90);
-        moveWithLeftSensor(650, 0.3);
+
+        moveWithLeftSensor(640, 0.3);
 
         sleep(2000);
         power = -0.3;
@@ -1068,19 +1070,19 @@ public class autoDecember7 extends LinearOpMode
 
         if(CLAW.getPosition()>=0.1 && LIFT.getCurrentPosition()>0) {
             if(ROTATE.getPosition()>=0.5 && obligitoryCounter2 >= 5)
-                LIFT.setPower(-0.7);
+                LIFT.setPower(-0.5);
             else{
                 if(obligitoryCounter2 == 0) {
                     rotateIn();
                     LIFT.setPower(0);
-                    obligitoryCounter2 ++;
+                    obligitoryCounter2++;
                 }else{
-                    obligitoryCounter++;
+                    obligitoryCounter2++;
                 }
             }
-        }else if(CLAW.getPosition()<0.1 && LIFT.getCurrentPosition()<500){
+        }else if(CLAW.getPosition()<0.1 && LIFT.getCurrentPosition()<480){
             LIFT.setPower(0.7);
-        }else if(LIFT.getCurrentPosition()>=480){
+        }else if(LIFT.getCurrentPosition()>=470){
             LIFT.setPower(0);
             rotateOut();
         }else{
