@@ -278,16 +278,16 @@ public class autoDecember7 extends LinearOpMode
 
         moveWithLeftSensor(650, 0.3);
 
-        goV2(2000, 0.5, new double[]{0.5,0.5,0.5,0.5}, true);
+        goV2(1500, 0.5, new double[]{0.7,0.7,0.7,0.7}, true);
+        array1 = new double[]{1, 0.25, 1, 0.25};
 
         if(blockPos == 2)
-            moveWithForwardSensor(1200, 0.7);
+            goV2(900, 0.7, array1, true);
         else if(blockPos == 1)
-            moveWithForwardSensor(1400, 0.7);
+            goV2(700, 0.7, array1, true);
         else
-            moveWithForwardSensor(1600, 0.7);
+            goV2(500, 0.7, array1, true);
 
-        array1 = new double[]{1, 0.25, 1, 0.25};
         fL.setPower(array1[0]);
         fR.setPower(array1[1]);
         bL.setPower(array1[2]);
@@ -873,6 +873,7 @@ public class autoDecember7 extends LinearOpMode
         double vuAng = tun;
         boolean turned = false;
         boolean targGreater = true;
+        boolean foundation = sR.getDistance(DistanceUnit.MM)<200;
         runtim2.reset();
         while (!turned && opModeIsActive() && runtim2.seconds() < 3) {
             double ang = getHeading();
@@ -903,7 +904,7 @@ public class autoDecember7 extends LinearOpMode
                 bR.setPower(-0.5);
                 targGreater = false;
             }else if (ang-vuAng > 35){
-                if(sR.getDistance(DistanceUnit.MM)<100) {
+                if(foundation) {
                     fL.setPower(0.7);
                     fR.setPower(-0.7);
                     bL.setPower(0.7);
@@ -916,7 +917,7 @@ public class autoDecember7 extends LinearOpMode
                 }
                 targGreater = false;
             }else if(vuAng - ang > 35){
-                if(sR.getDistance(DistanceUnit.MM)<100) {
+                if(foundation) {
                     fL.setPower(-0.7);
                     fR.setPower(0.7);
                     bL.setPower(-0.7);
@@ -932,7 +933,7 @@ public class autoDecember7 extends LinearOpMode
                 if(!targGreater){
                     turned = true;
                 }else{
-                if(sR.getDistance(DistanceUnit.MM)<200){
+                if(foundation){
                     fL.setPower(-0.5);
                     fR.setPower(0.5);
                     bL.setPower(-0.5);
@@ -947,7 +948,7 @@ public class autoDecember7 extends LinearOpMode
                 if(targGreater){
                     turned = true;
                 }else{
-                if(sR.getDistance(DistanceUnit.MM)<200) {
+                if(foundation) {
                     fL.setPower(0.5);
                     fR.setPower(-0.5);
                     bL.setPower(0.5);
