@@ -254,19 +254,19 @@ public class autoDecember7 extends LinearOpMode
         array1 = new double[] {0.5, 0.5, 0.5, 0.5};
         intakeOff();
         closeClaw();
-        turn(269, array1);
+        turn(269, array1, false);
         servosUp();
         double[] array2 = {0.3, 0.3, 0.3, 0.3};
         goV2(2000, 0.5, array2, true);
-        moveWithForwardSensor(550, 0.3);
+        moveWithForwardSensor(500, 0.3);
 
-        turn(180, new double[] {-0.3, -0.3, -0.3, -0.3});
-        goV2(-350, 0.3, new double[] {-0.3, -0.3, -0.3, -0.3}, true);
+        turn(180, new double[] {-0.3, -0.3, -0.3, -0.3}, false);
+        goV2(-420, 0.3, new double[] {-0.3, -0.3, -0.3, -0.3}, true);
         servosDown();
-        moveWithForwardSensor(300, 0.7);
+        moveWithForwardSensor(500, 0.7);
         strafeToAngle(150, 0.7);
         array1 = new double[] {-0.4, -0.4, -0.4, -0.4};
-        turn(90, array1);
+        turn(90, array1, false);
         sleep(900);
         servosUp();
         power = 0.3;
@@ -275,20 +275,23 @@ public class autoDecember7 extends LinearOpMode
         bL.setPower(power);
         bR.setPower(power);
         sleep(400);
-
-        moveWithLeftSensor(650, 0.3);
+        turn(90, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=90);
+        moveWithLeftSensor(680, 0.3);
 
         goV2(1500, 0.5, new double[]{0.5,0.5,0.5,0.5}, true);
         array1 = new double[]{1, 0.25, 1, 0.25};
-        moveWithLeftSensor(650, 0.5);
-        turn(90, new double[]{0.5,0.5,0.5,0.5});
+
+        turn(90, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=90);
+
+        if(sRL.getDistance(DistanceUnit.MM)<650)
+            moveWithLeftSensor(650, 0.5);
 
         if(blockPos == 2)
-            moveWithForwardSensor(720, 0.5);
+            moveWithForwardSensor(870, 0.5);
         else if(blockPos == 1)
-            moveWithForwardSensor(880, 0.5);
-        else
             moveWithForwardSensor(1070, 0.5);
+        else
+            moveWithForwardSensor(1270, 0.5);
 
         fL.setPower(array1[0]);
         fR.setPower(array1[1]);
@@ -310,7 +313,9 @@ public class autoDecember7 extends LinearOpMode
         sleep(700);
         intakeOff();
         closeClaw();
-        turn(90, new double[]{-0.5,-0.5,-0.5,-0.5});
+
+        turn(90, new double[]{-0.5,-0.5,-0.5,-0.5}, getHeading()<=90);
+
         sleep(2500);
         power = -0.3;
         fL.setPower(power);
@@ -324,6 +329,8 @@ public class autoDecember7 extends LinearOpMode
                 LIFT.setPower(0);
                 rotateOut();
         }
+        motorsOff();
+        sleep(100);
         openClaw();
         power = 0.3;
         fL.setPower(power);
@@ -331,7 +338,8 @@ public class autoDecember7 extends LinearOpMode
         bL.setPower(power);
         bR.setPower(power);
         sleep(200);
-        moveWithLeftSensor(650, 0.3);
+        rotateIn();
+        moveWithLeftSensor(680, 0.3);
         goV2(1500, 0.5, new double[]{0,0,0,0}, true);
     }
     private void goV2(int ticks, double power, double[] endPowers, boolean intakeDeployed){
@@ -367,9 +375,9 @@ public class autoDecember7 extends LinearOpMode
                     intakeDeployed = true;
                     phase2 = false;
                 }
-                if(LIFT.getCurrentPosition()>=50){
+                if(LIFT.getCurrentPosition()>=50 && intakeDeployed){
                     LIFT.setPower(-0.5);
-                }else{
+                }else if(intakeDeployed){
                     LIFT.setPower(0);
                 }
                 if(sR2.getDistance(DistanceUnit.MM)<70){
@@ -882,19 +890,17 @@ public class autoDecember7 extends LinearOpMode
     }
 
 
-    void turn(double tun, double[] endPowers){
+    void turn(double tun, double[] endPowers, boolean targGreater){
 
         double vuAng = tun;
         boolean turned = false;
-        boolean targGreater = true;
         boolean foundation = sR.getDistance(DistanceUnit.MM)<200;
         runtim2.reset();
-        while (!turned && opModeIsActive() && runtim2.seconds() < 3) {
+        while (!turned && opModeIsActive() && runtim2.seconds() < 4) {
             double ang = getHeading();
             if(sR.getDistance(DistanceUnit.MM)<100){
                 placeBlock(true);
             }
-
             telemetry.addData("Angle", ang);
             telemetry.addData("TurnTo", vuAng);
             telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
@@ -916,7 +922,6 @@ public class autoDecember7 extends LinearOpMode
                 fR.setPower(-0.5);
                 bL.setPower(0.5);
                 bR.setPower(-0.5);
-                targGreater = false;
             }else if (ang-vuAng > 35){
                 if(foundation) {
                     fL.setPower(0.7);
@@ -929,7 +934,6 @@ public class autoDecember7 extends LinearOpMode
                     bL.setPower(0.5);
                     bR.setPower(-0.5);
                 }
-                targGreater = false;
             }else if(vuAng - ang > 35){
                 if(foundation) {
                     fL.setPower(-0.7);
@@ -942,7 +946,6 @@ public class autoDecember7 extends LinearOpMode
                     bL.setPower(-0.5);
                     bR.setPower(0.5);
                 }
-                targGreater = true;
             }else if (ang < vuAng) {
                 if(!targGreater){
                     turned = true;
