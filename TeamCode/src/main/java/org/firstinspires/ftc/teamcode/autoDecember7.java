@@ -258,7 +258,7 @@ public class autoDecember7 extends LinearOpMode
         servosUp();
         double[] array2 = {0.3, 0.3, 0.3, 0.3};
         goV2(2000, 0.5, array2, true);
-        moveWithForwardSensor(500, 0.3);
+        moveWithForwardSensor(520, 0.5);
 
         turn(180, new double[] {-0.3, -0.3, -0.3, -0.3}, false);
         goV2(-420, 0.3, new double[] {-0.3, -0.3, -0.3, -0.3}, true);
@@ -287,11 +287,11 @@ public class autoDecember7 extends LinearOpMode
             moveWithLeftSensor(650, 0.5);
 
         if(blockPos == 2)
-            moveWithForwardSensor(870, 0.5);
+            moveWithForwardSensor(670, 0.5);
         else if(blockPos == 1)
-            moveWithForwardSensor(1070, 0.5);
+            moveWithForwardSensor(870, 0.5);
         else
-            moveWithForwardSensor(1270, 0.5);
+            moveWithForwardSensor(1070, 0.5);
 
         fL.setPower(array1[0]);
         fR.setPower(array1[1]);
@@ -315,14 +315,15 @@ public class autoDecember7 extends LinearOpMode
         closeClaw();
 
         turn(90, new double[]{-0.5,-0.5,-0.5,-0.5}, getHeading()<=90);
+        moveWithLeftSensor(650, 0.3);
 
-        sleep(2500);
+        sleep(2000);
         power = -0.3;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        while(sR.getDistance(DistanceUnit.MM)>130){
+        while(sR.getDistance(DistanceUnit.MM)>110){
             if(LIFT.getCurrentPosition()<400)
                 LIFT.setPower(0.7);
             else
@@ -339,7 +340,7 @@ public class autoDecember7 extends LinearOpMode
         bR.setPower(power);
         sleep(200);
         rotateIn();
-        moveWithLeftSensor(680, 0.3);
+        moveWithLeftSensor(650, 0.3);
         goV2(1500, 0.5, new double[]{0,0,0,0}, true);
     }
     private void goV2(int ticks, double power, double[] endPowers, boolean intakeDeployed){
@@ -951,10 +952,10 @@ public class autoDecember7 extends LinearOpMode
                     turned = true;
                 }else{
                 if(foundation){
-                    fL.setPower(-0.5);
-                    fR.setPower(0.5);
-                    bL.setPower(-0.5);
-                    bR.setPower(0.5);
+                    fL.setPower(-0.4);
+                    fR.setPower(0.4);
+                    bL.setPower(-0.4);
+                    bR.setPower(0.4);
                 }else {
                     fL.setPower(-0.22);
                     fR.setPower(0.22);
@@ -966,10 +967,10 @@ public class autoDecember7 extends LinearOpMode
                     turned = true;
                 }else{
                 if(foundation) {
-                    fL.setPower(0.5);
-                    fR.setPower(-0.5);
-                    bL.setPower(0.5);
-                    bR.setPower(-0.5);
+                    fL.setPower(0.4);
+                    fR.setPower(-0.4);
+                    bL.setPower(0.4);
+                    bR.setPower(-0.4);
                 }else{
                     fL.setPower(0.22);
                     fR.setPower(-0.22);
