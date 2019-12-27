@@ -18,6 +18,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -35,6 +36,7 @@ public class SamplePID extends LinearOpMode
     private DcMotor FR = null;
     private DcMotor BL = null;
     private DcMotor BR = null;
+    ElapsedTime runtim2 = new ElapsedTime();
     BNO055IMU               imu;
     Orientation             lastAngles = new Orientation();
     double                  globalAngle, power = .450, correction, rotation;
@@ -137,11 +139,11 @@ public class SamplePID extends LinearOpMode
             if (aButton || bButton)
             {
 
-                // turn 90 degrees right.
-                if (aButton) rotate(-90, power);
+                // drive safely.
+                if (aButton) drive(1000, 0.3);
 
-                // turn 90 degrees left.
-                if (bButton) rotate(90, power);
+                // YYET.
+                if (bButton) drive(1000, 0.8);
             }
         }
 
@@ -268,6 +270,92 @@ public class SamplePID extends LinearOpMode
         FR.setPower(0);
         BL.setPower(0);
         BR.setPower(0);
+
+        rotation = getAngle();
+
+        // wait for rotation to stop.
+        sleep(500);
+
+        // reset angle tracking on new heading.
+        resetAngle();
+    }
+
+    public void drive(int ticks, double power){
+        // restart imu angle tracking.
+        resetAngle();
+        int degrees = 0;
+
+        FL.setPower(power);
+        FR.setPower(power);
+        BL.setPower(power);
+        BR.setPower(power);
+
+
+        pidDrive.reset();
+
+
+        pidDrive.setSetpoint(0);
+        pidDrive.setInputRange(0, degrees);
+        pidDrive.setOutputRange(0, power);
+        pidDrive.setTolerance(1);
+        pidDrive.enable();
+
+        // getAngle() returns + when rotating counter clockwise (left) and - when rotating
+        // clockwise (right).
+
+        // rotate until turn is completed.
+        double pow = 0;
+        runtim2.reset();
+        boolean working = true;
+        if (degrees < 0)
+        {
+            // On right turn we have to get off zero first.
+            while (opModeIsActive() && getAngle() == 0)
+            {
+                FL.setPower(power);
+                FR.setPower(power);
+                BL.setPower(power);
+                BR.setPower(power);
+                //sleep(100);
+            }
+
+            do
+            {
+                power = pidDrive.performPID(getAngle()); // power will be - on right turn.
+                FL.setPower(power);
+                FR.setPower(power);
+                BL.setPower(power);
+                BR.setPower(power);
+            } while (opModeIsActive() && !pidDrive.onTarget());
+        }
+        else    // left turn.
+
+
+            do
+            {
+                pow = pidDrive.performPID(getAngle()); // power will be + on left turn.
+                FL.setPower(power-pow);
+                FR.setPower(power+pow);
+                BL.setPower(power-pow);
+                BR.setPower(power+pow);
+                if (Math.abs(FL.getCurrentPosition() - ticks)
+                        + Math.abs(FR.getCurrentPosition() - ticks)
+                        + Math.abs(BL.getCurrentPosition() - ticks)
+                        + Math.abs(BR.getCurrentPosition() - ticks)
+                        < 80) {
+                    working = false;
+                }
+            } while (opModeIsActive() && runtim2.seconds()<2.5 && working );
+
+        // turn the motors off.
+        FL.setPower(0);
+        FR.setPower(0);
+        BL.setPower(0);
+        BR.setPower(0);
+        FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         rotation = getAngle();
 
