@@ -1082,10 +1082,10 @@ public class autoDecember7 extends LinearOpMode
         }else{
             LIFT.setPower(0);
         }
-        if(ROTATE.getPosition()==0.025 && readyToPlace){
+        if(ROTATE.getPosition()==0.025){
             if(obligitoryCounter > -1 && obligitoryCounter<10 && CLAW.getPosition() < 0.1){
                 obligitoryCounter++;
-            }else{
+            }else if(readyToPlace){
                 openClaw();
                 obligitoryCounter = -1;
             }
