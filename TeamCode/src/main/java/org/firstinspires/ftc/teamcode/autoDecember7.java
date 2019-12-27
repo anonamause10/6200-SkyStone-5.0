@@ -263,7 +263,7 @@ public class autoDecember7 extends LinearOpMode
         turn(180, new double[] {-0.3, -0.3, -0.3, -0.3});
         goV2(-350, 0.3, new double[] {-0.3, -0.3, -0.3, -0.3}, true);
         servosDown();
-        moveWithForwardSensor(350, 0.7);
+        moveWithForwardSensor(300, 0.7);
         strafeToAngle(150, 0.7);
         array1 = new double[] {-0.4, -0.4, -0.4, -0.4};
         turn(90, array1);
@@ -284,11 +284,11 @@ public class autoDecember7 extends LinearOpMode
         turn(90, new double[]{0.5,0.5,0.5,0.5});
 
         if(blockPos == 2)
-            moveWithForwardSensor(620, 0.5);
+            moveWithForwardSensor(720, 0.5);
         else if(blockPos == 1)
-            moveWithForwardSensor(780, 0.5);
+            moveWithForwardSensor(880, 0.5);
         else
-            moveWithForwardSensor(970, 0.5);
+            moveWithForwardSensor(1070, 0.5);
 
         fL.setPower(array1[0]);
         fR.setPower(array1[1]);
