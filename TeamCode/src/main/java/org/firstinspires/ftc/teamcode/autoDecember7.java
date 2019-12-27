@@ -91,11 +91,11 @@ public class autoDecember7 extends LinearOpMode
     private DistanceSensor sRF;
     private DistanceSensor sRR;
     private TouchSensor touch;
-    private boolean intakeDeployed = false;
 
     private double voltage = 0.0;
     private double scale = 0.0;
     private int blockPos = 1;
+    int obligitoryCounter = 0;
     PIDController           pidRotate;
     Orientation             lastAngles = new Orientation();
     double globalAngle, rotation;
@@ -224,9 +224,9 @@ public class autoDecember7 extends LinearOpMode
             array1 = array2;
         }
         if(blockPos == 2)
-            goV2(520, 0.5, array1);
+            goV2(520, 0.5, array1, false);
         else
-            goV2(800, 0.5, array1);
+            goV2(800, 0.5, array1, false);
         intake();
         sleep(400);
         double power = 0.3;
@@ -242,35 +242,66 @@ public class autoDecember7 extends LinearOpMode
         bR.setPower(power);
         sleep(100);
         if(blockPos == 2)
-            sleep(400);
+            sleep(450);
         else if(blockPos == 1)
             sleep(600);
         else
-            sleep(650);
+            sleep(720);
 
         array1 = new double[] {0.5, 0.5, 0.5, 0.5};
+        intakeOff();
+        closeClaw();
         turn(270, array1);
-        double[] array2 = {0.3, 0.3, 0.3, 0.3};
-        goV2(2000, 0.5, array2);
-        moveWithForwardSensor(530, 0.3);
-        array1 = new double[] {-0.3, -0.3, -0.3, -0.3};
-        turn(180, array1);
-        goV2(-400, 0.3, array1);
-        servosDown();
-        sleep(200);
-        moveWithForwardSensor(300, 0.5);
-        strafeToAngle(150, 0.4);
-        turn(90, array1);
-        sleep(300);
         servosUp();
-        go(2000, 0.5);
-    }
+        double[] array2 = {0.3, 0.3, 0.3, 0.3};
+        goV2(2000, 0.5, array2, true);
+        moveWithForwardSensor(550, 0.3);
 
-    private void go(int ticks, double power){
-        double[] array = {0,0,0,0};
-        go(ticks, power, array);
+        turn(180, new double[] {-0.3, -0.3, -0.3, -0.3});
+        goV2(-350, 0.3, new double[] {-0.3, -0.3, -0.3, -0.3}, true);
+        servosDown();
+        moveWithForwardSensor(300, 0.5);
+        strafeToAngle(150, 0.5);
+        turn(90, array1);
+        sleep(800);
+        servosUp();
+
+        goV2(2000, 0.5, new double[]{0.5,0.5,0.5,0.5}, true);
+
+        if(blockPos == 2)
+            moveWithForwardSensor(700, 0.5);
+        else if(blockPos == 1)
+            moveWithForwardSensor(800, 0.5);
+        else
+            moveWithForwardSensor(900, 0.5);
+
+        array1 = new double[]{0.8, 0.2, 0.8, 0.2};
+        fL.setPower(array1[0]);
+        fR.setPower(array1[1]);
+        bL.setPower(array1[2]);
+        bR.setPower(array1[3]);
+        intake();
+        sleep(700);
+        power = 0.3;
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        sleep(500);
+
+        power = -0.5;
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        sleep(400);
+        intakeOff();
+        closeClaw();
+        sleep(100);
+        turn(90, new double[]{0,0,0,0});
+
     }
-    private void goV2(int ticks, double power, double[] endPowers){
+    private void goV2(int ticks, double power, double[] endPowers, boolean intakeDeployed){
         boolean phase2 = false;
         resetEncoders();
         if(!intakeDeployed){
@@ -313,6 +344,11 @@ public class autoDecember7 extends LinearOpMode
         bL.setPower(endPowers[2]);
         bR.setPower(endPowers[3]);
     }
+
+    private void go(int ticks, double power){
+    double[] array = {0,0,0,0};
+    go(ticks, power, array);
+    }
     private void go(int ticks, double power, double[] endPowers){
         fL.setTargetPosition(ticks);
         fR.setTargetPosition(ticks);
@@ -338,6 +374,11 @@ public class autoDecember7 extends LinearOpMode
                     < 80) {
                 working = false;
             }
+            if(LIFT.getCurrentPosition()>20){
+                LIFT.setPower(-0.5);
+            }else{
+                LIFT.setPower(0);
+            }
         }
 
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -349,6 +390,7 @@ public class autoDecember7 extends LinearOpMode
         bL.setPower(endPowers[2]);
         bR.setPower(endPowers[3]);
     }
+
     private void goUntilBlock(double power){
         fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -398,52 +440,11 @@ public class autoDecember7 extends LinearOpMode
         bR.setPower(0);
         resetEncoders();
     }
-    private void strafe(int ticks, double power){
-        fL.setTargetPosition(ticks);
-        fR.setTargetPosition(-ticks);
-        bL.setTargetPosition(-ticks);
-        bR.setTargetPosition(ticks);
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
-
-        fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        runtim2.reset();
-        boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<2.5 && working) {
-            updateT();
-            if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
-                    + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
-                    + Math.abs(bL.getCurrentPosition() - bL.getTargetPosition())
-                    + Math.abs(bR.getCurrentPosition() - bR.getTargetPosition())
-                    < 60) {
-                working = false;
-            }
-        }
-        fL.setPower(0);
-        fR.setPower(0);
-        bL.setPower(0);
-        bR.setPower(0);
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    }
-
 
     public double getHeading() {
         Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return (angles.firstAngle+360)%360;
     }
-
     private void rotateIn(){
         ROTATE.setPosition(0.69);
     }
@@ -471,24 +472,10 @@ public class autoDecember7 extends LinearOpMode
         IN1.setPower(0.7);
         IN2.setPower(0.7);
     }
-    private void outtake(){
-        IN1.setPower(-0.6);
-        IN2.setPower(-0.6);
-    }
+
     private void intakeOff(){
         IN1.setPower(0);
         IN2.setPower(0);
-    }
-
-    private double getBatteryVoltage() {
-        double result = Double.POSITIVE_INFINITY;
-        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
-            double voltage = sensor.getVoltage();
-            if (voltage > 0) {
-                result = Math.min(result, voltage);
-            }
-        }
-        return result;
     }
 
     private void updateT(){
@@ -504,9 +491,6 @@ public class autoDecember7 extends LinearOpMode
         telemetry.addData("BlockPos", blockPos);
         telemetry.addData("INTAKE POWER", IN1.getPower());
         telemetry.update();
-    }
-    String format(OpenGLMatrix transformationMatrix) {
-        return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
     }
 
     String formatAngle(AngleUnit angleUnit, double angle) {
@@ -546,6 +530,7 @@ public class autoDecember7 extends LinearOpMode
         bR.setPower(0);
         resetEncoders();
     }
+
     void moveWithForwardSensor(int target, double power){
 
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -555,6 +540,9 @@ public class autoDecember7 extends LinearOpMode
         runtim2.reset();
         if(sRF.getDistance(DistanceUnit.MM)>target){
             while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
+                if(sR.getDistance(DistanceUnit.MM)<100){
+                    placeBlock();
+                }
                 fL.setPower(power);
                 fR.setPower(power);
                 bL.setPower(power);
@@ -685,7 +673,6 @@ public class autoDecember7 extends LinearOpMode
         return globalAngle;
     }
 
-
     /**
      * Rotate left or right the number of degrees. Does not support turning more than 359 degrees.
      * @param degrees Degrees to turn, + is left - is right
@@ -780,10 +767,15 @@ public class autoDecember7 extends LinearOpMode
 
 
     void turn(double tun, double[] endPowers){
+
         double vuAng = tun;
         boolean turned = false;
+        boolean targGreater = true;
         while (!turned && opModeIsActive()) {
             double ang = getHeading();
+            if(sR.getDistance(DistanceUnit.MM)<100){
+                placeBlock();
+            }
 
             telemetry.addData("Angle", ang);
             telemetry.addData("TurnTo", vuAng);
@@ -797,38 +789,62 @@ public class autoDecember7 extends LinearOpMode
                 bL.setPower(0);
                 bR.setPower(0);
             }else if(ang>=260&& vuAng<=90){
-                fL.setPower(-0.3);
-                fR.setPower(0.3);
-                bL.setPower(-0.3);
-                bR.setPower(0.3);
+                fL.setPower(-0.5);
+                fR.setPower(0.5);
+                bL.setPower(-0.5);
+                bR.setPower(0.5);
             }else if(ang<=90&& vuAng>=260){
-                fL.setPower(0.3);
-                fR.setPower(-0.3);
-                bL.setPower(0.3);
-                bR.setPower(-0.3);
+                fL.setPower(0.5);
+                fR.setPower(-0.5);
+                bL.setPower(0.5);
+                bR.setPower(-0.5);
+                targGreater = false;
             }else if (ang-vuAng > 35){
                 fL.setPower(0.5 );
                 fR.setPower(-0.5 );
                 bL.setPower(0.5 );
                 bR.setPower(-0.5);
+                targGreater = false;
             }else if(vuAng - ang > 35){
                 fL.setPower(-0.5 );
                 fR.setPower(0.5 );
                 bL.setPower(-0.5 );
                 bR.setPower(0.5 );
+                targGreater = true;
             }else if (ang < vuAng) {
-                fL.setPower(-0.19 );
-                fR.setPower(0.19);
-                bL.setPower(-0.19 );
-                bR.setPower(0.19 );
+                if(!targGreater){
+                    turned = true;
+                }else{
+                if(sR.getDistance(DistanceUnit.MM)<100){
+                    fL.setPower(-0.4);
+                    fR.setPower(0.4);
+                    bL.setPower(-0.4);
+                    bR.setPower(0.4);
+                }else {
+                    fL.setPower(-0.22);
+                    fR.setPower(0.22);
+                    bL.setPower(-0.22);
+                    bR.setPower(0.22);
+                }}
             }else if (ang > vuAng) {
-                fL.setPower(0.19 );
-                fR.setPower(-0.19 );
-                bL.setPower(0.19 );
-                bR.setPower(-0.19 );
+                if(targGreater){
+                    turned = true;
+                }else{
+                if(sR.getDistance(DistanceUnit.MM)<100) {
+                    fL.setPower(0.4);
+                    fR.setPower(-0.4);
+                    bL.setPower(0.4);
+                    bR.setPower(-0.4);
+                }else{
+                    fL.setPower(0.22);
+                    fR.setPower(-0.22);
+                    bL.setPower(0.22);
+                    bR.setPower(-0.22);
+                }}
             }
             ang = getHeading();
-            turned = (Math.abs(ang - vuAng) <= 0.5);
+            if(!turned)
+                turned = (Math.abs(ang - vuAng) <= 0.5);
         }
         fL.setPower(endPowers[0]);
         fR.setPower(endPowers[1]);
@@ -902,27 +918,38 @@ public class autoDecember7 extends LinearOpMode
             bL.setPower(-power);
             bR.setPower(power);
             while (opModeIsActive() && runtim2.seconds() <= 4 && working) {
-                if(CLAW.getPosition()>=0.1 && LIFT.getCurrentPosition()>0) {
-                    rotateIn();
-                    if(ROTATE.getPosition()>=0.5)
-                        LIFT.setPower(-0.7);
-                }else if(CLAW.getPosition()<0.1 && LIFT.getCurrentPosition()<300){
-                    LIFT.setPower(0.7);
-                }else if(LIFT.getCurrentPosition()>=300){
-                    LIFT.setPower(0);
-                    rotateOut();
-                }else{
-                    LIFT.setPower(0);
-                }
-
-                if(ROTATE.getPosition()==0.025){
-                    openClaw();
+                if(sR.getDistance(DistanceUnit.MM)<100){
+                    placeBlock();
                 }
                 updateT();
                 if (getHeading() < angle) {
                     working = false;
                 }
             }
+        }
+    }
+    private void placeBlock(){
+
+        if(CLAW.getPosition()>=0.1 && LIFT.getCurrentPosition()>0) {
+            if(ROTATE.getPosition()>=0.5)
+                LIFT.setPower(-0.3);
+            else{
+                rotateIn();
+                LIFT.setPower(0);
+            }
+        }else if(CLAW.getPosition()<0.1 && LIFT.getCurrentPosition()<500){
+            LIFT.setPower(0.7);
+        }else if(LIFT.getCurrentPosition()>=480){
+            LIFT.setPower(0);
+            rotateOut();
+        }else{
+            LIFT.setPower(0);
+        }
+        if(ROTATE.getPosition()==0.025){
+            if(obligitoryCounter<30){
+                obligitoryCounter++;
+            }else
+            openClaw();
         }
     }
 
