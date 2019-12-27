@@ -342,7 +342,7 @@ public class SamplePID extends LinearOpMode
                         + Math.abs(FR.getCurrentPosition() - ticks)
                         + Math.abs(BL.getCurrentPosition() - ticks)
                         + Math.abs(BR.getCurrentPosition() - ticks)
-                        < 80) {
+                        < 200) {
                     working = false;
                 }
             } while (opModeIsActive() && runtim2.seconds()<2.5 && working );
