@@ -278,29 +278,28 @@ public class autoDecember7 extends LinearOpMode
 
         moveWithLeftSensor(650, 0.3);
 
-        goV2(1500, 0.5, new double[]{0.7,0.7,0.7,0.7}, true);
+        goV2(1500, 0.5, new double[]{0.5,0.5,0.5,0.5}, true);
         array1 = new double[]{1, 0.25, 1, 0.25};
 
         if(blockPos == 2)
-            goV2(900, 0.7, array1, true);
+            moveWithForwardSensor(620, 0.5);
         else if(blockPos == 1)
-            goV2(700, 0.7, array1, true);
+            moveWithForwardSensor(780, 0.5);
         else
-            goV2(500, 0.7, array1, true);
+            moveWithForwardSensor(970, 0.5);
 
         fL.setPower(array1[0]);
         fR.setPower(array1[1]);
         bL.setPower(array1[2]);
         bR.setPower(array1[3]);
         intake();
-        sleep(900);
+        sleep(700);
         power = 0.3;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(500);
-
+        sleep(200);
         power = -0.5;
         fL.setPower(power);
         fR.setPower(power);
@@ -309,9 +308,13 @@ public class autoDecember7 extends LinearOpMode
         sleep(700);
         intakeOff();
         closeClaw();
-        sleep(300);
         turn(90, new double[]{-0.5,-0.5,-0.5,-0.5});
         sleep(1500);
+        power = -0.3;
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
         while(sR.getDistance(DistanceUnit.MM)>130){
             if(LIFT.getCurrentPosition()<400)
                 LIFT.setPower(0.7);
@@ -320,13 +323,21 @@ public class autoDecember7 extends LinearOpMode
                 rotateOut();
         }
         openClaw();
-        goV2(1200, 0.5, new double[]{0,0,0,0}, true);
+        power = 0.3;
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        sleep(200);
+        moveWithLeftSensor(650, 0.3);
+        goV2(1500, 0.5, new double[]{0,0,0,0}, true);
     }
     private void goV2(int ticks, double power, double[] endPowers, boolean intakeDeployed){
         boolean phase2 = false;
         resetEncoders();
         if(!intakeDeployed){
-            LIFT.setPower(0.5);
+            LIFT.setPower(0.7);
+            runtim2.reset();
         }
         if(ticks < 0){
             fL.setPower(-power);
@@ -342,11 +353,12 @@ public class autoDecember7 extends LinearOpMode
             bL.setPower(power);
             bR.setPower(power);
             while(opModeIsActive()&&averageTicks()<ticks){
-                if(!intakeDeployed && LIFT.getCurrentPosition()>250){
-                    LIFT.setPower(-0.5);
+                if((!intakeDeployed && LIFT.getCurrentPosition()>300) || runtim2.seconds()>0.7){
+                    LIFT.setPower(-0.7);
                     phase2 = true;
+                    runtim2.reset();
                 }
-                if(phase2 && (touch.isPressed() || LIFT.getCurrentPosition() < -40)){
+                if((phase2 && (touch.isPressed() || LIFT.getCurrentPosition() < -40)) || runtim2.seconds()>0.7){
                     LIFT.setPower(0);
                     LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

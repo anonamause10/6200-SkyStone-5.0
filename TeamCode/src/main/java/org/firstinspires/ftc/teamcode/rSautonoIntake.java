@@ -190,6 +190,7 @@ public class rSautonoIntake extends LinearOpMode
         fR.setPower(0.25);
         bL.setPower(1);
         bR.setPower(0.25);
+        while(opModeIsActive()){}
     }
 
     private void go(int ticks, double power){
