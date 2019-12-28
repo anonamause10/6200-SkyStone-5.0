@@ -294,7 +294,7 @@ public class autoDecember7 extends LinearOpMode
         sleep(400);
         turn(90, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=90, 0);
 
-        if(sRL.getDistance(DistanceUnit.MM)<630 || sRL.getDistance(DistanceUnit.MM)>670)
+        if(sRL.getDistance(DistanceUnit.MM)<630)
         moveWithLeftSensor(630, 0.4);
         servosDown();
 
