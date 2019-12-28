@@ -192,7 +192,7 @@ public class teleop extends LinearOpMode {
             }else{
                 if(LIFT.getCurrentPosition()>700){
                     LIFT.setTargetPosition(LIFT.getCurrentPosition()); //STALL
-                    LIFT.setPower(0.25);
+                    LIFT.setPower(0.2);
                 }else if(LIFT.getCurrentPosition()<=30 && LIFT.getMode()==DcMotor.RunMode.RUN_TO_POSITION){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }else{

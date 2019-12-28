@@ -92,6 +92,7 @@ public class autoDecember7 extends LinearOpMode
     private DistanceSensor sRR;
     private DistanceSensor sRL;
     private TouchSensor touch;
+    private PIDController pidDrive;
 
     private double voltage = 0.0;
     private double scale = 0.0;
@@ -129,6 +130,11 @@ public class autoDecember7 extends LinearOpMode
         // create a sound parameter that holds the desired player parameters.
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
         pidRotate = new PIDController(.003, .00003, 0);
+        pidDrive = new PIDController(.05, 0, 0);
+        pidDrive.setSetpoint(0);
+        pidDrive.setOutputRange(0, 1.0);
+        pidDrive.setInputRange(-270, 270);
+        pidDrive.enable();
 
         params.loopControl = 0;
         params.waitForNonLoopingSoundsToFinish = true;
@@ -220,7 +226,7 @@ public class autoDecember7 extends LinearOpMode
         double[] array1 = {0.2, 0.6, 0.2, 0.6};
 
         if(blockPos == 0){
-            double[] array2 = {1, 0.15, 1, 0.15};
+            double[] array2 = {0.9, 0.15, 0.9, 0.15};
             array1 = array2;
         }else if(blockPos == 2){
             double[] array2 = {0.2, 0.8, 0.2, 0.8};
@@ -238,6 +244,9 @@ public class autoDecember7 extends LinearOpMode
         bL.setPower(power);
         bR.setPower(power);
         sleep(700);
+        if(blockPos==1){
+            sleep(100);
+        }
         power = -0.5;
         fL.setPower(power);
         fR.setPower(power);
@@ -254,19 +263,28 @@ public class autoDecember7 extends LinearOpMode
         array1 = new double[] {0.5, 0.5, 0.5, 0.5};
         intakeOff();
         closeClaw();
-        turn(269, array1, false);
+        if(blockPos==0)
+            turn(270, array1, false, 2);
+        else
+            turn(270, array1, true, 2);
         servosUp();
-        double[] array2 = {0.3, 0.3, 0.3, 0.3};
-        goV2(2000, 0.5, array2, true);
-        moveWithForwardSensor(520, 0.5);
 
-        turn(180, new double[] {-0.3, -0.3, -0.3, -0.3}, false);
+        drive(2000,0.5);
+        moveWithForwardSensor(600, 0.5, true);
+
+        turn(180, new double[] {-0.3, -0.3, -0.3, -0.3}, false, 2);
         goV2(-420, 0.3, new double[] {-0.3, -0.3, -0.3, -0.3}, true);
         servosDown();
-        moveWithForwardSensor(500, 0.7);
-        strafeToAngle(150, 0.7);
+        if(ROTATE.getPosition()<0.5){
+            openClaw();
+        }
+        moveWithForwardSensor(500, 0.7, true);
+        if(CLAW.getPosition()>0.1)
+            rotateIn();
+        if(sR.getDistance(DistanceUnit.MM)<110)
+            strafeToAngle(150, 0.7);
         array1 = new double[] {-0.4, -0.4, -0.4, -0.4};
-        turn(90, array1, false);
+        turn(90, array1, false, 1);
         sleep(900);
         servosUp();
         power = 0.3;
@@ -275,24 +293,26 @@ public class autoDecember7 extends LinearOpMode
         bL.setPower(power);
         bR.setPower(power);
         sleep(400);
-        turn(90, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=90);
+        turn(90, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=90, 0);
 
-        moveWithLeftSensor(650, 0.3);
+        if(sRL.getDistance(DistanceUnit.MM)<635 || sRL.getDistance(DistanceUnit.MM)>670)
+        moveWithLeftSensor(635, 0.28);
+        servosDown();
 
         goV2(1500, 0.5, new double[]{0.5,0.5,0.5,0.5}, true);
         array1 = new double[]{1, 0.25, 1, 0.25};
 
-        turn(90, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=90);
+        turn(90, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=90, 0);
 
         if(sRL.getDistance(DistanceUnit.MM)<635)
-            moveWithLeftSensor(640, 0.5);
+            moveWithLeftSensor(640, 0.3);
 
         if(blockPos == 2)
-            moveWithForwardSensor(670, 0.5);
+            moveWithForwardSensor(620, 0.4, false);
         else if(blockPos == 1)
-            moveWithForwardSensor(870, 0.5);
+            moveWithForwardSensor(820, 0.4, false);
         else
-            moveWithForwardSensor(1070, 0.5);
+            moveWithForwardSensor(1020, 0.4, false);
 
         fL.setPower(array1[0]);
         fR.setPower(array1[1]);
@@ -315,32 +335,32 @@ public class autoDecember7 extends LinearOpMode
         intakeOff();
         closeClaw();
 
-        turn(90, new double[]{-0.5,-0.5,-0.5,-0.5}, getHeading()<=90);
+        turn(90, new double[]{-0.5,-0.5,-0.5,-0.5}, getHeading()<=90, 0);
 
         moveWithLeftSensor(640, 0.3);
 
-        sleep(2000);
-        power = -0.3;
+        power = -0.5;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        while(sR.getDistance(DistanceUnit.MM)>110){
-            if(LIFT.getCurrentPosition()<400)
-                LIFT.setPower(0.7);
-            else
-                LIFT.setPower(0);
-                rotateOut();
-        }
+
+        sleep(1800);
+        LIFT.setPower(0.7);
+        sleep(500);
+
+        rotateOut();
+        LIFT.setPower(0.2);
         motorsOff();
-        sleep(100);
+
+        sleep(200);
         openClaw();
         power = 0.3;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(200);
+        sleep(500);
         rotateIn();
         moveWithLeftSensor(650, 0.3);
         goV2(1500, 0.5, new double[]{0,0,0,0}, true);
@@ -582,7 +602,7 @@ public class autoDecember7 extends LinearOpMode
         resetEncoders();
     }
 
-    void moveWithForwardSensor(int target, double power){
+    void moveWithForwardSensor(int target, double power, boolean placingblock){
 
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -591,8 +611,8 @@ public class autoDecember7 extends LinearOpMode
         runtim2.reset();
         if(sRF.getDistance(DistanceUnit.MM)>target){
             while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
-                if(sR.getDistance(DistanceUnit.MM)<100){
-                    placeBlock(false);
+                if(placingblock){
+                    placeBlock(sR.getDistance(DistanceUnit.MM)<100);
                 }
                 fL.setPower(power);
                 fR.setPower(power);
@@ -893,16 +913,15 @@ public class autoDecember7 extends LinearOpMode
     }
 
 
-    void turn(double tun, double[] endPowers, boolean targGreater){
+    void turn(double tun, double[] endPowers, boolean targGreater, int foundation){
 
         double vuAng = tun;
         boolean turned = false;
-        boolean foundation = sR.getDistance(DistanceUnit.MM)<200;
         runtim2.reset();
         while (!turned && opModeIsActive() && runtim2.seconds() < 4) {
             double ang = getHeading();
             if(sR.getDistance(DistanceUnit.MM)<100){
-                placeBlock(true);
+                placeBlock(false);
             }
             telemetry.addData("Angle", ang);
             telemetry.addData("TurnTo", vuAng);
@@ -916,29 +935,29 @@ public class autoDecember7 extends LinearOpMode
                 bL.setPower(0);
                 bR.setPower(0);
             }else if(ang>=260&& vuAng<=90){
-                fL.setPower(-0.5);
-                fR.setPower(0.5);
-                bL.setPower(-0.5);
-                bR.setPower(0.5);
+                fL.setPower(-0.4);
+                fR.setPower(0.4);
+                bL.setPower(-0.4);
+                bR.setPower(0.4);
             }else if(ang<=90&& vuAng>=260){
-                fL.setPower(0.5);
-                fR.setPower(-0.5);
-                bL.setPower(0.5);
-                bR.setPower(-0.5);
+                fL.setPower(0.4);
+                fR.setPower(-0.4);
+                bL.setPower(0.4);
+                bR.setPower(-0.4);
             }else if (ang-vuAng > 35){
-                if(foundation) {
+                if(foundation==1) {
                     fL.setPower(0.7);
                     fR.setPower(-0.7);
                     bL.setPower(0.7);
                     bR.setPower(-0.7);
                 }else{
-                    fL.setPower(0.5);
-                    fR.setPower(-0.5);
-                    bL.setPower(0.5);
-                    bR.setPower(-0.5);
+                    fL.setPower(0.4);
+                    fR.setPower(-0.4);
+                    bL.setPower(0.4);
+                    bR.setPower(-0.4);
                 }
             }else if(vuAng - ang > 35){
-                if(foundation) {
+                if(foundation==1) {
                     fL.setPower(-0.7);
                     fR.setPower(0.7);
                     bL.setPower(-0.7);
@@ -953,31 +972,42 @@ public class autoDecember7 extends LinearOpMode
                 if(!targGreater){
                     turned = true;
                 }else{
-                if(foundation){
+                if(foundation==1){
                     fL.setPower(-0.4);
                     fR.setPower(0.4);
                     bL.setPower(-0.4);
                     bR.setPower(0.4);
-                }else {
-                    fL.setPower(-0.22);
-                    fR.setPower(0.22);
-                    bL.setPower(-0.22);
-                    bR.setPower(0.22);
-                }}
+                }else if(foundation==2) {
+                    fL.setPower(-0.26);
+                    fR.setPower(0.26);
+                    bL.setPower(-0.26);
+                    bR.setPower(0.26);
+                }else{
+                    fL.setPower(-0.20);
+                    fR.setPower(0.20);
+                    bL.setPower(-0.20);
+                    bR.setPower(0.20);
+                }
+                }
             }else if (ang > vuAng) {
                 if(targGreater){
                     turned = true;
                 }else{
-                if(foundation) {
+                if(foundation==1) {
                     fL.setPower(0.4);
                     fR.setPower(-0.4);
                     bL.setPower(0.4);
                     bR.setPower(-0.4);
+                }else if(foundation==2){
+                    fL.setPower(0.26);
+                    fR.setPower(-0.26);
+                    bL.setPower(0.26);
+                    bR.setPower(-0.26);
                 }else{
-                    fL.setPower(0.22);
-                    fR.setPower(-0.22);
-                    bL.setPower(0.22);
-                    bR.setPower(-0.22);
+                    fL.setPower(0.20);
+                    fR.setPower(-0.20);
+                    bL.setPower(0.20);
+                    bR.setPower(-0.20);
                 }}
             }
             ang = getHeading();
@@ -1066,11 +1096,106 @@ public class autoDecember7 extends LinearOpMode
             }
         }
     }
+
+    public void drive(int ticks, double power){
+        // restart imu angle tracking.
+        resetAngle();
+        int degrees = 0;
+
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+        pidDrive.reset();
+
+
+        pidDrive.setSetpoint(0);
+        pidDrive.setInputRange(0, degrees);
+        pidDrive.setOutputRange(0, power);
+        pidDrive.setTolerance(1);
+        pidDrive.enable();
+
+        // getAngle() returns + when rotating counter clockwise (left) and - when rotating
+        // clockwise (right).
+
+        // rotate until turn is completed.
+        double pow = 0;
+        runtim2.reset();
+        boolean working = true;
+        if (degrees < 0)
+        {
+            // On right turn we have to get off zero first.
+            while (opModeIsActive() && getAngle() == 0)
+            {
+                fL.setPower(power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(power);
+                //sleep(100);
+            }
+
+            do
+            {
+                power = pidDrive.performPID(getAngle()); // power will be - on right turn.
+                fL.setPower(power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(power);
+            } while (opModeIsActive() && !pidDrive.onTarget());
+        }
+        else    // left turn.
+
+
+            do
+            {
+                pow = pidDrive.performPID(getAngle()); // power will be + on left turn.
+                updateT();
+                fL.setPower(power-pow);
+                fR.setPower(power+pow);
+                bL.setPower(power-pow);
+                bR.setPower(power+pow);
+                if (((4*ticks)-fL.getCurrentPosition()-fR.getCurrentPosition()-fL.getCurrentPosition()-bR.getCurrentPosition())<100){
+                    working = false;
+                }
+            } while (opModeIsActive() && runtim2.seconds()<5 && working );
+
+        // turn the motors off.
+        fL.setPower(0);
+        fR.setPower(0);
+        bL.setPower(0);
+        bR.setPower(0);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        rotation = getAngle();
+
+        // wait for rotation to stop.
+
+        // reset angle tracking on new heading.
+        resetAngle();
+    }
+
     private void placeBlock(boolean readyToPlace){
 
         if(CLAW.getPosition()>=0.1 && LIFT.getCurrentPosition()>0) {
             if(ROTATE.getPosition()>=0.5 && obligitoryCounter2 >= 5)
-                LIFT.setPower(-0.5);
+                LIFT.setPower(-0.4);
             else{
                 if(obligitoryCounter2 == 0) {
                     rotateIn();
@@ -1078,22 +1203,25 @@ public class autoDecember7 extends LinearOpMode
                     obligitoryCounter2++;
                 }else{
                     obligitoryCounter2++;
+                    LIFT.setPower(0);
                 }
             }
-        }else if(CLAW.getPosition()<0.1 && LIFT.getCurrentPosition()<480){
+        }else if(CLAW.getPosition()<0.1 && LIFT.getCurrentPosition()<530){
             LIFT.setPower(0.7);
-        }else if(LIFT.getCurrentPosition()>=470){
+        }else if(LIFT.getCurrentPosition()>=500){
             LIFT.setPower(0);
             rotateOut();
         }else{
             LIFT.setPower(0);
         }
+
         if(ROTATE.getPosition()==0.025){
             if(obligitoryCounter > -1 && obligitoryCounter<10 && CLAW.getPosition() < 0.1){
                 obligitoryCounter++;
             }else if(readyToPlace){
                 openClaw();
                 obligitoryCounter = -1;
+                rotateIn();
             }
         }
     }

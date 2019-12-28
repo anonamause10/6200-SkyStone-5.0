@@ -23,6 +23,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.FORWARD;
@@ -140,10 +141,10 @@ public class SamplePID extends LinearOpMode
             {
 
                 // drive safely.
-                if (aButton) drive(1000, 0.3);
+                if (aButton) drive(2500, 0.3);
 
                 // YYET.
-                if (bButton) drive(1000, 0.8);
+                if (bButton) drive(2500, 0.8);
             }
         }
 
@@ -334,24 +335,25 @@ public class SamplePID extends LinearOpMode
             do
             {
                 pow = pidDrive.performPID(getAngle()); // power will be + on left turn.
+                updateT();
                 FL.setPower(power-pow);
                 FR.setPower(power+pow);
                 BL.setPower(power-pow);
                 BR.setPower(power+pow);
-                if (Math.abs(FL.getCurrentPosition() - ticks)
-                        + Math.abs(FR.getCurrentPosition() - ticks)
-                        + Math.abs(BL.getCurrentPosition() - ticks)
-                        + Math.abs(BR.getCurrentPosition() - ticks)
-                        < 200) {
+                if (((4*ticks)-FL.getCurrentPosition()-FR.getCurrentPosition()-BL.getCurrentPosition()-BR.getCurrentPosition())<100){
                     working = false;
                 }
-            } while (opModeIsActive() && runtim2.seconds()<2.5 && working );
+            } while (opModeIsActive() && runtim2.seconds()<5 && working );
 
         // turn the motors off.
         FL.setPower(0);
         FR.setPower(0);
         BL.setPower(0);
         BR.setPower(0);
+        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -364,5 +366,15 @@ public class SamplePID extends LinearOpMode
 
         // reset angle tracking on new heading.
         resetAngle();
+    }
+
+    private void updateT(){
+        telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
+                        "back left (%.2f), back right (%.2f)", FL.getPower(), FR.getPower(),
+                BL.getPower(), BR.getPower());
+        telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
+                        "back left (%.1f), back right (%.1f)", (float)FL.getCurrentPosition(), (float)FR.getCurrentPosition(),
+                (float)BL.getCurrentPosition(), (float)BR.getCurrentPosition());
+        telemetry.update();
     }
 }
