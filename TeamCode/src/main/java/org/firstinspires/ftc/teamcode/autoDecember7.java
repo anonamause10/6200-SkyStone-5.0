@@ -269,22 +269,25 @@ public class autoDecember7 extends LinearOpMode
             turn(270, array1, true, 2);
         servosUp();
 
-        drive(2000,0.5);
-        moveWithForwardSensor(600, 0.5, true);
+        drive(2000,0.7);
+        moveWithForwardSensor(550, 0.5, true);
 
         turn(180, new double[] {-0.3, -0.3, -0.3, -0.3}, false, 2);
-        goV2(-420, 0.3, new double[] {-0.3, -0.3, -0.3, -0.3}, true);
+        goV2(-420, 0.3, new double[] {-0.25, -0.25, -0.25, -0.25}, true);
         servosDown();
         if(ROTATE.getPosition()<0.5){
             openClaw();
         }
-        moveWithForwardSensor(500, 0.7, true);
+        sleep(300);
+        moveWithForwardSensor(600, 0.7, true);
         if(CLAW.getPosition()>0.1)
             rotateIn();
         if(sR.getDistance(DistanceUnit.MM)<110)
             strafeToAngle(150, 0.7);
         array1 = new double[] {0,0,0,0};
+
         turn(90, array1, false, 1);
+
         servosUp();
         power = 0.3;
         fL.setPower(power);
@@ -292,19 +295,22 @@ public class autoDecember7 extends LinearOpMode
         bL.setPower(power);
         bR.setPower(power);
         sleep(400);
+
         turn(90, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=90, 0);
 
         if(sRL.getDistance(DistanceUnit.MM)<630)
         moveWithLeftSensor(630, 0.4);
         servosDown();
 
-        goV2(1500, 0.5, new double[]{0.5,0.5,0.5,0.5}, true);
+        goV2(700, 0.5, new double[]{0.5,0.5,0.5,0.5}, true);
         array1 = new double[]{1, 0.25, 1, 0.25};
 
         turn(90, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=90, 0);
 
-        if(sRL.getDistance(DistanceUnit.MM)<635)
+        if(sRL.getDistance(DistanceUnit.MM)<638)
             moveWithLeftSensor(640, 0.3);
+        if(sRL.getDistance(DistanceUnit.MM)>670)
+            moveWithLeftSensor(650, 0.3);
 
         if(blockPos == 2)
             moveWithForwardSensor(620, 0.4, false);
@@ -324,19 +330,22 @@ public class autoDecember7 extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(200);
+        sleep(400);
         power = -0.5;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(700);
+        sleep(800);
         intakeOff();
         closeClaw();
 
         turn(90, new double[]{-0.5,-0.5,-0.5,-0.5}, getHeading()<=90, 0);
 
-        moveWithLeftSensor(640, 0.3);
+        if(sRL.getDistance(DistanceUnit.MM)<625)
+            moveWithLeftSensor(625, 0.3);
+        if(sRL.getDistance(DistanceUnit.MM)>650)
+        moveWithLeftSensor(635, 0.3);
 
         power = -0.7;
         fL.setPower(power);
@@ -344,20 +353,26 @@ public class autoDecember7 extends LinearOpMode
         bL.setPower(power);
         bR.setPower(power);
 
-        sleep(1800);
+        sleep(1750);
+        if(blockPos==1){
+            sleep(200);
+        }else if(blockPos==2){
+            sleep(400);
+        }
         LIFT.setPower(0.7);
         power = -0.5;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(500);
+        sleep(450);
 
         rotateOut();
+        sleep(200);
         LIFT.setPower(0.2);
         motorsOff();
 
-        sleep(200);
+        sleep(300);
         openClaw();
         power = 0.3;
         fL.setPower(power);
@@ -367,7 +382,7 @@ public class autoDecember7 extends LinearOpMode
         sleep(500);
         rotateIn();
         moveWithLeftSensor(650, 0.3);
-        goV2(1500, 0.5, new double[]{0,0,0,0}, true);
+        goV2(1300, 0.5, new double[]{0,0,0,0}, true);
     }
     private void goV2(int ticks, double power, double[] endPowers, boolean intakeDeployed){
         boolean phase2 = false;
@@ -403,7 +418,7 @@ public class autoDecember7 extends LinearOpMode
                     phase2 = false;
                 }
                 if(LIFT.getCurrentPosition()>=50 && intakeDeployed){
-                    LIFT.setPower(-0.5);
+                    LIFT.setPower(-0.4);
                 }else if(intakeDeployed){
                     LIFT.setPower(0);
                 }
@@ -975,6 +990,7 @@ public class autoDecember7 extends LinearOpMode
             }else if (ang < vuAng) {
                 if(!targGreater){
                     turned = true;
+                    motorsOff();
                 }else{
                 if(foundation==1){
                     fL.setPower(-0.4);
@@ -996,6 +1012,7 @@ public class autoDecember7 extends LinearOpMode
             }else if (ang > vuAng) {
                 if(targGreater){
                     turned = true;
+                    motorsOff();
                 }else{
                 if(foundation==1) {
                     fL.setPower(0.4);
@@ -1198,25 +1215,25 @@ public class autoDecember7 extends LinearOpMode
     private void placeBlock(boolean readyToPlace){
 
         if(CLAW.getPosition()>=0.1 && LIFT.getCurrentPosition()>0) {
-            if(ROTATE.getPosition()>=0.5 && obligitoryCounter2 >= 5)
+            if(ROTATE.getPosition()>=0.5 && obligitoryCounter2 >= 13)
                 LIFT.setPower(-0.4);
             else{
                 if(obligitoryCounter2 == 0) {
                     rotateIn();
-                    LIFT.setPower(0);
+                    LIFT.setPower(0.2);
                     obligitoryCounter2++;
                 }else{
                     obligitoryCounter2++;
-                    LIFT.setPower(0);
+                    LIFT.setPower(0.2);
                 }
             }
-        }else if(CLAW.getPosition()<0.1 && LIFT.getCurrentPosition()<530){
-            LIFT.setPower(0.7);
-        }else if(LIFT.getCurrentPosition()>=500){
-            LIFT.setPower(0);
+        }else if(LIFT.getCurrentPosition()>=550){
+            LIFT.setPower(0.2);
             rotateOut();
+        }else if(CLAW.getPosition()<0.1 && ROTATE.getPosition()>=0.5 && LIFT.getCurrentPosition()<570){
+            LIFT.setPower(0.7);
         }else{
-            LIFT.setPower(0);
+            LIFT.setPower(0.2);
         }
 
         if(ROTATE.getPosition()==0.025){
