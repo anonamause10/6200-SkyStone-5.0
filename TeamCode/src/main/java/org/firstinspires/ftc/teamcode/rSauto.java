@@ -226,19 +226,19 @@ public class rSauto extends LinearOpMode
         }
         runtime.reset();
 
-        double[] array1 = {0.2, 0.6, 0.2, 0.6};
+        double[] array1 = {0.2*scale, 0.6*scale, 0.2*scale, 0.6*scale};
 
         if(blockPos == 0){
-            double[] array2 = {0.9, 0.15, 0.9, 0.15};
+            double[] array2 = {0.9*scale, 0.15*scale, 0.9*scale, 0.15*scale};
             array1 = array2;
         }else if(blockPos == 2){
-            double[] array2 = {0.2, 0.8, 0.2, 0.8};
+            double[] array2 = {0.2*scale, 0.8*scale, 0.2*scale, 0.8*scale};
             array1 = array2;
         }
         if(blockPos == 2)
-            goV2(520, 0.5, array1, false);
+            goV2(520, 0.5*scale, array1, false);
         else
-            goV2(800, 0.5, array1, false);
+            goV2(800, 0.5*scale, array1, false);
         intake();
         sleep(400);
         double power = 0.3*scale;
@@ -342,10 +342,10 @@ public class rSauto extends LinearOpMode
 
         turn(89, new double[]{-0.5,-0.5,-0.5,-0.5}, true, 0);
 
-        if(sRL.getDistance(DistanceUnit.MM)<625)
-            moveWithLeftSensor(625, 0.3);
-        if(sRL.getDistance(DistanceUnit.MM)>650)
-            moveWithLeftSensor(635, 0.3);
+        if(sRL.getDistance(DistanceUnit.MM)<620)
+            moveWithLeftSensor(620, 0.3);
+        if(sRL.getDistance(DistanceUnit.MM)>660)
+            moveWithLeftSensor(630, 0.3);
 
         power = -0.7*scale;
         fL.setPower(power);
@@ -379,8 +379,9 @@ public class rSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(500);
+        sleep(400);
         rotateIn();
+        sleep(100);
         moveWithLeftSensor(650, 0.3*scale);
         goV2(1300, 0.5, new double[]{0,0,0,0}, true);
     }
@@ -433,102 +434,6 @@ public class rSauto extends LinearOpMode
         fR.setPower(endPowers[1]);
         bL.setPower(endPowers[2]);
         bR.setPower(endPowers[3]);
-    }
-
-    private void go(int ticks, double power){
-        double[] array = {0,0,0,0};
-        go(ticks, power, array);
-    }
-    private void go(int ticks, double power, double[] endPowers){
-        fL.setTargetPosition(ticks);
-        fR.setTargetPosition(ticks);
-        bL.setTargetPosition(ticks);
-        bR.setTargetPosition(ticks);
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
-
-        fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        runtim2.reset();
-        boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<2.5 && working) {
-            updateT();
-            if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
-                    + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
-                    + Math.abs(bL.getCurrentPosition() - bL.getTargetPosition())
-                    + Math.abs(bR.getCurrentPosition() - bR.getTargetPosition())
-                    < 80) {
-                working = false;
-            }
-            if(LIFT.getCurrentPosition()>20){
-                LIFT.setPower(-0.5);
-            }else{
-                LIFT.setPower(0);
-            }
-        }
-
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fL.setPower(endPowers[0]);
-        fR.setPower(endPowers[1]);
-        bL.setPower(endPowers[2]);
-        bR.setPower(endPowers[3]);
-    }
-
-    private void goUntilBlock(double power){
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        intake();
-        sleep(200);
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        runtim2.reset();
-        while(opModeIsActive()&& runtim2.seconds()<3 && sR2.getDistance(DistanceUnit.MM)>70) {
-            updateT();
-        }
-        intakeOff();
-        fL.setTargetPosition(0);
-        fR.setTargetPosition(0);
-        bL.setTargetPosition(0);
-        bR.setTargetPosition(0);
-        fL.setPower(-0.5);
-        fR.setPower(-0.5);
-        bL.setPower(-0.5);
-        bR.setPower(-0.5);
-        fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<=4 && working) {
-            updateT();
-            if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
-                    + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
-                    + Math.abs(bL.getCurrentPosition() - bL.getTargetPosition())
-                    + Math.abs(bR.getCurrentPosition() - bR.getTargetPosition())
-                    < 30) {
-                working = false;
-            }
-        }
-        fL.setPower(0);
-        fR.setPower(0);
-        bL.setPower(0);
-        bR.setPower(0);
-        resetEncoders();
     }
 
     public double getHeading() {

@@ -226,19 +226,19 @@ public class bSauto extends LinearOpMode
         }
         runtime.reset();
 
-        double[] array1 = {0.6, 0.2, 0.6, 0.2};
+        double[] array1 = {0.6*scale, 0.2*scale, 0.6*scale, 0.2*scale};
 
         if(blockPos == 0){
-            double[] array2 = {0.15, 0.9, 0.15, 0.9};
+            double[] array2 = {0.15*scale, 0.9*scale, 0.15*scale, 0.9*scale};
             array1 = array2;
         }else if(blockPos == 2){
-            double[] array2 = {0.8, 0.2, 0.8, 0.2};
+            double[] array2 = {0.8*scale, 0.2*scale, 0.8*scale, 0.2*scale};
             array1 = array2;
         }
         if(blockPos == 2)
-            goV2(520, 0.5, array1, false);
+            goV2(520, 0.5*scale, array1, false);
         else
-            goV2(800, 0.5, array1, false);
+            goV2(800, 0.5*scale, array1, false);
         intake();
         sleep(400);
         double power = 0.3*scale;
@@ -273,7 +273,7 @@ public class bSauto extends LinearOpMode
         moveWithForwardSensor(550, 0.5, true);
 
         turn(180, new double[] {-0.3, -0.3, -0.3, -0.3}, true, 2);
-        goV2(-420, 0.3, new double[] {-0.25, -0.25, -0.25, -0.25}, true);
+        goV2(-520, 0.3, new double[] {-0.25, -0.25, -0.25, -0.25}, true);
         servosDown();
         if(ROTATE.getPosition()<0.5){
             openClaw();
@@ -342,10 +342,10 @@ public class bSauto extends LinearOpMode
 
         turn(270, new double[]{-0.5,-0.5,-0.5,-0.5}, false, 0);
 
-        if(sRR.getDistance(DistanceUnit.MM)<625)
-            moveWithRightSensor(625, 0.3);
-        if(sRR.getDistance(DistanceUnit.MM)>650)
-            moveWithRightSensor(635, 0.3);
+        if(sRR.getDistance(DistanceUnit.MM)<620)
+            moveWithRightSensor(620, 0.3);
+        if(sRR.getDistance(DistanceUnit.MM)>660)
+            moveWithRightSensor(630, 0.3);
 
         power = -0.7*scale;
         fL.setPower(power);
@@ -379,8 +379,9 @@ public class bSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(500);
+        sleep(400);
         rotateIn();
+        sleep(100);
         moveWithRightSensor(650, 0.3*scale);
         goV2(1300, 0.5, new double[]{0,0,0,0}, true);
     }
