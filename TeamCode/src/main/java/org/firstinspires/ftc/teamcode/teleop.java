@@ -166,7 +166,7 @@ public class teleop extends LinearOpMode {
                 clawServo.setPosition(0.15);
             }else if(gamepad2.right_bumper){
                 clawServo.setPosition(0);
-            }else if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<10){
+            }else if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<30){
                 clawServo.setPosition(0);
             }
 

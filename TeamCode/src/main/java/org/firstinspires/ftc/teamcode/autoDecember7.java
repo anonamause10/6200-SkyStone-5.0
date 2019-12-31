@@ -127,6 +127,9 @@ public class autoDecember7 extends LinearOpMode
 
         Context myApp = hardwareMap.appContext;
 
+        voltage = getBatteryVoltage();
+        scale = 12.8 / voltage;
+
         // create a sound parameter that holds the desired player parameters.
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
         pidRotate = new PIDController(.003, .00003, 0);
@@ -238,7 +241,7 @@ public class autoDecember7 extends LinearOpMode
             goV2(800, 0.5, array1, false);
         intake();
         sleep(400);
-        double power = 0.3;
+        double power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
@@ -247,7 +250,7 @@ public class autoDecember7 extends LinearOpMode
         if(blockPos==1){
             sleep(100);
         }
-        power = -0.5;
+        power = -0.5*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
@@ -263,10 +266,7 @@ public class autoDecember7 extends LinearOpMode
         array1 = new double[] {0.5, 0.5, 0.5, 0.5};
         intakeOff();
         closeClaw();
-        if(blockPos==0)
-            turn(270, array1, false, 2);
-        else
-            turn(270, array1, true, 2);
+        turn(270, array1, false, 2);
         servosUp();
 
         drive(2000,0.7);
@@ -289,7 +289,7 @@ public class autoDecember7 extends LinearOpMode
         turn(90, array1, false, 1);
 
         servosUp();
-        power = 0.3;
+        power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
@@ -303,7 +303,7 @@ public class autoDecember7 extends LinearOpMode
         servosDown();
 
         goV2(700, 0.5, new double[]{0.5,0.5,0.5,0.5}, true);
-        array1 = new double[]{1, 0.25, 1, 0.25};
+        array1 = new double[]{1*scale, 0.25*scale, 1*scale, 0.25*scale};
 
         turn(90, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=90, 0);
 
@@ -313,11 +313,11 @@ public class autoDecember7 extends LinearOpMode
             moveWithLeftSensor(650, 0.3);
 
         if(blockPos == 2)
-            moveWithForwardSensor(620, 0.4, false);
+            moveWithForwardSensor(700, 0.4*scale, false);
         else if(blockPos == 1)
-            moveWithForwardSensor(820, 0.4, false);
+            moveWithForwardSensor(920, 0.4*scale, false);
         else
-            moveWithForwardSensor(1020, 0.4, false);
+            moveWithForwardSensor(1020, 0.4*scale, false);
 
         fL.setPower(array1[0]);
         fR.setPower(array1[1]);
@@ -325,13 +325,13 @@ public class autoDecember7 extends LinearOpMode
         bR.setPower(array1[3]);
         intake();
         sleep(700);
-        power = 0.3;
+        power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
         sleep(400);
-        power = -0.5;
+        power = -0.5*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
@@ -340,14 +340,14 @@ public class autoDecember7 extends LinearOpMode
         intakeOff();
         closeClaw();
 
-        turn(90, new double[]{-0.5,-0.5,-0.5,-0.5}, getHeading()<=90, 0);
+        turn(89, new double[]{-0.5,-0.5,-0.5,-0.5}, true, 0);
 
         if(sRL.getDistance(DistanceUnit.MM)<625)
             moveWithLeftSensor(625, 0.3);
         if(sRL.getDistance(DistanceUnit.MM)>650)
         moveWithLeftSensor(635, 0.3);
 
-        power = -0.7;
+        power = -0.7*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
@@ -360,7 +360,7 @@ public class autoDecember7 extends LinearOpMode
             sleep(400);
         }
         LIFT.setPower(0.7);
-        power = -0.5;
+        power = -0.5*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
@@ -374,14 +374,14 @@ public class autoDecember7 extends LinearOpMode
 
         sleep(300);
         openClaw();
-        power = 0.3;
+        power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
         sleep(500);
         rotateIn();
-        moveWithLeftSensor(650, 0.3);
+        moveWithLeftSensor(650, 0.3*scale);
         goV2(1300, 0.5, new double[]{0,0,0,0}, true);
     }
     private void goV2(int ticks, double power, double[] endPowers, boolean intakeDeployed){
@@ -1003,10 +1003,10 @@ public class autoDecember7 extends LinearOpMode
                     bL.setPower(-0.26);
                     bR.setPower(0.26);
                 }else{
-                    fL.setPower(-0.20);
-                    fR.setPower(0.20);
-                    bL.setPower(-0.20);
-                    bR.setPower(0.20);
+                    fL.setPower(-0.20*scale);
+                    fR.setPower(0.20*scale);
+                    bL.setPower(-0.20*scale);
+                    bR.setPower(0.20*scale);
                 }
                 }
             }else if (ang > vuAng) {
@@ -1025,10 +1025,10 @@ public class autoDecember7 extends LinearOpMode
                     bL.setPower(0.26);
                     bR.setPower(-0.26);
                 }else{
-                    fL.setPower(0.20);
-                    fR.setPower(-0.20);
-                    bL.setPower(0.20);
-                    bR.setPower(-0.20);
+                    fL.setPower(0.20*scale);
+                    fR.setPower(-0.20*scale);
+                    bL.setPower(0.20*scale);
+                    bR.setPower(-0.20*scale);
                 }}
             }
             ang = getHeading();
@@ -1245,6 +1245,16 @@ public class autoDecember7 extends LinearOpMode
                 rotateIn();
             }
         }
+    }
+    private double getBatteryVoltage() {
+        double result = Double.POSITIVE_INFINITY;
+        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
+            double voltage = sensor.getVoltage();
+            if (voltage > 0) {
+                result = Math.min(result, voltage);
+            }
+        }
+        return result;
     }
 
 
