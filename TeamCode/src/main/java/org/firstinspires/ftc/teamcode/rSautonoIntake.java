@@ -77,7 +77,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.FRONT;
 
-@Autonomous(name="SPIN", group="ree")
+@Autonomous(name="yeet", group="ree")
 
 public class rSautonoIntake extends LinearOpMode
 {
@@ -180,17 +180,17 @@ public class rSautonoIntake extends LinearOpMode
             telemetry.update();
         }
         runtime.reset();
-        IN1.setPower(0.7);
-        IN2.setPower(0.7);
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fL.setPower(1);
-        fR.setPower(0.25);
-        bL.setPower(1);
-        bR.setPower(0.25);
-        while(opModeIsActive()){}
+        LIFT.setPower(0.5);
+        sleep(500);
+        LIFT.setTargetPosition(0);
+        LIFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        LIFT.setPower(-0.5);
+        runtim2.reset();
+        while(opModeIsActive()&&LIFT.getCurrentPosition()>5 && runtim2. seconds()<=0.75){
+        }
+        LIFT.setPower(0);
+        LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        go(200, 0.5);
     }
 
     private void go(int ticks, double power){
