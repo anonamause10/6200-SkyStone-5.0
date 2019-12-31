@@ -250,11 +250,25 @@ public class SkystoneDetector
                     if(right){
                         if (black != null) {
                             dist = Math.abs(black.br().x - input.width());
+                            if(dist > 350){
+                                pos = 0;
+                            }else if(dist > 180){
+                                pos = 1;
+                            }else{
+                                pos = 2;
+                            }
                         }
                     }
                     else{
                         if (black != null) {
                             dist = Math.abs(black.tl().x);
+                            if(dist < 150){
+                                pos = 0;
+                            }else if(dist < 320){
+                                pos = 1;
+                            }else{
+                                pos = 2;
+                            }
                         }
                     }
                 }

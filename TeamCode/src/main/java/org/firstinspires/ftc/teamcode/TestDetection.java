@@ -65,11 +65,21 @@ public class TestDetection extends LinearOpMode
     @Override
     public void runOpMode()
     {
-        detector = new SkystoneDetector(hardwareMap, true, true,true);
+        boolean blockPos = true;
         /*
          * Wait for the user to press start on the Driver Station
          */
-        waitForStart();
+        while (!opModeIsActive() && !isStopRequested()) {
+            telemetry.addData("status", "waiting for start command...");
+            telemetry.addData("blockpos", blockPos);
+            if(gamepad1.x){
+                blockPos = false;
+            }else if(gamepad1.a){
+                blockPos = true;
+            }
+            telemetry.update();
+        }
+        detector = new SkystoneDetector(hardwareMap, true, blockPos,true);
 
         while (opModeIsActive())
         {
