@@ -67,11 +67,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-@Autonomous(name="BLUE STONE", group="ree")
+@Autonomous(name="blu", group="ree")
 
 public class bSauto extends LinearOpMode
 {
-
+    private int[] zeroPos = {0,0,0,0};
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime runtim2 = new ElapsedTime();
 
@@ -89,16 +89,19 @@ public class bSauto extends LinearOpMode
     private DistanceSensor sR;
     private DistanceSensor sR2;
     private DistanceSensor sRF;
+    private DistanceSensor sRR;
     private DistanceSensor sRL;
     private TouchSensor touch;
+    private PIDController pidDrive;
 
     private double voltage = 0.0;
     private double scale = 0.0;
     private int blockPos = 1;
+    int obligitoryCounter = 0;
+    int obligitoryCounter2 = 0;
     PIDController           pidRotate;
     Orientation             lastAngles = new Orientation();
     double globalAngle, rotation;
-
 
     // The IMU sensor object
     BNO055IMU imu;
@@ -124,9 +127,17 @@ public class bSauto extends LinearOpMode
 
         Context myApp = hardwareMap.appContext;
 
+        voltage = getBatteryVoltage();
+        scale = 12.8 / voltage;
+
         // create a sound parameter that holds the desired player parameters.
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
         pidRotate = new PIDController(.003, .00003, 0);
+        pidDrive = new PIDController(.05, 0, 0);
+        pidDrive.setSetpoint(0);
+        pidDrive.setOutputRange(0, 1.0);
+        pidDrive.setInputRange(-270, 270);
+        pidDrive.enable();
 
         params.loopControl = 0;
         params.waitForNonLoopingSoundsToFinish = true;
@@ -160,16 +171,17 @@ public class bSauto extends LinearOpMode
         CLAW = hardwareMap.get(Servo.class, "CLAW");
         CLAW.setPosition(.25);
         ROTATE = hardwareMap.get(Servo.class, "ROTATE");
-        ROTATE.setPosition(.67);
+        ROTATE.setPosition(.69);
         servo = hardwareMap.get(Servo.class, "left");
         servo2 = hardwareMap.get(Servo.class, "right");
         servo.setPosition(.7);
         servo2.setPosition(.3);
 
-        SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, true, false);
+        //SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, false, false);
 
         sR = hardwareMap.get(DistanceSensor.class, "DSB");
         sR2 = hardwareMap.get(DistanceSensor.class, "DS2");
+        sRR = hardwareMap.get(DistanceSensor.class, "DSR");
         sRL = hardwareMap.get(DistanceSensor.class, "DSL");
         sRF = hardwareMap.get(DistanceSensor.class, "DSF");
         touch = hardwareMap.get(TouchSensor.class, "touch");
@@ -197,248 +209,230 @@ public class bSauto extends LinearOpMode
         double ang = Double.parseDouble(angle);
 
         telemetry.addData("Robot", "Initialized");
-        voltage = getBatteryVoltage();
-        scale = 12.7 / voltage;
-        telemetry.addData("Voltage:", voltage);
-        telemetry.addData("Scale", scale);
-        telemetry.update();
+        int blockPos = 0;
+
         //waitForStart();
         while (!opModeIsActive() && !isStopRequested()) {
             telemetry.addData("status", "waiting for start command...");
-            telemetry.addData("status", "waiting for start command...");
-            telemetry.addData("Stone curr dist: ", sky.getDist());
-            telemetry.addData("Stone Current pos", rundetect(sky));
+            telemetry.addData("blockpos", blockPos);
+            if(gamepad1.x){
+                blockPos = 0;
+            }else if(gamepad1.b){
+                blockPos = 2;
+            }else if(gamepad1.a){
+                blockPos = 1;
+            }
             telemetry.update();
         }
         runtime.reset();
 
-        LIFT.setPower(0.7);
-        sleep(400);
-        LIFT.setTargetPosition(0);
-        LIFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        LIFT.setPower(-0.5);
-        runtim2.reset();
-        while(opModeIsActive()&&(!touch.isPressed() || LIFT.getCurrentPosition() < -5) && runtim2.seconds()<0.7){
+        double[] array1 = {0.6, 0.2, 0.6, 0.2};
+
+        if(blockPos == 0){
+            double[] array2 = {0.15, 0.9, 0.15, 0.9};
+            array1 = array2;
+        }else if(blockPos == 2){
+            double[] array2 = {0.8, 0.2, 0.8, 0.2};
+            array1 = array2;
         }
-        LIFT.setPower(0);
-        LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        ROTATE.setPosition(0.69);
-        CLAW.setPosition(0.15);
-
-
-        //START AUTO HERE LMAO
-        blockPos = rundetect(sky);
-        sky.stop();
-        moveWithForwardSensor(210, 0.35);
-
-
-
-
-        goUntilBlock(0.3);
-        if(blockPos == 1){
-            strafe(450, 0.7);
-        }
-
-        intakeOff();
-        turn(92);
-
-        if(sRL.getDistance(DistanceUnit.MM)<635) {
-            moveWithLeftSensor(655, 0.35);
-        }else if (sRL.getDistance(DistanceUnit.MM)>670)
-            moveWithLeftSensor(655, 0.4);{
-        }
-
-        go(2100, 0.6);
-        turn(92);
-        outtake();
-
-        if(sRL.getDistance(DistanceUnit.MM)<635) {
-            moveWithLeftSensor(655, 0.35);
-        }else if (sRL.getDistance(DistanceUnit.MM)>670)
-            moveWithLeftSensor(655, 0.4);{
-        }
-
-        go(-2200, 0.6);
-
-        turn(90);
-        intakeOff();
-
-        if(sRL.getDistance(DistanceUnit.MM)<630) {
-            moveWithLeftSensor(655, 0.3);
-        }else if (sRL.getDistance(DistanceUnit.MM)>670)
-            moveWithLeftSensor(655, 0.3);{
-        }
-
-        if(blockPos == 0)
-            moveWithBackSensor(650, 0.4);
-        else if(blockPos == 1)
-            moveWithBackSensor(580, 0.4);
+        if(blockPos == 2)
+            goV2(520, 0.5, array1, false);
         else
-            moveWithBackSensor(400, 0.4);
-
-        turn(320);
-
-        goUntilBlock(0.4);
-
-        turn(90);
-        moveWithBackSensor(645, 0.5);
-
-
-        if(sRL.getDistance(DistanceUnit.MM)<640) {
-            moveWithLeftSensor(655, 0.35);
-        }else if (sRL.getDistance(DistanceUnit.MM)>670)
-            moveWithLeftSensor(655, 0.4);{
-        }
-
-        turn(92);
-        go(1900,0.6);
-        turn(92);
-
-        if(sRL.getDistance(DistanceUnit.MM)<640) {
-            moveWithLeftSensor(655, 0.5);
-        }else if (sRL.getDistance(DistanceUnit.MM)>670)
-            moveWithLeftSensor(655, 0.5);{
-        }
-
-        outtake();
-        go(-780,0.8);
-        intakeOff();
-
-    }
-
-    private void go(int ticks, double power){
-        fL.setTargetPosition(ticks);
-        fR.setTargetPosition(ticks);
-        bL.setTargetPosition(ticks);
-        bR.setTargetPosition(ticks);
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
-
-        fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        runtim2.reset();
-        boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<3 && working) {
-            updateT();
-            if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
-                    + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
-                    + Math.abs(bL.getCurrentPosition() - bL.getTargetPosition())
-                    + Math.abs(bR.getCurrentPosition() - bR.getTargetPosition())
-                    < 60) {
-                working = false;
-            }
-        }
-        fL.setPower(0);
-        fR.setPower(0);
-        bL.setPower(0);
-        bR.setPower(0);
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    }
-    private void goUntilBlock(double power){
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            goV2(800, 0.5, array1, false);
         intake();
-        sleep(200);
+        sleep(400);
+        double power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        runtim2.reset();
-        while(opModeIsActive()&& runtim2.seconds()<2.5 && sR2.getDistance(DistanceUnit.MM)>70) {
-            updateT();
+        sleep(700);
+        if(blockPos==1){
+            sleep(100);
         }
+        power = -0.5*scale;
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        sleep(100);
+        if(blockPos == 2)
+            sleep(450);
+        else if(blockPos == 1)
+            sleep(600);
+        else
+            sleep(720);
+
+        array1 = new double[] {0.5, 0.5, 0.5, 0.5};
         intakeOff();
-        fL.setTargetPosition(0);
-        fR.setTargetPosition(0);
-        bL.setTargetPosition(0);
-        bR.setTargetPosition(0);
-        fL.setPower(-0.5);
-        fR.setPower(-0.5);
-        bL.setPower(-0.5);
-        bR.setPower(-0.5);
-        fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<=2.5 && working) {
-            updateT();
-            if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
-                    + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
-                    + Math.abs(bL.getCurrentPosition() - bL.getTargetPosition())
-                    + Math.abs(bR.getCurrentPosition() - bR.getTargetPosition())
-                    < 30) {
-                working = false;
-            }
+        closeClaw();
+        turn(90, array1, true, 2);
+        servosUp();
+
+        drive(2000,0.7);
+        moveWithForwardSensor(550, 0.5, true);
+
+        turn(180, new double[] {-0.3, -0.3, -0.3, -0.3}, true, 2);
+        goV2(-420, 0.3, new double[] {-0.25, -0.25, -0.25, -0.25}, true);
+        servosDown();
+        if(ROTATE.getPosition()<0.5){
+            openClaw();
         }
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fL.setPower(0);
-        fR.setPower(0);
-        bL.setPower(0);
-        bR.setPower(0);
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    }
-    private void strafe(int ticks, double power){
-        fL.setTargetPosition(ticks);
-        fR.setTargetPosition(-ticks);
-        bL.setTargetPosition(-ticks);
-        bR.setTargetPosition(ticks);
+        sleep(300);
+        moveWithForwardSensor(600, 0.7, true);
+        if(CLAW.getPosition()>0.1)
+            rotateIn();
+        if(sR.getDistance(DistanceUnit.MM)<110)
+            strafeToAngle(210, 0.7);
+        array1 = new double[] {0,0,0,0};
+
+        turn(270, array1, true, 1);
+
+        servosUp();
+        power = 0.3*scale;
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        sleep(400);
+
+        turn(270, new double[]{0.5,0.5,0.5,0.5}, 270>=getHeading(), 0);
+
+        if(sRR.getDistance(DistanceUnit.MM)<630)
+            moveWithRightSensor(630, 0.4);
+        servosDown();
+
+        goV2(700, 0.5, new double[]{0.5,0.5,0.5,0.5}, true);
+        array1 = new double[]{0.25*scale, 1*scale, 0.25*scale, 1*scale};
+
+        turn(270, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=270, 0);
+
+        if(sRR.getDistance(DistanceUnit.MM)<638)
+            moveWithRightSensor(640, 0.3);
+        if(sRR.getDistance(DistanceUnit.MM)>670)
+            moveWithRightSensor(650, 0.3);
+
+        if(blockPos == 2)
+            moveWithForwardSensor(720, 0.4*scale, false);
+        else if(blockPos == 1)
+            moveWithForwardSensor(870, 0.4*scale, false);
+        else
+            moveWithForwardSensor(1020, 0.4*scale, false);
+
+        fL.setPower(array1[0]);
+        fR.setPower(array1[1]);
+        bL.setPower(array1[2]);
+        bR.setPower(array1[3]);
+        intake();
+        sleep(700);
+        power = 0.3*scale;
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        sleep(400);
+        power = -0.5*scale;
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        sleep(800);
+        intakeOff();
+        closeClaw();
+
+        turn(270, new double[]{-0.5,-0.5,-0.5,-0.5}, false, 0);
+
+        if(sRR.getDistance(DistanceUnit.MM)<625)
+            moveWithRightSensor(625, 0.3);
+        if(sRR.getDistance(DistanceUnit.MM)>650)
+            moveWithRightSensor(635, 0.3);
+
+        power = -0.7*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
 
-        fL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        fR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bL.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        bR.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        runtim2.reset();
-        boolean working = true;
-        while(opModeIsActive() && fL.isBusy()&& fR.isBusy() && bL.isBusy() && bR.isBusy() && runtim2.seconds()<1 && working) {
-            updateT();
-            if (Math.abs(fL.getCurrentPosition() - fL.getTargetPosition())
-                    + Math.abs(fR.getCurrentPosition() - fR.getTargetPosition())
-                    + Math.abs(bL.getCurrentPosition() - bL.getTargetPosition())
-                    + Math.abs(bR.getCurrentPosition() - bR.getTargetPosition())
-                    < 80) {
-                working = false;
+        sleep(1750);
+        if(blockPos==1){
+            sleep(200);
+        }else if(blockPos==2){
+            sleep(400);
+        }
+        LIFT.setPower(0.7);
+        power = -0.5*scale;
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        sleep(450);
+
+        rotateOut();
+        sleep(200);
+        LIFT.setPower(0.2);
+        motorsOff();
+
+        sleep(300);
+        openClaw();
+        power = 0.3*scale;
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        sleep(500);
+        rotateIn();
+        moveWithRightSensor(650, 0.3*scale);
+        goV2(1300, 0.5, new double[]{0,0,0,0}, true);
+    }
+    private void goV2(int ticks, double power, double[] endPowers, boolean intakeDeployed){
+        boolean phase2 = false;
+        resetEncoders();
+        if(!intakeDeployed){
+            LIFT.setPower(0.7);
+            runtim2.reset();
+        }
+        if(ticks < 0){
+            fL.setPower(-power);
+            fR.setPower(-power);
+            bL.setPower(-power);
+            bR.setPower(-power);
+            while(opModeIsActive()&&averageTicks()>ticks){
+                updateT();
+            }
+        }else{
+            fL.setPower(power);
+            fR.setPower(power);
+            bL.setPower(power);
+            bR.setPower(power);
+            while(opModeIsActive()&&averageTicks()<ticks){
+                if((!intakeDeployed && LIFT.getCurrentPosition()>300) || runtim2.seconds()>0.7){
+                    LIFT.setPower(-0.7);
+                    phase2 = true;
+                    runtim2.reset();
+                }
+                if((phase2 && (touch.isPressed() || LIFT.getCurrentPosition() < -40)) || runtim2.seconds()>0.7){
+                    LIFT.setPower(0);
+                    LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    intakeDeployed = true;
+                    phase2 = false;
+                }
+                if(LIFT.getCurrentPosition()>=50 && intakeDeployed){
+                    LIFT.setPower(-0.4);
+                }else if(intakeDeployed){
+                    LIFT.setPower(0);
+                }
+                if(sR2.getDistance(DistanceUnit.MM)<70){
+                    closeClaw();
+                    intakeOff();
+                }
+                updateT();
             }
         }
-        fL.setPower(0);
-        fR.setPower(0);
-        bL.setPower(0);
-        bR.setPower(0);
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fL.setPower(endPowers[0]);
+        fR.setPower(endPowers[1]);
+        bL.setPower(endPowers[2]);
+        bR.setPower(endPowers[3]);
     }
 
 
@@ -446,22 +440,17 @@ public class bSauto extends LinearOpMode
         Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return (angles.firstAngle+360)%360;
     }
-
     private void rotateIn(){
         ROTATE.setPosition(0.69);
-        sleep(100);
     }
     private void rotateOut(){
         ROTATE.setPosition(0.025);
-        sleep(100);
     }
     private void closeClaw(){
         CLAW.setPosition(0);
-        sleep(100);
     }
     private void openClaw(){
         CLAW.setPosition(0.15);
-        sleep(100);
     }
     private void servosUp(){
         servo.setPosition(.5);
@@ -478,24 +467,10 @@ public class bSauto extends LinearOpMode
         IN1.setPower(0.7);
         IN2.setPower(0.7);
     }
-    private void outtake(){
-        IN1.setPower(-0.6);
-        IN2.setPower(-0.6);
-    }
+
     private void intakeOff(){
         IN1.setPower(0);
         IN2.setPower(0);
-    }
-
-    private double getBatteryVoltage() {
-        double result = Double.POSITIVE_INFINITY;
-        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
-            double voltage = sensor.getVoltage();
-            if (voltage > 0) {
-                result = Math.min(result, voltage);
-            }
-        }
-        return result;
     }
 
     private void updateT(){
@@ -511,9 +486,6 @@ public class bSauto extends LinearOpMode
         telemetry.addData("BlockPos", blockPos);
         telemetry.addData("INTAKE POWER", IN1.getPower());
         telemetry.update();
-    }
-    String format(OpenGLMatrix transformationMatrix) {
-        return (transformationMatrix != null) ? transformationMatrix.formatAsTransform() : "null";
     }
 
     String formatAngle(AngleUnit angleUnit, double angle) {
@@ -551,16 +523,10 @@ public class bSauto extends LinearOpMode
         fR.setPower(0);
         bL.setPower(0);
         bR.setPower(0);
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        resetEncoders();
     }
-    void moveWithForwardSensor(int target, double power){
+
+    void moveWithForwardSensor(int target, double power, boolean placingblock){
 
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -569,6 +535,9 @@ public class bSauto extends LinearOpMode
         runtim2.reset();
         if(sRF.getDistance(DistanceUnit.MM)>target){
             while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
+                if(placingblock){
+                    placeBlock(sR.getDistance(DistanceUnit.MM)<100);
+                }
                 fL.setPower(power);
                 fR.setPower(power);
                 bL.setPower(power);
@@ -583,21 +552,87 @@ public class bSauto extends LinearOpMode
                 updateT();
             }
         }
-        fL.setPower(0);
-        fR.setPower(0);
-        bL.setPower(0);
-        bR.setPower(0);
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+    void moveWithRightSensor(int target, double power){
+
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        runtim2.reset();
+        double startAngle = getHeading();
+        if(sRR.getDistance(DistanceUnit.MM)<target){
+            while(opModeIsActive()&&(sRR.getDistance(DistanceUnit.MM) < target)&&runtim2.seconds()<1){
+                fL.setPower(-power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(-power);
+
+                if(startAngle==0) {
+                    if(imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - startAngle>0.25){
+                        fL.setPower(fL.getPower()-0.02);
+                        fR.setPower(fR.getPower()+0.02);
+                        bL.setPower(bL.getPower()-0.02);
+                        bR.setPower(bR.getPower()+0.02);
+                    }else if((imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - startAngle<0.25)){
+                        fL.setPower(fL.getPower()+0.02);
+                        fR.setPower(fR.getPower()-0.02);
+                        bL.setPower(bL.getPower()+0.02);
+                        bR.setPower(bR.getPower()-0.02);
+                    }else{}
+                }else {
+                    if (getHeading() - startAngle > 0.25) {
+                        fL.setPower(fL.getPower() - 0.02);
+                        fR.setPower(fR.getPower() + 0.02);
+                        bL.setPower(bL.getPower() - 0.02);
+                        bR.setPower(bR.getPower() + 0.02);
+                    } else if ((getHeading() - startAngle < 0.25)) {
+                        fL.setPower(fL.getPower() + 0.02);
+                        fR.setPower(fR.getPower() - 0.02);
+                        bL.setPower(bL.getPower() + 0.02);
+                        bR.setPower(bR.getPower() - 0.02);
+                    }else{}
+                }
+                updateT();
+            }}else {
+            while (opModeIsActive() && (sRR.getDistance(DistanceUnit.MM) > target) && runtim2.seconds() < 1) {
+                fL.setPower(power);
+                fR.setPower(-power);
+                bL.setPower(-power);
+                bR.setPower(power);
+                if (startAngle == 0) {
+                    if (imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - startAngle < 0.25) {
+                        fL.setPower(fL.getPower() - 0.02);
+                        fR.setPower(fR.getPower() + 0.02);
+                        bL.setPower(bL.getPower() - 0.02);
+                        bR.setPower(bR.getPower() + 0.02);
+                    } else if ((imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - startAngle > 0.25)) {
+                        fL.setPower(fL.getPower() + 0.02);
+                        fR.setPower(fR.getPower() - 0.02);
+                        bL.setPower(bL.getPower() + 0.02);
+                        bR.setPower(bR.getPower() - 0.02);
+                    } else {
+                    }
+                } else {
+                    if (getHeading() - startAngle < 0.25) {
+                        fL.setPower(fL.getPower() - 0.02);
+                        fR.setPower(fR.getPower() + 0.02);
+                        bL.setPower(bL.getPower() - 0.02);
+                        bR.setPower(bR.getPower() + 0.02);
+                    } else if ((getHeading() - startAngle > 0.25)) {
+                        fL.setPower(fL.getPower() + 0.02);
+                        fR.setPower(fR.getPower() - 0.02);
+                        bL.setPower(bL.getPower() + 0.02);
+                        bR.setPower(bR.getPower() - 0.02);
+                    } else {
+                    }
+                }
+                updateT();
+
+            }
+        }
     }
     void moveWithLeftSensor(int target, double power){
-
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -672,18 +707,6 @@ public class bSauto extends LinearOpMode
 
             }
         }
-        fL.setPower(0);
-        fR.setPower(0);
-        bL.setPower(0);
-        bR.setPower(0);
-        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
 
@@ -720,7 +743,6 @@ public class bSauto extends LinearOpMode
 
         return globalAngle;
     }
-
 
     /**
      * Rotate left or right the number of degrees. Does not support turning more than 359 degrees.
@@ -815,12 +837,16 @@ public class bSauto extends LinearOpMode
     }
 
 
-    void turn(double tun){
+    void turn(double tun, double[] endPowers, boolean targGreater, int foundation){
+
         double vuAng = tun;
         boolean turned = false;
-        while (!turned && opModeIsActive()) {
+        runtim2.reset();
+        while (!turned && opModeIsActive() && runtim2.seconds() < 4) {
             double ang = getHeading();
-
+            if(sR.getDistance(DistanceUnit.MM)<100){
+                placeBlock(false);
+            }
             telemetry.addData("Angle", ang);
             telemetry.addData("TurnTo", vuAng);
             telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
@@ -832,40 +858,251 @@ public class bSauto extends LinearOpMode
                 fR.setPower(0);
                 bL.setPower(0);
                 bR.setPower(0);
-            }else if(ang>=260&& vuAng<=100){
-                fL.setPower(-0.3);
-                fR.setPower(0.3);
-                bL.setPower(-0.3);
-                bR.setPower(0.3);
-            }else if(ang<=100&& vuAng>=260){
-                fL.setPower(0.3);
-                fR.setPower(-0.3);
-                bL.setPower(0.3);
-                bR.setPower(-0.3);
+            }else if(ang>=260&& vuAng<=90){
+                fL.setPower(-0.4);
+                fR.setPower(0.4);
+                bL.setPower(-0.4);
+                bR.setPower(0.4);
+            }else if(ang<=90&& vuAng>=260){
+                fL.setPower(0.4);
+                fR.setPower(-0.4);
+                bL.setPower(0.4);
+                bR.setPower(-0.4);
             }else if (ang-vuAng > 35){
-                fL.setPower(0.5 );
-                fR.setPower(-0.5 );
-                bL.setPower(0.5 );
-                bR.setPower(-0.5);
+                if(foundation==1) {
+                    fL.setPower(0.7);
+                    fR.setPower(-0.7);
+                    bL.setPower(0.7);
+                    bR.setPower(-0.7);
+                }else{
+                    fL.setPower(0.4);
+                    fR.setPower(-0.4);
+                    bL.setPower(0.4);
+                    bR.setPower(-0.4);
+                }
             }else if(vuAng - ang > 35){
-                fL.setPower(-0.5 );
-                fR.setPower(0.5 );
-                bL.setPower(-0.5 );
-                bR.setPower(0.5 );
+                if(foundation==1) {
+                    fL.setPower(-0.7);
+                    fR.setPower(0.7);
+                    bL.setPower(-0.7);
+                    bR.setPower(0.7);
+                }else{
+                    fL.setPower(-0.5);
+                    fR.setPower(0.5);
+                    bL.setPower(-0.5);
+                    bR.setPower(0.5);
+                }
             }else if (ang < vuAng) {
-                fL.setPower(-0.25 );
-                fR.setPower(0.25);
-                bL.setPower(-0.25 );
-                bR.setPower(0.25 );
+                if(!targGreater){
+                    turned = true;
+                    motorsOff();
+                }else{
+                    if(foundation==1){
+                        fL.setPower(-0.4);
+                        fR.setPower(0.4);
+                        bL.setPower(-0.4);
+                        bR.setPower(0.4);
+                    }else if(foundation==2) {
+                        fL.setPower(-0.26);
+                        fR.setPower(0.26);
+                        bL.setPower(-0.26);
+                        bR.setPower(0.26);
+                    }else{
+                        fL.setPower(-0.20*scale);
+                        fR.setPower(0.20*scale);
+                        bL.setPower(-0.20*scale);
+                        bR.setPower(0.20*scale);
+                    }
+                }
             }else if (ang > vuAng) {
-                fL.setPower(0.25 );
-                fR.setPower(-0.25 );
-                bL.setPower(0.25);
-                bR.setPower(-0.25);
+                if(targGreater){
+                    turned = true;
+                    motorsOff();
+                }else{
+                    if(foundation==1) {
+                        fL.setPower(0.4);
+                        fR.setPower(-0.4);
+                        bL.setPower(0.4);
+                        bR.setPower(-0.4);
+                    }else if(foundation==2){
+                        fL.setPower(0.26);
+                        fR.setPower(-0.26);
+                        bL.setPower(0.26);
+                        bR.setPower(-0.26);
+                    }else{
+                        fL.setPower(0.20*scale);
+                        fR.setPower(-0.20*scale);
+                        bL.setPower(0.20*scale);
+                        bR.setPower(-0.20*scale);
+                    }}
             }
             ang = getHeading();
-            turned = (Math.abs(ang - vuAng) <= 0.5);
+            if(!turned)
+                turned = (Math.abs(ang - vuAng) <= 0.5);
         }
+        fL.setPower(endPowers[0]);
+        fR.setPower(endPowers[1]);
+        bL.setPower(endPowers[2]);
+        bR.setPower(endPowers[3]);
+    }
+
+    public int rundetect(SkystoneDetector sky){
+        double dist = sky.getDist();
+        int position = 0;
+        if(dist > 350){
+            position = 0;
+        }else if(dist > 180){
+            position = 1;
+        }else{
+            position = 2;
+        }
+        return position;
+    }
+    private void resetEncoders(){
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+    private void motorsOff(){
+        fL.setPower(0);
+        fR.setPower(0);
+        bL.setPower(0);
+        bR.setPower(0);
+    }
+    private double averageTicks(){
+        return (fL.getCurrentPosition()+fR.getCurrentPosition()+bL.getCurrentPosition()+bR.getCurrentPosition())/4;
+    }
+    private void strafeToAngle(int angle, double power){
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        runtim2.reset();
+        boolean working = true;
+        if(getHeading() < 30 && angle > 300){
+            fL.setPower(power);
+            fR.setPower(-power);
+            bL.setPower(-power);
+            bR.setPower(power);
+            while (opModeIsActive() && runtim2.seconds() <= 4 && working) {
+                if(sR.getDistance(DistanceUnit.MM)<100){
+                    placeBlock(true);
+                }
+                updateT();
+                if (getHeading() < angle && getHeading() > (angle - 10)) {
+                    working = false;
+                }
+            }
+        }else if(angle > getHeading()) {
+            fL.setPower(-power);
+            fR.setPower(power);
+            bL.setPower(power);
+            bR.setPower(-power);
+
+            while (opModeIsActive() && runtim2.seconds() <= 4 && working) {
+                if(sR.getDistance(DistanceUnit.MM)<100){
+                    placeBlock(true);
+                }
+                updateT();
+                if (getHeading() > angle) {
+                    working = false;
+                }
+            }
+        }else if(angle < getHeading()) {
+            fL.setPower(power);
+            fR.setPower(-power);
+            bL.setPower(-power);
+            bR.setPower(power);
+            while (opModeIsActive() && runtim2.seconds() <= 4 && working) {
+                if(sR.getDistance(DistanceUnit.MM)<100){
+                    placeBlock(true);
+                }
+                updateT();
+                if (getHeading() < angle) {
+                    working = false;
+                }
+            }
+        }
+    }
+
+    public void drive(int ticks, double power){
+        // restart imu angle tracking.
+        resetAngle();
+        int degrees = 0;
+
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+        pidDrive.reset();
+
+
+        pidDrive.setSetpoint(0);
+        pidDrive.setInputRange(0, degrees);
+        pidDrive.setOutputRange(0, power);
+        pidDrive.setTolerance(1);
+        pidDrive.enable();
+
+        // getAngle() returns + when rotating counter clockwise (left) and - when rotating
+        // clockwise (right).
+
+        // rotate until turn is completed.
+        double pow = 0;
+        runtim2.reset();
+        boolean working = true;
+        if (degrees < 0)
+        {
+            // On right turn we have to get off zero first.
+            while (opModeIsActive() && getAngle() == 0)
+            {
+                fL.setPower(power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(power);
+                //sleep(100);
+            }
+
+            do
+            {
+                power = pidDrive.performPID(getAngle()); // power will be - on right turn.
+                fL.setPower(power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(power);
+            } while (opModeIsActive() && !pidDrive.onTarget());
+        }
+        else    // left turn.
+
+
+            do
+            {
+                pow = pidDrive.performPID(getAngle()); // power will be + on left turn.
+                updateT();
+                fL.setPower(power-pow);
+                fR.setPower(power+pow);
+                bL.setPower(power-pow);
+                bR.setPower(power+pow);
+                if (((4*ticks)-fL.getCurrentPosition()-fR.getCurrentPosition()-fL.getCurrentPosition()-bR.getCurrentPosition())<100){
+                    working = false;
+                }
+            } while (opModeIsActive() && runtim2.seconds()<5 && working );
+
+        // turn the motors off.
         fL.setPower(0);
         fR.setPower(0);
         bL.setPower(0);
@@ -878,19 +1115,58 @@ public class bSauto extends LinearOpMode
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        rotation = getAngle();
+
+        // wait for rotation to stop.
+
+        // reset angle tracking on new heading.
+        resetAngle();
     }
 
-    public int rundetect(SkystoneDetector sky){
-        double dist = sky.getDist();
-        int position = 0;
-        if(dist < 150||dist > 380){
-            position = 0;
-        }else if(dist < 320){
-            position = 1;
+    private void placeBlock(boolean readyToPlace){
+
+        if(CLAW.getPosition()>=0.1 && LIFT.getCurrentPosition()>0) {
+            if(ROTATE.getPosition()>=0.5 && obligitoryCounter2 >= 13)
+                LIFT.setPower(-0.4);
+            else{
+                if(obligitoryCounter2 == 0) {
+                    rotateIn();
+                    LIFT.setPower(0.2);
+                    obligitoryCounter2++;
+                }else{
+                    obligitoryCounter2++;
+                    LIFT.setPower(0.2);
+                }
+            }
+        }else if(LIFT.getCurrentPosition()>=550){
+            LIFT.setPower(0.2);
+            rotateOut();
+        }else if(CLAW.getPosition()<0.1 && ROTATE.getPosition()>=0.5 && LIFT.getCurrentPosition()<570){
+            LIFT.setPower(0.7);
         }else{
-            position = 0;
+            LIFT.setPower(0.2);
         }
-        return position;
+
+        if(ROTATE.getPosition()==0.025){
+            if(obligitoryCounter > -1 && obligitoryCounter<10 && CLAW.getPosition() < 0.1){
+                obligitoryCounter++;
+            }else if(readyToPlace){
+                openClaw();
+                obligitoryCounter = -1;
+                rotateIn();
+            }
+        }
+    }
+    private double getBatteryVoltage() {
+        double result = Double.POSITIVE_INFINITY;
+        for (VoltageSensor sensor : hardwareMap.voltageSensor) {
+            double voltage = sensor.getVoltage();
+            if (voltage > 0) {
+                result = Math.min(result, voltage);
+            }
+        }
+        return result;
     }
 
 

@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Autonomous(name="Justin got a 4 on the APCSA exam twice", group="ree")
+@Disabled
 
 public class autoDecember7 extends LinearOpMode
 {
@@ -313,9 +314,9 @@ public class autoDecember7 extends LinearOpMode
             moveWithLeftSensor(650, 0.3);
 
         if(blockPos == 2)
-            moveWithForwardSensor(700, 0.4*scale, false);
+            moveWithForwardSensor(720, 0.4*scale, false);
         else if(blockPos == 1)
-            moveWithForwardSensor(920, 0.4*scale, false);
+            moveWithForwardSensor(870, 0.4*scale, false);
         else
             moveWithForwardSensor(1020, 0.4*scale, false);
 
