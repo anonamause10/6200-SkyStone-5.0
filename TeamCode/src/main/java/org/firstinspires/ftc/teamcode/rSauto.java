@@ -113,9 +113,8 @@ public class rSauto extends LinearOpMode
             "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
             "ss_light_speed", "ss_mine", "ss_power_up", "ss_r2d2_up", "ss_roger_roger", "ss_siren", "ss_wookie" };
     boolean soundPlaying = false;
+    private SkystoneDetector detector;
 
-
-    //for right with camera: pos 0 is 0, pos 1 is 114, pos 2 is 284
 
     @Override
     public void runOpMode() {
@@ -126,6 +125,7 @@ public class rSauto extends LinearOpMode
         boolean was_dpad_down   = false;
 
         Context myApp = hardwareMap.appContext;
+        detector = new SkystoneDetector(hardwareMap, true, true,true);
 
         voltage = getBatteryVoltage();
         scale = 12.8 / voltage;
@@ -213,17 +213,12 @@ public class rSauto extends LinearOpMode
 
         //waitForStart();
         while (!opModeIsActive() && !isStopRequested()) {
-            telemetry.addData("status", "waiting for start command...");
-            telemetry.addData("blockpos", blockPos);
-            if(gamepad1.x){
-                blockPos = 0;
-            }else if(gamepad1.b){
-                blockPos = 2;
-            }else if(gamepad1.a){
-                blockPos = 1;
-            }
+            telemetry.addData("blockPos", detector.getPos());
             telemetry.update();
         }
+        blockPos = (int)detector.getPos();
+        detector.stop();
+
         runtime.reset();
 
         double[] array1 = {0.2*scale, 0.6*scale, 0.2*scale, 0.6*scale};
@@ -232,7 +227,7 @@ public class rSauto extends LinearOpMode
             double[] array2 = {0.9*scale, 0.15*scale, 0.9*scale, 0.15*scale};
             array1 = array2;
         }else if(blockPos == 2){
-            double[] array2 = {0.2*scale, 0.8*scale, 0.2*scale, 0.8*scale};
+            double[] array2 = {0.2*scale, 0.9*scale, 0.2*scale, 0.9*scale};
             array1 = array2;
         }
         if(blockPos == 2)
@@ -279,11 +274,10 @@ public class rSauto extends LinearOpMode
             openClaw();
         }
         sleep(300);
-        moveWithForwardSensor(600, 0.7, true);
+        moveWithForwardSensor(620, 0.7, true);
+
         if(CLAW.getPosition()>0.1)
             rotateIn();
-        if(sR.getDistance(DistanceUnit.MM)<110)
-            strafeToAngle(150, 0.7);
         array1 = new double[] {0,0,0,0};
 
         turn(90, array1, false, 1);
@@ -294,12 +288,15 @@ public class rSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(400);
+        sleep(100);
 
-        turn(90, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=90, 0);
+        turn(90, new double[]{0.3,0.3,0.3,0.3}, getHeading()<=90, 0);
+        sleep(100);
 
-        if(sRL.getDistance(DistanceUnit.MM)<630)
-            moveWithLeftSensor(630, 0.4);
+        if(sRL.getDistance(DistanceUnit.MM)<620)
+            moveWithLeftSensor(630, 0.3*scale);
+        if(sRL.getDistance(DistanceUnit.MM)>660)
+            moveWithLeftSensor(630, 0.3*scale);
         servosDown();
 
         goV2(700, 0.5, new double[]{0.5,0.5,0.5,0.5}, true);
@@ -307,13 +304,8 @@ public class rSauto extends LinearOpMode
 
         turn(90, new double[]{0.5,0.5,0.5,0.5}, getHeading()<=90, 0);
 
-        if(sRL.getDistance(DistanceUnit.MM)<638)
-            moveWithLeftSensor(640, 0.3);
-        if(sRL.getDistance(DistanceUnit.MM)>670)
-            moveWithLeftSensor(650, 0.3);
-
         if(blockPos == 2)
-            moveWithForwardSensor(720, 0.4*scale, false);
+            moveWithForwardSensor(670, 0.4*scale, false);
         else if(blockPos == 1)
             moveWithForwardSensor(870, 0.4*scale, false);
         else
@@ -330,22 +322,21 @@ public class rSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(400);
+        sleep(600);
         power = -0.5*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(800);
+        sleep(850);
         intakeOff();
         closeClaw();
 
-        turn(89, new double[]{-0.5,-0.5,-0.5,-0.5}, true, 0);
-
+        turn(90, new double[]{0,0,0,0}, true, 0);
         if(sRL.getDistance(DistanceUnit.MM)<620)
-            moveWithLeftSensor(620, 0.3);
+            moveWithLeftSensor(630, 0.3*scale);
         if(sRL.getDistance(DistanceUnit.MM)>660)
-            moveWithLeftSensor(630, 0.3);
+            moveWithLeftSensor(630, 0.3*scale);
 
         power = -0.7*scale;
         fL.setPower(power);
@@ -365,14 +356,14 @@ public class rSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(450);
+        sleep(350);
 
         rotateOut();
-        sleep(200);
+        sleep(300);
         LIFT.setPower(0.2);
         motorsOff();
 
-        sleep(300);
+        sleep(500);
         openClaw();
         power = 0.3*scale;
         fL.setPower(power);
@@ -381,8 +372,13 @@ public class rSauto extends LinearOpMode
         bR.setPower(power);
         sleep(400);
         rotateIn();
-        sleep(100);
-        moveWithLeftSensor(650, 0.3*scale);
+        sleep(200);
+
+        if(sRL.getDistance(DistanceUnit.MM)<620)
+            moveWithLeftSensor(630, 0.3*scale);
+        if(sRL.getDistance(DistanceUnit.MM)>660)
+            moveWithLeftSensor(630, 0.3*scale);
+
         goV2(1300, 0.5, new double[]{0,0,0,0}, true);
     }
     private void goV2(int ticks, double power, double[] endPowers, boolean intakeDeployed){
@@ -898,20 +894,20 @@ public class rSauto extends LinearOpMode
                     motorsOff();
                 }else{
                     if(foundation==1){
-                        fL.setPower(-0.4);
-                        fR.setPower(0.4);
-                        bL.setPower(-0.4);
-                        bR.setPower(0.4);
+                        fL.setPower(-0.4*scale);
+                        fR.setPower(0.4*scale);
+                        bL.setPower(-0.4*scale);
+                        bR.setPower(0.4*scale);
                     }else if(foundation==2) {
-                        fL.setPower(-0.26);
-                        fR.setPower(0.26);
-                        bL.setPower(-0.26);
-                        bR.setPower(0.26);
+                        fL.setPower(-0.22*scale);
+                        fR.setPower(0.22*scale);
+                        bL.setPower(-0.22*scale);
+                        bR.setPower(0.22*scale);
                     }else{
-                        fL.setPower(-0.20*scale);
-                        fR.setPower(0.20*scale);
-                        bL.setPower(-0.20*scale);
-                        bR.setPower(0.20*scale);
+                        fL.setPower(-0.19*scale);
+                        fR.setPower(0.19*scale);
+                        bL.setPower(-0.19*scale);
+                        bR.setPower(0.19*scale);
                     }
                 }
             }else if (ang > vuAng) {
@@ -920,20 +916,20 @@ public class rSauto extends LinearOpMode
                     motorsOff();
                 }else{
                     if(foundation==1) {
-                        fL.setPower(0.4);
-                        fR.setPower(-0.4);
-                        bL.setPower(0.4);
-                        bR.setPower(-0.4);
+                        fL.setPower(0.4*scale);
+                        fR.setPower(-0.4*scale);
+                        bL.setPower(0.4*scale);
+                        bR.setPower(-0.4*scale);
                     }else if(foundation==2){
-                        fL.setPower(0.26);
-                        fR.setPower(-0.26);
-                        bL.setPower(0.26);
-                        bR.setPower(-0.26);
+                        fL.setPower(0.22*scale);
+                        fR.setPower(-0.22*scale);
+                        bL.setPower(0.22*scale);
+                        bR.setPower(-0.22*scale);
                     }else{
-                        fL.setPower(0.20*scale);
-                        fR.setPower(-0.20*scale);
-                        bL.setPower(0.20*scale);
-                        bR.setPower(-0.20*scale);
+                        fL.setPower(0.19*scale);
+                        fR.setPower(-0.19*scale);
+                        bL.setPower(0.19*scale);
+                        bR.setPower(-0.19*scale);
                     }}
             }
             ang = getHeading();
@@ -946,18 +942,7 @@ public class rSauto extends LinearOpMode
         bR.setPower(endPowers[3]);
     }
 
-    public int rundetect(SkystoneDetector sky){
-        double dist = sky.getDist();
-        int position = 0;
-        if(dist > 350){
-            position = 0;
-        }else if(dist > 180){
-            position = 1;
-        }else{
-            position = 2;
-        }
-        return position;
-    }
+
     private void resetEncoders(){
         fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
