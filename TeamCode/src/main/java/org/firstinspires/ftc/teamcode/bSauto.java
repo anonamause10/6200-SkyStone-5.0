@@ -226,7 +226,7 @@ public class bSauto extends LinearOpMode
         double[] array1 = {0.68*scale, 0.2*scale, 0.68*scale, 0.2*scale};
 
         if(blockPos == 0){
-            double[] array2 = {0.1*scale, 0.85*scale, 0.1*scale, 0.85*scale};
+            double[] array2 = {0.1*scale, 0.88*scale, 0.1*scale, 0.88*scale};
             array1 = array2;
         }else if(blockPos == 2){
             double[] array2 = {0.9*scale, 0.1*scale, 0.9*scale, 0.1*scale};
@@ -237,26 +237,29 @@ public class bSauto extends LinearOpMode
         else
             goV2(850, 0.5*scale, array1, false);
         intake();
-        sleep(400);
+        if(blockPos!=0)
+            sleep(100);
+        sleep(300);
         double power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(700);
-        if(blockPos==1){
+        sleep(900);
+        if(blockPos==2){
             sleep(100);
         }
+
         power = -0.5*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(100);
+        sleep(130);
         if(blockPos == 2)
-            sleep(450);
+            sleep(500);
         else if(blockPos == 1)
-            sleep(600);
+            sleep(620);
         else
             sleep(770);
 
@@ -267,7 +270,7 @@ public class bSauto extends LinearOpMode
         servosUp();
 
         drive(2000,0.7);
-        moveWithForwardSensor(550, 0.6, true);
+        moveWithForwardSensor(570, 0.6*scale, true);
 
         turn(180, new double[] {0,0,0,0}, true, 2);
         goV2(-650, 0.3, new double[] {-0.25, -0.25, -0.25, -0.25}, true);
@@ -277,12 +280,10 @@ public class bSauto extends LinearOpMode
         sleep(400);
 
         /**moveWithForwardSensor(680, 0.7, true);
-
-        if(CLAW.getPosition()>0.1)
-            rotateIn();
-        array1 = new double[] {0,0,0,0};
-
-        turn(270, array1, true, 1);*/
+         if(CLAW.getPosition()>0.1)
+         rotateIn();
+         array1 = new double[] {0,0,0,0};
+         turn(270, array1, true, 1);*/
         fL.setPower(0.2*scale);
         fR.setPower(0.8*scale);
         bL.setPower(0.2*scale);
@@ -308,10 +309,10 @@ public class bSauto extends LinearOpMode
 
         turn(270, new double[]{0,0,0,0}, getHeading()<=270, 0);
 
-        if(sRR.getDistance(DistanceUnit.MM)<625)
-            moveWithRightSensor(645, 0.3*scale);
+        if(sRR.getDistance(DistanceUnit.MM)<630)
+            moveWithRightSensor(647, 0.28*scale);
         if(sRR.getDistance(DistanceUnit.MM)>655)
-            moveWithRightSensor(645, 0.3*scale);
+            moveWithRightSensor(647, 0.28*scale);
         LIFT.setPower(-0.02);
 
 
@@ -323,7 +324,7 @@ public class bSauto extends LinearOpMode
         else if(blockPos == 1)
             moveWithForwardSensor(870, 0.4*scale, false);
         else
-            moveWithForwardSensor(1030, 0.4*scale, false);
+            moveWithForwardSensor(1050, 0.4*scale, false);
 
         fL.setPower(array1[0]);
         fR.setPower(array1[1]);
@@ -348,9 +349,9 @@ public class bSauto extends LinearOpMode
 
         turn(270, new double[]{0,0,0,0}, false, 0);
 
-        if(sRR.getDistance(DistanceUnit.MM)<620)
-            moveWithRightSensor(645, 0.3*scale);
-        if(sRR.getDistance(DistanceUnit.MM)>655)
+        if(sRR.getDistance(DistanceUnit.MM)<630)
+            moveWithRightSensor(648, 0.28*scale);
+        if(sRR.getDistance(DistanceUnit.MM)>=649)
             moveWithRightSensor(645, 0.3*scale);
 
         power = -0.7*scale;
@@ -371,7 +372,7 @@ public class bSauto extends LinearOpMode
         bL.setPower(power);
         bR.setPower(power);
 
-        sleep(1150);
+        sleep(1250);
 
         LIFT.setPower(0.7);
         power = -0.5*scale;
@@ -379,7 +380,7 @@ public class bSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(350);
+        sleep(250);
 
         rotateOut();
         sleep(300);
@@ -400,11 +401,13 @@ public class bSauto extends LinearOpMode
         sleep(300);
 
         if(sRR.getDistance(DistanceUnit.MM)<620)
-            moveWithRightSensor(645, 0.3*scale);
+            moveWithRightSensor(645, 0.28*scale);
         if(sRR.getDistance(DistanceUnit.MM)>655)
-            moveWithRightSensor(645, 0.3*scale);
+            moveWithRightSensor(645, 0.28*scale);
 
         goV2(1000, 0.5, new double[]{0,0,0,0}, true);
+        servosDown();
+        sleep(200);
     }
     private void goV2(int ticks, double power, double[] endPowers, boolean intakeDeployed){
         boolean phase2 = false;
@@ -960,7 +963,7 @@ public class bSauto extends LinearOpMode
             }
             ang = getHeading();
             if(!turned)
-                turned = (Math.abs(ang - vuAng) <= 0.5);
+                turned = (Math.abs(ang - vuAng) <= 0.25);
         }
         fL.setPower(endPowers[0]);
         fR.setPower(endPowers[1]);
@@ -1101,6 +1104,11 @@ public class bSauto extends LinearOpMode
 
             do
             {
+                if(LIFT.getCurrentPosition()>=50){
+                    LIFT.setPower(-0.4*scale);
+                }else{
+                    LIFT.setPower(0);
+                }
                 pow = pidDrive.performPID(getAngle()); // power will be + on left turn.
                 updateT();
                 fL.setPower(power-pow);
