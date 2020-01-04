@@ -250,9 +250,11 @@ public class SkystoneDetector
                     if(right){
                         if (black != null) {
                             dist = Math.abs(black.br().x - input.width());
-                            if(dist > 350){
+                            if(dist > 500) {
+                                pos = 0;
+                            }else if(dist > 310){
                                 pos = 2;
-                            }else if(dist > 180){
+                            }else if(dist > 120){
                                 pos = 1;
                             }else{
                                 pos = 0;
@@ -389,6 +391,9 @@ public class SkystoneDetector
             totalScore += ratioscore;
             totalScore += areascore;
             totalScore+=rightDist;
+            if(rect.br().y<220){
+                totalScore = 1000000;
+            }
             return totalScore  ;
 
         }
