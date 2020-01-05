@@ -270,7 +270,7 @@ public class bSauto extends LinearOpMode
         servosUp();
 
         drive(2000,0.7);
-        moveWithForwardSensor(570, 0.6*scale, true);
+        moveWithForwardSensor(620, 0.6*scale, true);
 
         turn(180, new double[] {0,0,0,0}, true, 2);
         goV2(-650, 0.3, new double[] {-0.25, -0.25, -0.25, -0.25}, true);
@@ -309,10 +309,10 @@ public class bSauto extends LinearOpMode
 
         turn(270, new double[]{0,0,0,0}, getHeading()<=270, 0);
 
-        if(sRR.getDistance(DistanceUnit.MM)<630)
-            moveWithRightSensor(647, 0.28*scale);
-        if(sRR.getDistance(DistanceUnit.MM)>655)
-            moveWithRightSensor(647, 0.28*scale);
+        if(sRR.getDistance(DistanceUnit.MM)<680)
+            moveWithRightSensor(682, 0.3*scale);
+        if(sRR.getDistance(DistanceUnit.MM)>685)
+            moveWithRightSensor(683, 0.3*scale);
         LIFT.setPower(-0.02);
 
 
@@ -349,10 +349,10 @@ public class bSauto extends LinearOpMode
 
         turn(270, new double[]{0,0,0,0}, false, 0);
 
-        if(sRR.getDistance(DistanceUnit.MM)<630)
-            moveWithRightSensor(648, 0.28*scale);
-        if(sRR.getDistance(DistanceUnit.MM)>=649)
-            moveWithRightSensor(645, 0.3*scale);
+        if(sRR.getDistance(DistanceUnit.MM)<680)
+            moveWithRightSensor(682, 0.3*scale);
+        if(sRR.getDistance(DistanceUnit.MM)>685)
+            moveWithRightSensor(683, 0.3*scale);
 
         power = -0.7*scale;
         fL.setPower(power);
@@ -400,10 +400,10 @@ public class bSauto extends LinearOpMode
         rotateIn();
         sleep(300);
 
-        if(sRR.getDistance(DistanceUnit.MM)<620)
-            moveWithRightSensor(645, 0.28*scale);
-        if(sRR.getDistance(DistanceUnit.MM)>655)
-            moveWithRightSensor(645, 0.28*scale);
+        if(sRR.getDistance(DistanceUnit.MM)<680)
+            moveWithRightSensor(682, 0.3*scale);
+        if(sRR.getDistance(DistanceUnit.MM)>685)
+            moveWithRightSensor(683, 0.3*scale);
 
         goV2(1000, 0.5, new double[]{0,0,0,0}, true);
         servosDown();

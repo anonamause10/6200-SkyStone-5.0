@@ -226,7 +226,7 @@ public class rSauto extends LinearOpMode
         double[] array1 = {0.2*scale, 0.68*scale, 0.2*scale, 0.68*scale};
 
         if(blockPos == 0){
-            double[] array2 = {0.88*scale, 0.1*scale, 0.88*scale, 0.1*scale};
+            double[] array2 = {0.89*scale, 0.1*scale, 0.89*scale, 0.1*scale};
             array1 = array2;
         }else if(blockPos == 2){
             double[] array2 = {0.1*scale, 0.85*scale, 0.1*scale, 0.85*scale};
@@ -303,12 +303,12 @@ public class rSauto extends LinearOpMode
         motorsOff();
         servosUp();
         LIFT.setPower(-0.01*scale);
-        power = 0.3*scale;
+        power = -0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(10);
+        sleep(350);
 
         turn(90, new double[]{0,0,0,0}, getHeading()<90, 0);
 
@@ -341,6 +341,8 @@ public class rSauto extends LinearOpMode
         bL.setPower(power);
         bR.setPower(power);
         sleep(600);
+        if(blockPos == 0)
+            sleep(100);
         power = -0.5*scale;
         fL.setPower(power);
         fR.setPower(power);
