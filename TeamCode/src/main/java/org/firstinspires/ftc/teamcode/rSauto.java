@@ -124,7 +124,7 @@ public class rSauto extends LinearOpMode
         boolean was_dpad_down   = false;
 
         Context myApp = hardwareMap.appContext;
-        //detector = new SkystoneDetector(hardwareMap, true, false,true);
+        detector = new SkystoneDetector(hardwareMap, true, true,true);
 
         voltage = getBatteryVoltage();
         scale = 12.8 / voltage;
@@ -176,8 +176,6 @@ public class rSauto extends LinearOpMode
         servo.setPosition(.7);
         servo2.setPosition(.3);
 
-        //SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, false, false);
-
         sR = hardwareMap.get(DistanceSensor.class, "DSB");
         sR2 = hardwareMap.get(DistanceSensor.class, "DS2");
         sRR = hardwareMap.get(DistanceSensor.class, "DSR");
@@ -212,15 +210,15 @@ public class rSauto extends LinearOpMode
 
         //waitForStart();
         while (!opModeIsActive() && !isStopRequested()) {
-            //telemetry.addData("blockPos", detector.getPos());
+            telemetry.addData("blockPos", detector.getPos());
             if(gamepad1.x)blockPos = 0;
             if(gamepad1.a)blockPos = 1;
             if(gamepad1.b)blockPos = 2;
+            if(gamepad1.y)blockPos = (int)detector.getPos();
             telemetry.addData("blockPOs", blockPos);
             telemetry.update();
         }
-        //blockPos = (int)detector.getPos();
-        //detector.stop();
+
         runtime.reset();
 
         double[] array1 = {0.2*scale, 0.68*scale, 0.2*scale, 0.68*scale};
@@ -274,6 +272,10 @@ public class rSauto extends LinearOpMode
         rotateOut();
         goV2(-650, 0.3, new double[] {-0.25, -0.25, -0.25, -0.25}, true);
         servosDown();
+        fL.setPower(0.12*scale);
+        fR.setPower(0.12*scale);
+        bL.setPower(0.12*scale);
+        bR.setPower(0.12*scale);
         openClaw();
         sleep(400);
 
@@ -327,7 +329,7 @@ public class rSauto extends LinearOpMode
         else if(blockPos == 2)
             moveWithForwardSensor(830, 0.4*scale, false);
         else if(blockPos == 1)
-            moveWithForwardSensor(1090, 0.4*scale, false);
+            moveWithForwardSensor(980, 0.4*scale, false);
 
         fL.setPower(array1[0]);
         fR.setPower(array1[1]);
@@ -379,7 +381,7 @@ public class rSauto extends LinearOpMode
         bL.setPower(power);
         bR.setPower(power);
 
-        sleep(1280);
+        sleep(1310);
 
         LIFT.setPower(0.7);
         power = -0.5*scale;
@@ -387,7 +389,7 @@ public class rSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(220);
+        sleep(190);
 
         rotateOut();
         power = -0.3*scale;
@@ -400,9 +402,9 @@ public class rSauto extends LinearOpMode
             sleep(200);
         LIFT.setPower(0.2);
         motorsOff();
-
-        sleep(500);
         openClaw();
+        sleep(500);
+
         power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
@@ -417,9 +419,9 @@ public class rSauto extends LinearOpMode
         if(sRL.getDistance(DistanceUnit.MM)>683)
             moveWithLeftSensor(681, 0.3*scale);
 
-        goV2(1000, 0.5, new double[]{0,0,0,0}, true);
+        detector.stop();
+        goV2(1000, 0.7, new double[]{0,0,0,0}, true);
         servosDown();
-        sleep(200);
     }
     private void goV2(int ticks, double power, double[] endPowers, boolean intakeDeployed){
         boolean phase2 = false;
@@ -923,10 +925,10 @@ public class rSauto extends LinearOpMode
                     bL.setPower(-0.7);
                     bR.setPower(0.7);
                 }else{
-                    fL.setPower(-0.5);
-                    fR.setPower(0.5);
-                    bL.setPower(-0.5);
-                    bR.setPower(0.5);
+                    fL.setPower(-0.4);
+                    fR.setPower(0.4);
+                    bL.setPower(-0.4);
+                    bR.setPower(0.4);
                 }
             }else if (ang < vuAng) {
                 if(!targGreater){
@@ -944,10 +946,10 @@ public class rSauto extends LinearOpMode
                         bL.setPower(-0.22*scale);
                         bR.setPower(0.22*scale);
                     }else{
-                        fL.setPower(-0.18*scale);
-                        fR.setPower(0.18*scale);
-                        bL.setPower(-0.18*scale);
-                        bR.setPower(0.18*scale);
+                        fL.setPower(-0.17*scale);
+                        fR.setPower(0.17*scale);
+                        bL.setPower(-0.17*scale);
+                        bR.setPower(0.17*scale);
                     }
                 }
             }else if (ang > vuAng) {
@@ -966,15 +968,15 @@ public class rSauto extends LinearOpMode
                         bL.setPower(0.22*scale);
                         bR.setPower(-0.22*scale);
                     }else{
-                        fL.setPower(0.18*scale);
-                        fR.setPower(-0.18*scale);
-                        bL.setPower(0.18*scale);
-                        bR.setPower(-0.18*scale);
+                        fL.setPower(0.17*scale);
+                        fR.setPower(-0.17*scale);
+                        bL.setPower(0.17*scale);
+                        bR.setPower(-0.17*scale);
                     }}
             }
             ang = getHeading();
             if(!turned)
-                turned = (Math.abs(ang - vuAng) <= 0.25);
+                turned = (Math.abs(ang - vuAng) <= 0.2);
         }
         fL.setPower(endPowers[0]);
         fR.setPower(endPowers[1]);

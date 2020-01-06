@@ -160,6 +160,21 @@ public class teleop extends LinearOpMode {
                 rotateServo.setPosition(0.69);
             }else if(gamepad2.b){
                 rotateServo.setPosition(0.025);
+
+                // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
+                if ((soundID = myApp.getResources().getIdentifier(sounds[soundIndex], "raw", myApp.getPackageName())) != 0){
+
+                    // Signal that the sound is now playing.
+                    soundPlaying = true;
+
+                    // Start playing, and also Create a callback that will clear the playing flag when the sound is complete.
+                    SoundPlayer.getInstance().startPlaying(myApp, soundID, params, null,
+                            new Runnable() {
+                                public void run() {
+                                    soundPlaying = false;
+                                }} );
+                }
+
             }
 
             if(gamepad2.left_bumper) {

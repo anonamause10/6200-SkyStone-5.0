@@ -270,23 +270,27 @@ public class bSauto extends LinearOpMode
         servosUp();
 
         drive(2000,0.7);
-        moveWithForwardSensor(620, 0.6*scale, true);
+        moveWithForwardSensor(605, 0.6*scale, true);
 
         turn(180, new double[] {0,0,0,0}, true, 2);
+        rotateOut();
         goV2(-650, 0.3, new double[] {-0.25, -0.25, -0.25, -0.25}, true);
-
         servosDown();
+        fL.setPower(0.4*scale);
+        fR.setPower(0.4*scale);
+        bL.setPower(0.4*scale);
+        bR.setPower(0.4*scale);
         openClaw();
         sleep(400);
 
-        /**moveWithForwardSensor(680, 0.7, true);
-         if(CLAW.getPosition()>0.1)
-         rotateIn();
-         array1 = new double[] {0,0,0,0};
-         turn(270, array1, true, 1);*/
-        fL.setPower(0.2*scale);
+        fL.setPower(-0.7*scale);
+        fR.setPower(0.7*scale);
+        bL.setPower(0.7*scale);
+        bR.setPower(-0.7*scale);
+        sleep(300);
+        fL.setPower(0.05*scale);
         fR.setPower(0.8*scale);
-        bL.setPower(0.2*scale);
+        bL.setPower(0.05*scale);
         bR.setPower(0.8*scale);
         rotateIn();
         while(opModeIsActive()&&getHeading()<269){
@@ -347,11 +351,11 @@ public class bSauto extends LinearOpMode
         intakeOff();
         closeClaw();
 
-        turn(270, new double[]{0,0,0,0}, false, 0);
+        turn(270.3, new double[]{0,0,0,0}, false, 0);
 
         if(sRR.getDistance(DistanceUnit.MM)<680)
             moveWithRightSensor(682, 0.3*scale);
-        if(sRR.getDistance(DistanceUnit.MM)>685)
+        if(sRR.getDistance(DistanceUnit.MM)>684)
             moveWithRightSensor(683, 0.3*scale);
 
         power = -0.7*scale;
@@ -372,7 +376,7 @@ public class bSauto extends LinearOpMode
         bL.setPower(power);
         bR.setPower(power);
 
-        sleep(1250);
+        sleep(1310);
 
         LIFT.setPower(0.7);
         power = -0.5*scale;
@@ -380,7 +384,7 @@ public class bSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(250);
+        sleep(190);
 
         rotateOut();
         sleep(300);
@@ -388,9 +392,8 @@ public class bSauto extends LinearOpMode
             sleep(200);
         LIFT.setPower(0.2);
         motorsOff();
-
-        sleep(500);
         openClaw();
+        sleep(500);
         power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
@@ -587,7 +590,7 @@ public class bSauto extends LinearOpMode
         runtim2.reset();
         double startAngle = getHeading();
         if(sRR.getDistance(DistanceUnit.MM)<target){
-            while(opModeIsActive()&&(sRR.getDistance(DistanceUnit.MM) < target)&&runtim2.seconds()<1){
+            while(opModeIsActive()&&(sRR.getDistance(DistanceUnit.MM) < target)&&runtim2.seconds()<1.5){
                 fL.setPower(-power);
                 fR.setPower(power);
                 bL.setPower(power);
@@ -620,7 +623,7 @@ public class bSauto extends LinearOpMode
                 }
                 updateT();
             }}else {
-            while (opModeIsActive() && (sRR.getDistance(DistanceUnit.MM) > target) && runtim2.seconds() < 1) {
+            while (opModeIsActive() && (sRR.getDistance(DistanceUnit.MM) > target) && runtim2.seconds() < 1.5) {
                 fL.setPower(power);
                 fR.setPower(-power);
                 bL.setPower(-power);
@@ -912,10 +915,10 @@ public class bSauto extends LinearOpMode
                     bL.setPower(-0.7);
                     bR.setPower(0.7);
                 }else{
-                    fL.setPower(-0.5);
-                    fR.setPower(0.5);
-                    bL.setPower(-0.5);
-                    bR.setPower(0.5);
+                    fL.setPower(-0.4);
+                    fR.setPower(0.4);
+                    bL.setPower(-0.4);
+                    bR.setPower(0.4);
                 }
             }else if (ang < vuAng) {
                 if(!targGreater){
@@ -933,10 +936,10 @@ public class bSauto extends LinearOpMode
                         bL.setPower(-0.22*scale);
                         bR.setPower(0.22*scale);
                     }else{
-                        fL.setPower(-0.18*scale);
-                        fR.setPower(0.18*scale);
-                        bL.setPower(-0.18*scale);
-                        bR.setPower(0.18*scale);
+                        fL.setPower(-0.17*scale);
+                        fR.setPower(0.17*scale);
+                        bL.setPower(-0.17*scale);
+                        bR.setPower(0.17*scale);
                     }
                 }
             }else if (ang > vuAng) {
@@ -955,15 +958,15 @@ public class bSauto extends LinearOpMode
                         bL.setPower(0.22*scale);
                         bR.setPower(-0.22*scale);
                     }else{
-                        fL.setPower(0.18*scale);
-                        fR.setPower(-0.18*scale);
-                        bL.setPower(0.18*scale);
-                        bR.setPower(-0.18*scale);
+                        fL.setPower(0.17*scale);
+                        fR.setPower(-0.17*scale);
+                        bL.setPower(0.17*scale);
+                        bR.setPower(-0.17*scale);
                     }}
             }
             ang = getHeading();
             if(!turned)
-                turned = (Math.abs(ang - vuAng) <= 0.25);
+                turned = (Math.abs(ang - vuAng) <= 0.2);
         }
         fL.setPower(endPowers[0]);
         fR.setPower(endPowers[1]);
