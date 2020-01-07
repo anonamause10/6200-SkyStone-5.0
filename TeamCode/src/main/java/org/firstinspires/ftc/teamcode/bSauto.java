@@ -392,8 +392,9 @@ public class bSauto extends LinearOpMode
             sleep(200);
         LIFT.setPower(0.2);
         motorsOff();
+        sleep(300);
         openClaw();
-        sleep(500);
+        sleep(200);
         power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
