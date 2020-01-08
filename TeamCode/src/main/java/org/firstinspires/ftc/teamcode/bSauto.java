@@ -109,10 +109,7 @@ public class bSauto extends LinearOpMode
     // State used for updating telemetry
     Orientation angles;
     Acceleration gravity;
-    String  sounds[] =  {"ss_alarm", "ss_bb8_down", "ss_bb8_up", "ss_darth_vader", "ss_fly_by",
-            "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
-            "ss_light_speed", "ss_mine", "ss_power_up", "ss_r2d2_up", "ss_roger_roger", "ss_siren", "ss_wookie" };
-    boolean soundPlaying = false;
+    boolean usingCamera = true;
     SkystoneDetector detector = null;
 
     @Override
@@ -124,7 +121,8 @@ public class bSauto extends LinearOpMode
         boolean was_dpad_down   = false;
 
         Context myApp = hardwareMap.appContext;
-        //detector = new SkystoneDetector(hardwareMap, true, false,true);
+
+        detector = new SkystoneDetector(hardwareMap, true, false,true);
 
         voltage = getBatteryVoltage();
         scale = 12.8 / voltage;
@@ -211,16 +209,20 @@ public class bSauto extends LinearOpMode
         int blockPos = 0;
 
         //waitForStart();
-        while (!opModeIsActive() && !isStopRequested()) {
-            //telemetry.addData("blockPos", detector.getPos());
-            if(gamepad1.x)blockPos = 0;
-            if(gamepad1.a)blockPos = 1;
-            if(gamepad1.b)blockPos = 2;
-            telemetry.addData("blockPOs", blockPos);
+        while (!isStopRequested()&&!opModeIsActive()) {
+
+            if(usingCamera)
+                telemetry.addData("blockPos", detector.getPos());
+            else
+                telemetry.addData("blockPOs", blockPos);
+            if(gamepad1.x){blockPos = 0; usingCamera = false; detector.stop();}
+            if(gamepad1.a){blockPos = 1; usingCamera = false; detector.stop();}
+            if(gamepad1.b){blockPos = 2; usingCamera = false; detector.stop();}
+
             telemetry.update();
         }
-        //blockPos = (int)detector.getPos();
-        //detector.stop();
+        if(usingCamera)
+            blockPos = (int)detector.getPos();
         runtime.reset();
 
         double[] array1 = {0.68*scale, 0.2*scale, 0.68*scale, 0.2*scale};
@@ -326,7 +328,7 @@ public class bSauto extends LinearOpMode
         if(blockPos == 2)
             moveWithForwardSensor(700, 0.4*scale, false);
         else if(blockPos == 1)
-            moveWithForwardSensor(870, 0.4*scale, false);
+            moveWithForwardSensor(855, 0.4*scale, false);
         else
             moveWithForwardSensor(1050, 0.4*scale, false);
 
@@ -408,6 +410,9 @@ public class bSauto extends LinearOpMode
             moveWithRightSensor(682, 0.3*scale);
         if(sRR.getDistance(DistanceUnit.MM)>685)
             moveWithRightSensor(683, 0.3*scale);
+
+        if(usingCamera)
+            detector.stop();
 
         goV2(1000, 0.5, new double[]{0,0,0,0}, true);
         servosDown();

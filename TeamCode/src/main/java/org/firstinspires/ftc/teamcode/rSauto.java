@@ -109,21 +109,12 @@ public class rSauto extends LinearOpMode
     // State used for updating telemetry
     Orientation angles;
     Acceleration gravity;
-    String  sounds[] =  {"ss_alarm", "ss_bb8_down", "ss_bb8_up", "ss_darth_vader", "ss_fly_by",
-            "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
-            "ss_light_speed", "ss_mine", "ss_power_up", "ss_r2d2_up", "ss_roger_roger", "ss_siren", "ss_wookie" };
-    boolean soundPlaying = false;
+    boolean usingCamera = true;
     SkystoneDetector detector = null;
 
     @Override
     public void runOpMode() {
-        // Variables for choosing from the available sounds
-        int     soundIndex      = 0;
-        int     soundID         = -1;
-        boolean was_dpad_up     = false;
-        boolean was_dpad_down   = false;
 
-        Context myApp = hardwareMap.appContext;
         detector = new SkystoneDetector(hardwareMap, true, true,true);
 
         voltage = getBatteryVoltage();
@@ -203,21 +194,25 @@ public class rSauto extends LinearOpMode
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         gravity = imu.getGravity();
         String angle = formatAngle(angles.angleUnit, angles.firstAngle);
-        double ang = Double.parseDouble(angle);
+
 
         telemetry.addData("Robot", "Initialized");
         int blockPos = 0;
 
         //waitForStart();
-        while (!opModeIsActive() && !isStopRequested()) {
-            telemetry.addData("blockPos", detector.getPos());
-            if(gamepad1.x)blockPos = 0;
-            if(gamepad1.a)blockPos = 1;
-            if(gamepad1.b)blockPos = 2;
-            if(gamepad1.y)blockPos = (int)detector.getPos();
-            telemetry.addData("blockPOs", blockPos);
+        while (!isStopRequested()&&!opModeIsActive()) {
+            if(usingCamera)
+                telemetry.addData("blockPos", detector.getPos());
+            else
+                telemetry.addData("blockPOs", blockPos);
+            if(gamepad1.x){blockPos = 0; usingCamera = false; detector.stop();}
+            if(gamepad1.a){blockPos = 1; usingCamera = false; detector.stop();}
+            if(gamepad1.b){blockPos = 2; usingCamera = false; detector.stop();}
+
             telemetry.update();
         }
+        if(usingCamera)
+            blockPos = (int)detector.getPos();
 
         runtime.reset();
 
@@ -419,7 +414,9 @@ public class rSauto extends LinearOpMode
         if(sRL.getDistance(DistanceUnit.MM)>683)
             moveWithLeftSensor(681, 0.3*scale);
 
-        detector.stop();
+        if(usingCamera)
+            detector.stop();
+
         goV2(1000, 0.7, new double[]{0,0,0,0}, true);
         servosDown();
     }

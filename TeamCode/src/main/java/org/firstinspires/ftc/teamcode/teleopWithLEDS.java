@@ -36,9 +36,9 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 /**
  * Created by isong on 10/17/18.
  */
-@TeleOp(group = "a", name="TeleOp")
+@TeleOp(group = "z", name="TeleOp with LEDS")
 
-public class teleop extends LinearOpMode {
+public class teleopWithLEDS extends LinearOpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor FL = null;
@@ -52,6 +52,8 @@ public class teleop extends LinearOpMode {
     private Servo clawServo = null;
     private Servo foundServL = null;
     private Servo foundServR = null;
+    RevBlinkinLedDriver blinkinLedDriver;
+    private String pattern = "";
 
     boolean clawClosed = false;
 
@@ -81,7 +83,7 @@ public class teleop extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         // Variables for choosing from the available sounds
-        int     soundIndex      = 8;
+        int     soundIndex      = 0;
         int     soundID         = -1;
         boolean yPrev     = false;
         boolean xPrev   = false;
@@ -96,6 +98,8 @@ public class teleop extends LinearOpMode {
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
         params.loopControl = 0;
         params.waitForNonLoopingSoundsToFinish = true;
+
+        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blink");
 
         FL = hardwareMap.get(DcMotor.class, "fL");FR = hardwareMap.get(DcMotor.class, "fR");
         BL = hardwareMap.get(DcMotor.class, "bL");BR = hardwareMap.get(DcMotor.class, "bR");
@@ -135,7 +139,8 @@ public class teleop extends LinearOpMode {
         touch = hardwareMap.get(TouchSensor.class, "touch");
 
         //initIMU();
-
+        blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_END_TO_END_BLEND);
+        pattern = "CP1_2_END_TO_END_BLEND";
         telemetry.addData("Robot", "Initialized");
         telemetry.update();
 
@@ -178,8 +183,12 @@ public class teleop extends LinearOpMode {
                 clawServo.setPosition(0.15);
             }else if(gamepad2.right_bumper){
                 clawServo.setPosition(0);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_COLOR_GRADIENT);
+                pattern = "CP1_2_COLOR_GRADIENT";
             }else if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<30 && clawServo.getPosition()!=0){
                 clawServo.setPosition(0);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE_GREEN);
+                pattern = "BLUE_GREEN";
             }
 
             //ARM STUFF
@@ -195,6 +204,10 @@ public class teleop extends LinearOpMode {
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     LIFT.setPower(0);
                 }else if (-gamepad2.left_stick_y>=0){
+                    if(!pattern.equals("CP1_2_SINELON")) {
+                        blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_SINELON);
+                        pattern = "CP1_2_SINELON";
+                    }
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     LIFT.setPower(-gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25);
                 }else{
@@ -206,6 +219,11 @@ public class teleop extends LinearOpMode {
                 if(LIFT.getCurrentPosition()>50){
                     LIFT.setTargetPosition(LIFT.getCurrentPosition()); //STALL
                     LIFT.setPower(0.2);
+
+                    if(pattern.equals("CP1_2_SINELON")) {
+                        blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP2_BREATH_SLOW);
+                        pattern = "CP2_BREATH_SLOW";
+                    }
 
                 }else if(LIFT.getCurrentPosition()<=5 && LIFT.getMode()==DcMotor.RunMode.RUN_TO_POSITION){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -224,18 +242,22 @@ public class teleop extends LinearOpMode {
             }else if(gamepad1.right_bumper && intSens.getDistance(DistanceUnit.MM)>70){
                 IN1.setPower(0.7);
                 IN2.setPower(0.7);
+                if(!pattern.equals("CP1_LIGHT_CHASE")) {
+                    blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_LIGHT_CHASE);
+                    pattern = "CP1_LIGHT_CHASE";
+                }
             }else{
                 IN1.setPower(0);
                 IN2.setPower(0);
             }
 
             /**if(gamepad1.left_trigger != 0){
-                IN1.setPower(-gamepad1.left_trigger);
-                IN2.setPower(-gamepad1.left_trigger);
-            }else if(gamepad1.right_trigger != 0){
-                IN1.setPower(gamepad1.right_trigger);
-                IN2.setPower(gamepad1.right_trigger);
-            }*/
+             IN1.setPower(-gamepad1.left_trigger);
+             IN2.setPower(-gamepad1.left_trigger);
+             }else if(gamepad1.right_trigger != 0){
+             IN1.setPower(gamepad1.right_trigger);
+             IN2.setPower(gamepad1.right_trigger);
+             }*/
 
             //FOUNDATION
 
