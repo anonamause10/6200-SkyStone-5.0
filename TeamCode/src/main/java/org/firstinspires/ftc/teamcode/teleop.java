@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -66,7 +67,7 @@ public class teleop extends LinearOpMode {
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
     private DistanceSensor intSens = null;
-    private TouchSensor touch = null;
+    private DigitalChannel touch = null;
     // List of available sound resources
     String  sounds[] =  {"ss_alarm", "ss_bb8_down", "ss_bb8_up", "ss_darth_vader", "ss_fly_by",
             "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
@@ -135,7 +136,8 @@ public class teleop extends LinearOpMode {
         foundServR.setPosition(.3);
 
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
-        touch = hardwareMap.get(TouchSensor.class, "touch");
+        touch = hardwareMap.get(DigitalChannel.class, "touch");
+        touch.setMode(DigitalChannel.Mode.INPUT);
 
         //initIMU();
 
@@ -193,16 +195,15 @@ public class teleop extends LinearOpMode {
             }
 
             if(gamepad2.left_stick_y != 0 || gamepad2.right_stick_y != 0) {
-                if(touch.isPressed()){
-                    LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    LIFT.setPower(0);
-                }else if (-gamepad2.left_stick_y>=0){
+                if (-gamepad2.left_stick_y>=0){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     LIFT.setPower(-gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25);
-                }else if(!touch.isPressed()){
+                }else if(touch.getState()){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     LIFT.setPower(-0.5 * gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25 + 0.2);
+                }else{
+                    LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }
             }else{
 
@@ -273,7 +274,7 @@ public class teleop extends LinearOpMode {
             telemetry.addData("Lif2:",LIFT.getCurrentPosition());
             telemetry.addData("DISTANCE", intSens.getDistance(DistanceUnit.MM));
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("touch", "" + touch.getValue(), touch.isPressed());
+            telemetry.addData("touch", touch.getState());
             telemetry.update();
 
         }
