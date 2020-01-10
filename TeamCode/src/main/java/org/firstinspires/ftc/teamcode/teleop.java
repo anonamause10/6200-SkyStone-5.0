@@ -203,6 +203,7 @@ public class teleop extends LinearOpMode {
                     LIFT.setPower(-0.5 * gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25 + 0.2);
                 }else{
                     LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    LIFT.setPower(0);
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }
             }else{
