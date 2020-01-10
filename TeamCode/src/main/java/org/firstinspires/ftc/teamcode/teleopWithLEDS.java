@@ -36,6 +36,7 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 /**
  * Created by isong on 10/17/18.
  */
+@Disabled
 @TeleOp(group = "z", name="TeleOp with LEDS")
 
 public class teleopWithLEDS extends LinearOpMode {
@@ -160,6 +161,8 @@ public class teleopWithLEDS extends LinearOpMode {
             //CLAW STUFF
             if (gamepad2.a) {
                 rotateServo.setPosition(0.69);
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_END_TO_END_BLEND);
+                pattern = "CP1_2_END_TO_END_BLEND";
             }else if(gamepad2.b){
                 rotateServo.setPosition(0.025);
 
@@ -187,8 +190,8 @@ public class teleopWithLEDS extends LinearOpMode {
                 pattern = "CP1_2_COLOR_GRADIENT";
             }else if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<30 && clawServo.getPosition()!=0){
                 clawServo.setPosition(0);
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE_GREEN);
-                pattern = "BLUE_GREEN";
+                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+                pattern = "GREEN";
             }
 
             //ARM STUFF
@@ -242,9 +245,9 @@ public class teleopWithLEDS extends LinearOpMode {
             }else if(gamepad1.right_bumper && intSens.getDistance(DistanceUnit.MM)>70){
                 IN1.setPower(0.7);
                 IN2.setPower(0.7);
-                if(!pattern.equals("CP1_LIGHT_CHASE")) {
-                    blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_LIGHT_CHASE);
-                    pattern = "CP1_LIGHT_CHASE";
+                if(!pattern.equals("CP1_SHOT")) {
+                    blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_SHOT);
+                    pattern = "CP1_SHOT";
                 }
             }else{
                 IN1.setPower(0);

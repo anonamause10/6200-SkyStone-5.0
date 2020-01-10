@@ -110,7 +110,7 @@ public class bSauto extends LinearOpMode
     Orientation angles;
     Acceleration gravity;
     boolean usingCamera = true;
-    SkystoneDetector detector = null;
+    SkystoneDetectorNew detector = null;
 
     @Override
     public void runOpMode() {
@@ -122,7 +122,7 @@ public class bSauto extends LinearOpMode
 
         Context myApp = hardwareMap.appContext;
 
-        detector = new SkystoneDetector(hardwareMap, true, false,true);
+        detector = new SkystoneDetectorNew(hardwareMap, true, false,true);
 
         voltage = getBatteryVoltage();
         scale = 12.8 / voltage;
@@ -261,7 +261,7 @@ public class bSauto extends LinearOpMode
         if(blockPos == 2)
             sleep(500);
         else if(blockPos == 1)
-            sleep(620);
+            sleep(650);
         else
             sleep(770);
 
@@ -317,7 +317,7 @@ public class bSauto extends LinearOpMode
 
         if(sRR.getDistance(DistanceUnit.MM)<680)
             moveWithRightSensor(682, 0.3*scale);
-        if(sRR.getDistance(DistanceUnit.MM)>685)
+        if(sRR.getDistance(DistanceUnit.MM)>684)
             moveWithRightSensor(683, 0.3*scale);
         LIFT.setPower(-0.02);
 
@@ -353,12 +353,15 @@ public class bSauto extends LinearOpMode
         intakeOff();
         closeClaw();
 
-        turn(270.3, new double[]{0,0,0,0}, false, 0);
+        turn(270, new double[]{0,0,0,0}, false, 0);
 
         if(sRR.getDistance(DistanceUnit.MM)<680)
             moveWithRightSensor(682, 0.3*scale);
-        if(sRR.getDistance(DistanceUnit.MM)>684)
+
+        if(sRR.getDistance(DistanceUnit.MM)>=684)
             moveWithRightSensor(683, 0.3*scale);
+        else
+            turn(270, new double[]{0,0,0,0}, false, 0);
 
         power = -0.7*scale;
         fL.setPower(power);
@@ -408,8 +411,8 @@ public class bSauto extends LinearOpMode
 
         if(sRR.getDistance(DistanceUnit.MM)<680)
             moveWithRightSensor(682, 0.3*scale);
-        if(sRR.getDistance(DistanceUnit.MM)>685)
-            moveWithRightSensor(683, 0.3*scale);
+        if(sRR.getDistance(DistanceUnit.MM)>=785)
+            moveWithRightSensor(700, 0.3*scale);
 
         if(usingCamera)
             detector.stop();
@@ -942,10 +945,10 @@ public class bSauto extends LinearOpMode
                         bL.setPower(-0.22*scale);
                         bR.setPower(0.22*scale);
                     }else{
-                        fL.setPower(-0.17*scale);
-                        fR.setPower(0.17*scale);
-                        bL.setPower(-0.17*scale);
-                        bR.setPower(0.17*scale);
+                        fL.setPower(-0.16*scale);
+                        fR.setPower(0.16*scale);
+                        bL.setPower(-0.16*scale);
+                        bR.setPower(0.16*scale);
                     }
                 }
             }else if (ang > vuAng) {
@@ -964,10 +967,10 @@ public class bSauto extends LinearOpMode
                         bL.setPower(0.22*scale);
                         bR.setPower(-0.22*scale);
                     }else{
-                        fL.setPower(0.17*scale);
-                        fR.setPower(-0.17*scale);
-                        bL.setPower(0.17*scale);
-                        bR.setPower(-0.17*scale);
+                        fL.setPower(0.16*scale);
+                        fR.setPower(-0.16*scale);
+                        bL.setPower(0.16*scale);
+                        bR.setPower(-0.16*scale);
                     }}
             }
             ang = getHeading();

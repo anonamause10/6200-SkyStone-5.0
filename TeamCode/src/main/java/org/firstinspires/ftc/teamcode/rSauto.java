@@ -110,12 +110,12 @@ public class rSauto extends LinearOpMode
     Orientation angles;
     Acceleration gravity;
     boolean usingCamera = true;
-    SkystoneDetector detector = null;
+    SkystoneDetectorNew detector = null;
 
     @Override
     public void runOpMode() {
 
-        detector = new SkystoneDetector(hardwareMap, true, true,true);
+        detector = new SkystoneDetectorNew(hardwareMap, true, true,true);
 
         voltage = getBatteryVoltage();
         scale = 12.8 / voltage;

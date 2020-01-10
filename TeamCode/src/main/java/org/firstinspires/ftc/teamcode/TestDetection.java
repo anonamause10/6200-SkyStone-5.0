@@ -58,7 +58,7 @@ import java.util.concurrent.TimeUnit;
 @TeleOp
 public class TestDetection extends LinearOpMode
 {
-    private SkystoneDetector detector;
+    private SkystoneDetectorNew detector;
 
 
 
@@ -79,7 +79,7 @@ public class TestDetection extends LinearOpMode
             }
             telemetry.update();
         }
-        detector = new SkystoneDetector(hardwareMap, true, blockPos,true);
+        detector = new SkystoneDetectorNew(hardwareMap, true, blockPos,true);
 
         while (opModeIsActive())
         {

@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 
-public class SkystoneDetector
+public class SkystoneDetectorNew
 {
     OpenCvCamera phoneCam;
     private Mat displayMat = new Mat(); // Display debug info to the screen (this is what is returned)
@@ -78,7 +78,7 @@ public class SkystoneDetector
     public boolean right;
     public boolean whole;
 
-    public SkystoneDetector(HardwareMap hardwareMap, boolean webcam, boolean right, boolean whole)
+    public SkystoneDetectorNew(HardwareMap hardwareMap, boolean webcam, boolean right, boolean whole)
     {
         this.right = right;
         this.whole = whole;
@@ -195,7 +195,7 @@ public class SkystoneDetector
             Imgproc.GaussianBlur(colormat,colormat,new Size(3,3),0);
             Core.split(colormat, channels);
             if(channels.size() > 0){
-                Imgproc.threshold(channels.get(1), mask, 90, 255, Imgproc.THRESH_BINARY_INV);
+                Imgproc.threshold(channels.get(1), mask, 110, 255, Imgproc.THRESH_BINARY_INV);
             }
 
 
@@ -250,27 +250,45 @@ public class SkystoneDetector
                     if(right){
                         if (black != null) {
                             dist = Math.abs(black.br().x - input.width());
-                            if(dist > 500) {
+
+                            double pos0 = mask.get(322,576)[0];
+                            double pos1 = mask.get(322,352)[0];
+                            double pos2 = mask.get(322,256)[0];
+
+                            double donk = Math.min(pos0, pos2);
+                            donk = Math.min(donk, pos1);
+                            if(donk == pos0) {
                                 pos = 0;
-                            }else if(dist > 310){
-                                pos = 2;
-                            }else if(dist > 120){
+                            }else if(donk == pos1){
                                 pos = 1;
+                            }else if(donk == pos2){
+                                pos = 2;
                             }else{
                                 pos = 0;
                             }
+                            Log.w("sizes","Blockpos0: "+pos0);
+                            Log.w("sizes","Blockpos1: "+pos1);
+                            Log.w("sizes","Blockpos2: "+pos2);
+
                         }
                     }
                     else{
                         if (black != null) {
                             dist = Math.abs(black.tl().x);
-                            if(dist < 790 && dist>550){
+                            double pos1 = mask.get(322,576)[0];
+                            double pos0 = mask.get(322,352)[0];
+
+                            if(pos1 == 255 && pos0 == 255){
+                                pos = 2;
+                            }else if(pos1 == 255){
                                 pos = 0;
-                            }else if(dist>550){
+                            }else if(pos0 == 255){
                                 pos = 1;
                             }else{
-                                pos = 2;
+                                pos = 0;
                             }
+                            Log.w("sizes","Blockpos0: "+pos0);
+                            Log.w("sizes","Blockpos1: "+pos1);
                         }
                     }
                 }
@@ -288,7 +306,9 @@ public class SkystoneDetector
                 }
             }
 
-
+            Imgproc.circle(displayMat, new Point(576, 322), 20, new Scalar(255,255,255));
+            Imgproc.circle(displayMat, new Point(352, 322), 20, new Scalar(255,255,255));
+            Imgproc.circle(displayMat, new Point(256, 322), 20, new Scalar(255,255,255));
             return displayMat;
         }
 
@@ -391,7 +411,7 @@ public class SkystoneDetector
             totalScore += ratioscore;
             totalScore += areascore;
             totalScore+=rightDist;
-            if(rect.br().y<220){
+            if(rect.br().y<250){
                 totalScore = 1000000;
             }
             if(!right && rect.tl().x<100){

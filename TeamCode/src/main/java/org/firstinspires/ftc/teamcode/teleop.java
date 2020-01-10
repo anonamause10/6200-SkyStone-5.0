@@ -52,6 +52,7 @@ public class teleop extends LinearOpMode {
     private Servo clawServo = null;
     private Servo foundServL = null;
     private Servo foundServR = null;
+    private DcMotor YEETER = null;
 
     boolean clawClosed = false;
 
@@ -116,6 +117,8 @@ public class teleop extends LinearOpMode {
         LIFT.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         LIFT.setPower(0);
         LIFT.setTargetPosition(LIFT.getCurrentPosition());
+
+        YEETER = hardwareMap.get(DcMotor.class, "YEET");
 
         IN1 = hardwareMap.get(DcMotor.class, "IN1");
         IN1.setDirection(FORWARD);
@@ -197,7 +200,7 @@ public class teleop extends LinearOpMode {
                 }else if (-gamepad2.left_stick_y>=0){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     LIFT.setPower(-gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25);
-                }else{
+                }else if(!touch.isPressed()){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     LIFT.setPower(-0.5 * gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25 + 0.2);
                 }
@@ -212,6 +215,13 @@ public class teleop extends LinearOpMode {
                 }else{
                     LIFT.setPower(0);
                 }
+            }
+            if(gamepad2.right_trigger!=0){
+                YEETER.setPower(gamepad2.right_trigger);
+            }else if(gamepad2.left_trigger!=0){
+                YEETER.setPower(-gamepad2.left_trigger);
+            }else{
+                YEETER.setPower(0);
             }
             dPadDPrev = gamepad2.dpad_down; dPadUPrev = gamepad2.dpad_up;
             dPadLPrev = gamepad2.dpad_left; dPadRPrev = gamepad2.dpad_right;
@@ -229,10 +239,12 @@ public class teleop extends LinearOpMode {
                 IN2.setPower(0);
             }
 
-            /**if(gamepad1.left_trigger != 0){
-                IN1.setPower(-gamepad1.left_trigger);
-                IN2.setPower(-gamepad1.left_trigger);
-            }else if(gamepad1.right_trigger != 0){
+            if(gamepad1.left_trigger != 0){
+                IN1.setPower(gamepad1.left_trigger);
+                IN2.setPower(gamepad1.left_trigger);
+            }
+
+            /**}else if(gamepad1.right_trigger != 0){
                 IN1.setPower(gamepad1.right_trigger);
                 IN2.setPower(gamepad1.right_trigger);
             }*/
@@ -261,6 +273,7 @@ public class teleop extends LinearOpMode {
             telemetry.addData("Lif2:",LIFT.getCurrentPosition());
             telemetry.addData("DISTANCE", intSens.getDistance(DistanceUnit.MM));
             telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("touch", "" + touch.getValue(), touch.isPressed());
             telemetry.update();
 
         }
