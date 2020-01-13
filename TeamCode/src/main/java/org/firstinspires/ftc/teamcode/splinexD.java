@@ -37,11 +37,12 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 /**
  * Created by isong on 10/17/18.
  */
-@TeleOp(group = "a", name="TeleOp")
+@TeleOp(group = "z", name="help")
 
-public class teleop extends LinearOpMode {
+public class splinexD extends LinearOpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
+    private ElapsedTime runtime2 = new ElapsedTime();
     private DcMotor FL = null;
     private DcMotor FR = null;
     private DcMotor BL = null;
@@ -54,15 +55,19 @@ public class teleop extends LinearOpMode {
     private Servo foundServL = null;
     private Servo foundServR = null;
     private DcMotor YEETER = null;
-    boolean lightsaber = false;
+    private double[] powers = {0.8, 0.05, 0.8, 0.05};
 
-    boolean clawClosed = false;
+    private int indx = 0;
 
     private boolean dPadDPrev = false;
     private boolean dPadUPrev = false;
     private boolean dPadLPrev = false;
     private boolean dPadRPrev = false;
+    private boolean drive = true;
     private boolean sPrev = false;
+    private boolean aPrev = false;
+    private double secondsToDisplay = 0;
+
 
 
     private boolean lbumpprev = false;
@@ -154,119 +159,71 @@ public class teleop extends LinearOpMode {
         runtime.reset();
         while (opModeIsActive()) {
 
-            //DRIVE + MAYBE LED + PROBABLY NOT SOUND STUFF
-            drive();
-
-            //CLAW STUFF
-            if (gamepad2.a) {
-                rotateServo.setPosition(0.69);
-            }else if(gamepad2.b){
-                rotateServo.setPosition(0.025);
-                playSound( 0, myApp, params);
+            if(drive)
+                drive();
+            if(gamepad2.start && !sPrev){
+                drive = !drive;
             }
+            sPrev = gamepad2.start;
 
-            if(gamepad2.left_bumper) {
-                clawServo.setPosition(0.15);
-            }else if(gamepad2.right_bumper){
-                clawServo.setPosition(0);
-            }else if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<30 && clawServo.getPosition()!=0){
-                clawServo.setPosition(0);
+            if(gamepad2.dpad_up&&!dPadUPrev){
+                indx++;
+                if(indx>3)indx = 0;
+            }else if(gamepad2.dpad_down&&!dPadDPrev){
+                indx--;
+                if(indx<0)indx = 3;
             }
+            dPadDPrev = gamepad2.dpad_down;
+            dPadUPrev = gamepad2.dpad_up;
 
-            //ARM STUFF
-
-            if(gamepad2.start && gamepad2.back){
-                LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            if(gamepad2.dpad_left&&!dPadLPrev){
+                powers[indx] = powers[indx]-0.05;
+            }else if(gamepad2.dpad_right&&!dPadRPrev){
+                powers[indx] = powers[indx]+0.05;
             }
+            dPadLPrev = gamepad2.dpad_left;
+            dPadRPrev = gamepad2.dpad_right;
 
-            if(gamepad2.left_stick_y != 0 || gamepad2.right_stick_y != 0) {
-                if (-gamepad2.left_stick_y>=0){
-                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    LIFT.setPower(-gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25);
-                }else if(touch.getState()){
-                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    LIFT.setPower(-0.5 * gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25 + 0.2);
-                }else{
-                    LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    LIFT.setPower(0);
-                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                }
-            }else{
-
-                if(LIFT.getCurrentPosition()>50){
-                    LIFT.setTargetPosition(LIFT.getCurrentPosition()); //STALL
-                    LIFT.setPower(0.2);
-
-                }else if(LIFT.getCurrentPosition()<=5 && LIFT.getMode()==DcMotor.RunMode.RUN_TO_POSITION){
-                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                }else{
-                    LIFT.setPower(0);
-                }
-            }
-            if(gamepad2.right_trigger!=0){
-                YEETER.setPower(-gamepad2.right_trigger);
-                if(!lightsaber) {
-                    playSound(8, myApp, params);
-                    lightsaber = true;
-                }
-            }else if(gamepad2.left_trigger!=0){
-                YEETER.setPower(gamepad2.left_trigger);
-                if(lightsaber) lightsaber = false;
-            }else{
-                YEETER.setPower(0);
-            }
-            dPadDPrev = gamepad2.dpad_down; dPadUPrev = gamepad2.dpad_up;
-            dPadLPrev = gamepad2.dpad_left; dPadRPrev = gamepad2.dpad_right;
-
-            //INTAKE STUFF
-
-            if(gamepad1.left_bumper){
-                IN1.setPower(-0.4);
-                IN2.setPower(-0.4);
-            }else if(gamepad1.right_bumper && intSens.getDistance(DistanceUnit.MM)>70){
-                IN1.setPower(0.7);
-                IN2.setPower(0.7);
-            }else{
-                IN1.setPower(0);
-                IN2.setPower(0);
-            }
-
-            if(gamepad1.left_trigger != 0){
-                IN1.setPower(gamepad1.left_trigger);
-                IN2.setPower(gamepad1.left_trigger);
-            }
-
-            /**}else if(gamepad1.right_trigger != 0){
-                IN1.setPower(gamepad1.right_trigger);
-                IN2.setPower(gamepad1.right_trigger);
-            }*/
-
-            //FOUNDATION
-
-            if(gamepad1.dpad_up){
+            if(gamepad1.dpad_up||gamepad2.left_bumper){
                 foundServL.setPosition(0.4);
                 foundServR.setPosition(0.65);
-            }else if(gamepad1.dpad_down){
+            }else if(gamepad1.dpad_down || gamepad2.right_bumper){
                 foundServL.setPosition(0);
                 foundServR.setPosition(0.4);
             }
 
-            //VARIABLE CHECKS
+            if(gamepad2.a){
+                FL.setPower(powers[0]);
+                FR.setPower(powers[1]);
+                BL.setPower(powers[2]);
+                BR.setPower(powers[3]);
 
-            xPrev = gamepad2.x;
-            yPrev = gamepad2.y;
+                if(!aPrev)
+                    runtime2.reset();
+
+            }else if(!drive){
+                FL.setPower(0);
+                FR.setPower(0);
+                BL.setPower(0);
+                BR.setPower(0);
+                if(aPrev){
+                    secondsToDisplay = runtime2.milliseconds();
+                }
+            }
+            aPrev = gamepad2.a;
 
             //TELEMETRY
 
             telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
                             "back left (%.2f), back right (%.2f)", FL.getPower(), FR.getPower(),
                     BL.getPower(), BR.getPower());
-            telemetry.addData("Lift:", LIFT.getPower());
-            telemetry.addData("Lif2:",LIFT.getCurrentPosition());
-            telemetry.addData("DISTANCE", intSens.getDistance(DistanceUnit.MM));
+
+            telemetry.addData("Wheel Powers", "front left (%.2f), front right (%.2f), " +
+            "back left (%.2f), back right (%.2f)", powers[0], powers[1], powers[2], powers[3]);
+            telemetry.addData("indx", indx);
+            telemetry.addData("drive", drive);
+            telemetry.addData("seconds2", secondsToDisplay);
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("touch", touch.getState());
             telemetry.update();
 
         }

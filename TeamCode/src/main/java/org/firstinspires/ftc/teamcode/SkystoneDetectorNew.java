@@ -253,7 +253,7 @@ public class SkystoneDetectorNew
 
                             double pos0 = mask.get(322,576)[0];
                             double pos1 = mask.get(322,352)[0];
-                            double pos2 = mask.get(322,256)[0];
+                            double pos2 = mask.get(322,236)[0];
 
                             double donk = Math.min(pos0, pos2);
                             donk = Math.min(donk, pos1);
@@ -308,7 +308,7 @@ public class SkystoneDetectorNew
 
             Imgproc.circle(displayMat, new Point(576, 322), 20, new Scalar(255,255,255));
             Imgproc.circle(displayMat, new Point(352, 322), 20, new Scalar(255,255,255));
-            Imgproc.circle(displayMat, new Point(256, 322), 20, new Scalar(255,255,255));
+            Imgproc.circle(displayMat, new Point(236, 322), 20, new Scalar(255,255,255));
             return displayMat;
         }
 

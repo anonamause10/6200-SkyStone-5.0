@@ -43,6 +43,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -91,8 +92,9 @@ public class rSauto extends LinearOpMode
     private DistanceSensor sRF;
     private DistanceSensor sRR;
     private DistanceSensor sRL;
-    private TouchSensor touch;
+    private DigitalChannel touch;
     private PIDController pidDrive;
+    private DcMotor YEETER;
 
     private double voltage = 0.0;
     private double scale = 0.0;
@@ -164,15 +166,16 @@ public class rSauto extends LinearOpMode
         ROTATE.setPosition(.69);
         servo = hardwareMap.get(Servo.class, "left");
         servo2 = hardwareMap.get(Servo.class, "right");
-        servo.setPosition(.7);
-        servo2.setPosition(.3);
+        servo.setPosition(0);
+        servo2.setPosition(.4);
 
         sR = hardwareMap.get(DistanceSensor.class, "DSB");
         sR2 = hardwareMap.get(DistanceSensor.class, "DS2");
         sRR = hardwareMap.get(DistanceSensor.class, "DSR");
         sRL = hardwareMap.get(DistanceSensor.class, "DSL");
         sRF = hardwareMap.get(DistanceSensor.class, "DSF");
-        touch = hardwareMap.get(TouchSensor.class, "touch");
+        touch = hardwareMap.get(DigitalChannel.class, "touch");
+        touch.setMode(DigitalChannel.Mode.INPUT);
 
 
         BNO055IMU.Parameters parameters2 = new BNO055IMU.Parameters();
@@ -194,6 +197,8 @@ public class rSauto extends LinearOpMode
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         gravity = imu.getGravity();
         String angle = formatAngle(angles.angleUnit, angles.firstAngle);
+
+        YEETER = hardwareMap.get(DcMotor.class, "YEET");
 
 
         telemetry.addData("Robot", "Initialized");
@@ -233,6 +238,7 @@ public class rSauto extends LinearOpMode
         if(blockPos==2)
             sleep(100);
         sleep(300);
+
         double power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
@@ -240,13 +246,23 @@ public class rSauto extends LinearOpMode
         bR.setPower(power);
         sleep(900);
 
+        if(sR2.getDistance(DistanceUnit.MM)<70){
+            intakeOff();
+            closeClaw();}
 
         power = -0.5*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(130);
+        sleep(80);
+        if(CLAW.getPosition()>0.1){
+        intakeOff();
+        closeClaw();
+        }
+
+        sleep(50);
+
         if(blockPos == 2)
             sleep(570);
         else if(blockPos == 1)
@@ -255,8 +271,7 @@ public class rSauto extends LinearOpMode
             sleep(770);
 
         array1 = new double[] {0.5, 0.5, 0.5, 0.5};
-        intakeOff();
-        closeClaw();
+
         turn(270, new double[]{0,0,0,0}, false, 0);
         servosUp();
 
@@ -284,11 +299,17 @@ public class rSauto extends LinearOpMode
         bL.setPower(-0.7*scale);
         bR.setPower(0.7*scale);
         sleep(300);
-        fL.setPower(0.8*scale);
-        fR.setPower(0.05*scale);
-        bL.setPower(0.8*scale);
-        bR.setPower(0.05*scale);
         rotateIn();
+        fL.setPower(0.7*scale);
+        fR.setPower(0.7*scale);
+        bL.setPower(0.7*scale);
+        bR.setPower(0.7*scale);
+        sleep(800);
+        fL.setPower(0.7*scale);
+        fR.setPower(-0.7*scale);
+        bL.setPower(0.7*scale);
+        bR.setPower(-0.7*scale);
+
         while(opModeIsActive()&&getHeading()>91){
             if(getHeading()<125 && ROTATE.getPosition()>0.6 && LIFT.getCurrentPosition()>5){
                 LIFT.setPower(-0.2*scale);
@@ -300,12 +321,13 @@ public class rSauto extends LinearOpMode
         motorsOff();
         servosUp();
         LIFT.setPower(-0.01*scale);
-        power = -0.3*scale;
+
+        power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(350);
+        sleep(100);
 
         turn(90, new double[]{0,0,0,0}, getHeading()<90, 0);
 
@@ -392,14 +414,16 @@ public class rSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(300);
+        sleep(150);
+        LIFT.setPower(0.2);
+        sleep(150);
         if(sR.getDistance(DistanceUnit.MM)>100)
             sleep(200);
-        LIFT.setPower(0.2);
         motorsOff();
         sleep(300);
         openClaw();
         sleep(200);
+
         power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
@@ -407,18 +431,29 @@ public class rSauto extends LinearOpMode
         bR.setPower(power);
         sleep(400);
         rotateIn();
-        sleep(300);
-
-        if(sRL.getDistance(DistanceUnit.MM)<678)
-            moveWithLeftSensor(680, 0.3*scale);
-        if(sRL.getDistance(DistanceUnit.MM)>683)
-            moveWithLeftSensor(681, 0.3*scale);
+        sleep(500);
+        motorsOff();
+        LIFT.setPower(-0.3);
 
         if(usingCamera)
             detector.stop();
-
-        goV2(1000, 0.7, new double[]{0,0,0,0}, true);
+        if(LIFT.getCurrentPosition()<10 || !touch.getState()){
+            LIFT.setPower(0);
+        }
+        YEETER.setPower(-1);
+        sleep(300);
+        if(LIFT.getCurrentPosition()<10 || !touch.getState()){
+            LIFT.setPower(0);
+        }
+        YEETER.setPower(0);
+        //goV2(1000, 0.7, new double[]{0,0,0,0}, true);
         servosDown();
+
+        while(opModeIsActive()){
+        if(LIFT.getCurrentPosition()<10 || !touch.getState()){
+            LIFT.setPower(0);
+            break;
+        }}
     }
     private void goV2(int ticks, double power, double[] endPowers, boolean intakeDeployed){
         boolean phase2 = false;
@@ -446,7 +481,7 @@ public class rSauto extends LinearOpMode
                     phase2 = true;
                     runtim2.reset();
                 }
-                if((phase2 && (touch.isPressed() || LIFT.getCurrentPosition() < -40)) || runtim2.seconds()>0.7){
+                if((phase2 && (!touch.getState() || LIFT.getCurrentPosition() < -40)) || runtim2.seconds()>0.7){
                     LIFT.setPower(0);
                     LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -489,13 +524,13 @@ public class rSauto extends LinearOpMode
         CLAW.setPosition(0.15);
     }
     private void servosUp(){
-        servo.setPosition(.5);
-        servo2.setPosition(.5);
+        servo.setPosition(.4);
+        servo2.setPosition(.65);
         sleep(100);
     }
     private void servosDown(){
-        servo.setPosition(.7);
-        servo2.setPosition(.3);
+        servo.setPosition(0);
+        servo2.setPosition(.4);
         sleep(100);
     }
 

@@ -43,6 +43,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -91,8 +92,9 @@ public class bSauto extends LinearOpMode
     private DistanceSensor sRF;
     private DistanceSensor sRR;
     private DistanceSensor sRL;
-    private TouchSensor touch;
+    private DigitalChannel touch;
     private PIDController pidDrive;
+    private DcMotor YEETER;
 
     private double voltage = 0.0;
     private double scale = 0.0;
@@ -158,6 +160,7 @@ public class bSauto extends LinearOpMode
         fR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         bL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         bR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        YEETER = hardwareMap.get(DcMotor.class, "YEET");
 
         LIFT = hardwareMap.get(DcMotor.class, "LIFT");
         LIFT.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -171,8 +174,8 @@ public class bSauto extends LinearOpMode
         ROTATE.setPosition(.69);
         servo = hardwareMap.get(Servo.class, "left");
         servo2 = hardwareMap.get(Servo.class, "right");
-        servo.setPosition(.7);
-        servo2.setPosition(.3);
+        servo.setPosition(0);
+        servo2.setPosition(.4);
 
         //SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, false, false);
 
@@ -181,7 +184,8 @@ public class bSauto extends LinearOpMode
         sRR = hardwareMap.get(DistanceSensor.class, "DSR");
         sRL = hardwareMap.get(DistanceSensor.class, "DSL");
         sRF = hardwareMap.get(DistanceSensor.class, "DSF");
-        touch = hardwareMap.get(TouchSensor.class, "touch");
+        touch = hardwareMap.get(DigitalChannel.class, "touch");
+        touch.setMode(DigitalChannel.Mode.INPUT);
 
 
         BNO055IMU.Parameters parameters2 = new BNO055IMU.Parameters();
@@ -235,7 +239,7 @@ public class bSauto extends LinearOpMode
             array1 = array2;
         }
         if(blockPos == 2)
-            goV2(420, 0.5*scale, array1, false);
+            goV2(3800, 0.5*scale, array1, false);
         else
             goV2(850, 0.5*scale, array1, false);
         intake();
@@ -252,12 +256,22 @@ public class bSauto extends LinearOpMode
             sleep(100);
         }
 
+        if(sR2.getDistance(DistanceUnit.MM)<70){
+            intakeOff();
+            closeClaw();}
+
         power = -0.5*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(130);
+        sleep(80);
+        if(CLAW.getPosition()>0.1){
+            intakeOff();
+            closeClaw();
+        }
+
+        sleep(50);
         if(blockPos == 2)
             sleep(500);
         else if(blockPos == 1)
@@ -390,12 +404,13 @@ public class bSauto extends LinearOpMode
         bL.setPower(power);
         bR.setPower(power);
         sleep(190);
-
         rotateOut();
-        sleep(300);
+        sleep(150);
+        LIFT.setPower(0.2);
+        sleep(150);
+
         if(sR.getDistance(DistanceUnit.MM)>100)
             sleep(200);
-        LIFT.setPower(0.2);
         motorsOff();
         sleep(300);
         openClaw();
@@ -407,19 +422,31 @@ public class bSauto extends LinearOpMode
         bR.setPower(power);
         sleep(400);
         rotateIn();
-        sleep(300);
-
-        if(sRR.getDistance(DistanceUnit.MM)<680)
-            moveWithRightSensor(682, 0.3*scale);
-        if(sRR.getDistance(DistanceUnit.MM)>=785)
-            moveWithRightSensor(700, 0.3*scale);
+        sleep(500);
+        motorsOff();
+        LIFT.setPower(-0.3);
 
         if(usingCamera)
             detector.stop();
+        if(LIFT.getCurrentPosition()<10 || !touch.getState()){
+            LIFT.setPower(0);
+        }
 
-        goV2(1000, 0.5, new double[]{0,0,0,0}, true);
+        YEETER.setPower(-1);
+
+        sleep(300);
+        if(LIFT.getCurrentPosition()<10 || !touch.getState()){
+            LIFT.setPower(0);
+        }
+        YEETER.setPower(0);
+        //goV2(1000, 0.7, new double[]{0,0,0,0}, true);
         servosDown();
-        sleep(200);
+
+        while(opModeIsActive()){
+            if(LIFT.getCurrentPosition()<10 || !touch.getState()){
+                LIFT.setPower(0);
+                break;
+            }}
     }
     private void goV2(int ticks, double power, double[] endPowers, boolean intakeDeployed){
         boolean phase2 = false;
@@ -447,7 +474,7 @@ public class bSauto extends LinearOpMode
                     phase2 = true;
                     runtim2.reset();
                 }
-                if((phase2 && (touch.isPressed() || LIFT.getCurrentPosition() < -40)) || runtim2.seconds()>0.7){
+                if((phase2 && (!touch.getState() || LIFT.getCurrentPosition() < -40)) || runtim2.seconds()>0.7){
                     LIFT.setPower(0);
                     LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -490,13 +517,13 @@ public class bSauto extends LinearOpMode
         CLAW.setPosition(0.15);
     }
     private void servosUp(){
-        servo.setPosition(.5);
-        servo2.setPosition(.5);
+        servo.setPosition(.4);
+        servo2.setPosition(.65);
         sleep(100);
     }
     private void servosDown(){
-        servo.setPosition(.7);
-        servo2.setPosition(.3);
+        servo.setPosition(0);
+        servo2.setPosition(.4);
         sleep(100);
     }
 

@@ -29,7 +29,7 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 /**
  * Created by isong on 10/17/18.
  */
-@Disabled
+
 @TeleOp(name="one servo")
 
 public class servotester extends LinearOpMode {
@@ -46,7 +46,7 @@ public class servotester extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        S1 = hardwareMap.get(Servo.class, "servo");
+        S1 = hardwareMap.get(Servo.class, "left");
         S1.setPosition(0);
         telemetry.addData("Robot", "Initialized");
         telemetry.update();

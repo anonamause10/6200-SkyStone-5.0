@@ -158,7 +158,7 @@ public class rFauto extends LinearOpMode
         IN2 = hardwareMap.get(DcMotor.class,"IN2");
         IN2.setDirection(DcMotor.Direction.REVERSE);
         servo = hardwareMap.get(Servo.class, "left");
-        servo.setPosition(.7);
+        servo.setPosition(0);
         servo2 = hardwareMap.get(Servo.class, "right");
         servo2.setPosition(.3);
         LIFT = hardwareMap.get(DcMotor.class, "LIFT");
@@ -208,7 +208,7 @@ public class rFauto extends LinearOpMode
         servoUp();
         go(-200, 0.5);
         moveWithLeftSensor(400, 0.4);
-        moveWithBackSensor(87, 0.4);
+        go(-1000, 0.5);
         servoToFoun();
         sleep(300);
         moveWithForwardSensor(430, 0.4);
@@ -391,12 +391,12 @@ public class rFauto extends LinearOpMode
         return (angles.firstAngle+360)%360;
     }
     private void servoUp(){
-        servo.setPosition(.5);
+        servo.setPosition(.4);
         servo2.setPosition(.5);
         sleep(100);
     }
     private void servoToFoun(){
-        servo.setPosition(0.7);
+        servo.setPosition(0);
         servo2.setPosition(0.3);
         sleep(100);
     }
