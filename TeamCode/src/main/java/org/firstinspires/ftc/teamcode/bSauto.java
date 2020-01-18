@@ -128,6 +128,11 @@ public class bSauto extends LinearOpMode
 
         voltage = getBatteryVoltage();
         scale = 12.8 / voltage;
+        double scale2 = 1;
+        if (voltage<=13.4){
+            scale2 = 1.15;
+            scale = scale*scale2;
+        }
 
         // create a sound parameter that holds the desired player parameters.
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
@@ -335,6 +340,8 @@ public class bSauto extends LinearOpMode
             moveWithRightSensor(683, 0.3*scale);
         LIFT.setPower(-0.02);
 
+        turn(270, new double[]{0,0,0,0}, getHeading()<=270, 0);
+
 
         drive(900, 0.7);
         array1 = new double[]{0.24*scale, 0.95*scale, 0.24*scale, 0.95*scale};
@@ -375,7 +382,7 @@ public class bSauto extends LinearOpMode
         if(sRR.getDistance(DistanceUnit.MM)>=684)
             moveWithRightSensor(683, 0.3*scale);
         else
-            turn(270, new double[]{0,0,0,0}, false, 0);
+            turn(270, new double[]{0,0,0,0}, 270>getHeading(), 0);
 
         power = -0.7*scale;
         fL.setPower(power);
@@ -415,15 +422,20 @@ public class bSauto extends LinearOpMode
         sleep(300);
         openClaw();
         sleep(200);
+
+        YEETER.setPower(-1);
         power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(400);
+
+        sleep(300);
+        YEETER.setPower(0);
         rotateIn();
-        sleep(500);
+        sleep(600);
         motorsOff();
+
         LIFT.setPower(-0.3);
 
         if(usingCamera)
@@ -431,14 +443,10 @@ public class bSauto extends LinearOpMode
         if(LIFT.getCurrentPosition()<10 || !touch.getState()){
             LIFT.setPower(0);
         }
-
-        YEETER.setPower(-1);
-
         sleep(300);
         if(LIFT.getCurrentPosition()<10 || !touch.getState()){
             LIFT.setPower(0);
         }
-        YEETER.setPower(0);
         //goV2(1000, 0.7, new double[]{0,0,0,0}, true);
         servosDown();
 
@@ -908,9 +916,7 @@ public class bSauto extends LinearOpMode
         runtim2.reset();
         while (!turned && opModeIsActive() && runtim2.seconds() < 4) {
             double ang = getHeading();
-            if(sR.getDistance(DistanceUnit.MM)<100){
-                placeBlock(false);
-            }
+
             telemetry.addData("Angle", ang);
             telemetry.addData("TurnTo", vuAng);
             telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
@@ -1117,47 +1123,101 @@ public class bSauto extends LinearOpMode
         double pow = 0;
         runtim2.reset();
         boolean working = true;
-        if (degrees < 0)
+
+
+
+        do
         {
-            // On right turn we have to get off zero first.
-            while (opModeIsActive() && getAngle() == 0)
-            {
-                fL.setPower(power);
-                fR.setPower(power);
-                bL.setPower(power);
-                bR.setPower(power);
-                //sleep(100);
+            if(LIFT.getCurrentPosition()>=50){
+                LIFT.setPower(-0.4*scale);
+            }else{
+                LIFT.setPower(0);
             }
+            pow = pidDrive.performPID(getAngle()); // power will be + on left turn.
+            updateT();
+            fL.setPower(power-pow);
+            fR.setPower(power+pow);
+            bL.setPower(power-pow);
+            bR.setPower(power+pow);
+            if (Math.abs((4*ticks)-fL.getCurrentPosition()-fR.getCurrentPosition()-fL.getCurrentPosition()-bR.getCurrentPosition())<100){
+                working = false;
+            }
+        } while (opModeIsActive() && runtim2.seconds()<5 && working );
 
-            do
-            {
-                power = pidDrive.performPID(getAngle()); // power will be - on right turn.
-                fL.setPower(power);
-                fR.setPower(power);
-                bL.setPower(power);
-                bR.setPower(power);
-            } while (opModeIsActive() && !pidDrive.onTarget());
-        }
-        else    // left turn.
+        // turn the motors off.
+        fL.setPower(0);
+        fR.setPower(0);
+        bL.setPower(0);
+        bR.setPower(0);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        rotation = getAngle();
+
+        // wait for rotation to stop.
+
+        // reset angle tracking on new heading.
+        resetAngle();
+    }
+
+    public void driveSleep(int time, double power){
+        // restart imu angle tracking.
+        resetAngle();
+        int degrees = 0;
+
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
-            do
-            {
-                if(LIFT.getCurrentPosition()>=50){
-                    LIFT.setPower(-0.4*scale);
-                }else{
-                    LIFT.setPower(0);
-                }
-                pow = pidDrive.performPID(getAngle()); // power will be + on left turn.
-                updateT();
-                fL.setPower(power-pow);
-                fR.setPower(power+pow);
-                bL.setPower(power-pow);
-                bR.setPower(power+pow);
-                if (((4*ticks)-fL.getCurrentPosition()-fR.getCurrentPosition()-fL.getCurrentPosition()-bR.getCurrentPosition())<100){
-                    working = false;
-                }
-            } while (opModeIsActive() && runtim2.seconds()<5 && working );
+        pidDrive.reset();
+
+
+        pidDrive.setSetpoint(0);
+        pidDrive.setInputRange(0, degrees);
+        pidDrive.setOutputRange(0, power);
+        pidDrive.setTolerance(1);
+        pidDrive.enable();
+
+        // getAngle() returns + when rotating counter clockwise (left) and - when rotating
+        // clockwise (right).
+
+        // rotate until turn is completed.
+        double pow = 0;
+        runtim2.reset();
+        boolean working = true;
+
+
+
+        do
+        {
+            if(LIFT.getCurrentPosition()>=50){
+                LIFT.setPower(-0.4*scale);
+            }else{
+                LIFT.setPower(0);
+            }
+            pow = pidDrive.performPID(getAngle()); // power will be + on left turn.
+            updateT();
+            fL.setPower(power-pow);
+            fR.setPower(power+pow);
+            bL.setPower(power-pow);
+            bR.setPower(power+pow);
+        } while (opModeIsActive() && runtim2.milliseconds()<time);
 
         // turn the motors off.
         fL.setPower(0);

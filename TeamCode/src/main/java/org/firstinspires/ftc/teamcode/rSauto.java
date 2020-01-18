@@ -121,6 +121,11 @@ public class rSauto extends LinearOpMode
 
         voltage = getBatteryVoltage();
         scale = 12.8 / voltage;
+        double scale2 = 1;
+        if (voltage<=13.4){
+            scale2 = 1.15;
+            scale = scale*scale2;
+        }
 
         // create a sound parameter that holds the desired player parameters.
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
@@ -336,16 +341,23 @@ public class rSauto extends LinearOpMode
         if(sRL.getDistance(DistanceUnit.MM)>683)
             moveWithLeftSensor(681, 0.3*scale);
         LIFT.setPower(-0.02);
+        turn(90, new double[]{0,0,0,0}, 90>getHeading(), 0);
 
 
-        drive(900, 0.7);
+        drive(1500, 0.7);
         array1 = new double[]{0.95*scale, 0.24*scale, 0.95*scale, 0.24*scale};
+
+        if(sRR.getDistance(DistanceUnit.MM)>100){
+            blockPos = 4;
+        }
 
         if(blockPos == 0)
             moveWithForwardSensor(1190, 0.4*scale, false);
         else if(blockPos == 2)
-            moveWithForwardSensor(830, 0.4*scale, false);
-        else if(blockPos == 1)
+            moveWithForwardSensor(840, 0.4*scale, false);
+        else if(blockPos == 4)
+            moveWithForwardSensor(870, 0.4*scale, false);
+        else
             moveWithForwardSensor(980, 0.4*scale, false);
 
         fL.setPower(array1[0]);
@@ -377,28 +389,15 @@ public class rSauto extends LinearOpMode
 
         if(sRL.getDistance(DistanceUnit.MM)<678)
             moveWithLeftSensor(680, 0.3*scale);
+
         if(sRL.getDistance(DistanceUnit.MM)>683)
             moveWithLeftSensor(681, 0.3*scale);
+        else
+            turn(90, new double[]{0,0,0,0}, 90>getHeading(), 0);
 
-        power = -0.7*scale;
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
 
-        sleep(1350);
-        if(blockPos==1){
-            sleep(200);
-        }else if(blockPos==2){
-            sleep(200);
-        }
-        power = -0.55*scale;
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
-
-        sleep(1310);
+        driveSleep(1350, -0.7);
+        driveSleep(810, -0.55);
 
         LIFT.setPower(0.7);
         power = -0.5*scale;
@@ -406,7 +405,7 @@ public class rSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(190);
+        sleep(210);
 
         rotateOut();
         power = -0.3*scale;
@@ -414,7 +413,8 @@ public class rSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(150);
+        sleep(120);
+
         LIFT.setPower(0.2);
         sleep(150);
         if(sR.getDistance(DistanceUnit.MM)>100)
@@ -424,15 +424,19 @@ public class rSauto extends LinearOpMode
         openClaw();
         sleep(200);
 
+        YEETER.setPower(-1);
         power = 0.3*scale;
         fL.setPower(power);
-        fR.setPower(power);
+        fR.setPower(power + 0.01);
         bL.setPower(power);
-        bR.setPower(power);
-        sleep(400);
+        bR.setPower(power + 0.01);
+
+        sleep(300);
+        YEETER.setPower(0);
         rotateIn();
-        sleep(500);
+        sleep(600);
         motorsOff();
+
         LIFT.setPower(-0.3);
 
         if(usingCamera)
@@ -440,12 +444,10 @@ public class rSauto extends LinearOpMode
         if(LIFT.getCurrentPosition()<10 || !touch.getState()){
             LIFT.setPower(0);
         }
-        YEETER.setPower(-1);
         sleep(300);
         if(LIFT.getCurrentPosition()<10 || !touch.getState()){
             LIFT.setPower(0);
         }
-        YEETER.setPower(0);
         //goV2(1000, 0.7, new double[]{0,0,0,0}, true);
         servosDown();
 
@@ -914,9 +916,6 @@ public class rSauto extends LinearOpMode
         runtim2.reset();
         while (!turned && opModeIsActive() && runtim2.seconds() < 4) {
             double ang = getHeading();
-            if(sR.getDistance(DistanceUnit.MM)<100){
-                placeBlock(false);
-            }
             telemetry.addData("Angle", ang);
             telemetry.addData("TurnTo", vuAng);
             telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
@@ -978,10 +977,10 @@ public class rSauto extends LinearOpMode
                         bL.setPower(-0.22*scale);
                         bR.setPower(0.22*scale);
                     }else{
-                        fL.setPower(-0.17*scale);
-                        fR.setPower(0.17*scale);
-                        bL.setPower(-0.17*scale);
-                        bR.setPower(0.17*scale);
+                        fL.setPower(-0.155*scale);
+                        fR.setPower(0.155*scale);
+                        bL.setPower(-0.155*scale);
+                        bR.setPower(0.155*scale);
                     }
                 }
             }else if (ang > vuAng) {
@@ -1000,10 +999,10 @@ public class rSauto extends LinearOpMode
                         bL.setPower(0.22*scale);
                         bR.setPower(-0.22*scale);
                     }else{
-                        fL.setPower(0.17*scale);
-                        fR.setPower(-0.17*scale);
-                        bL.setPower(0.17*scale);
-                        bR.setPower(-0.17*scale);
+                        fL.setPower(0.155*scale);
+                        fR.setPower(-0.155*scale);
+                        bL.setPower(0.155*scale);
+                        bR.setPower(-0.155*scale);
                     }}
             }
             ang = getHeading();
@@ -1123,28 +1122,7 @@ public class rSauto extends LinearOpMode
         double pow = 0;
         runtim2.reset();
         boolean working = true;
-        if (degrees < 0)
-        {
-            // On right turn we have to get off zero first.
-            while (opModeIsActive() && getAngle() == 0)
-            {
-                fL.setPower(power);
-                fR.setPower(power);
-                bL.setPower(power);
-                bR.setPower(power);
-                //sleep(100);
-            }
 
-            do
-            {
-                power = pidDrive.performPID(getAngle()); // power will be - on right turn.
-                fL.setPower(power);
-                fR.setPower(power);
-                bL.setPower(power);
-                bR.setPower(power);
-            } while (opModeIsActive() && !pidDrive.onTarget());
-        }
-        else    // left turn.
 
 
             do
@@ -1160,10 +1138,85 @@ public class rSauto extends LinearOpMode
                 fR.setPower(power+pow);
                 bL.setPower(power-pow);
                 bR.setPower(power+pow);
-                if (((4*ticks)-fL.getCurrentPosition()-fR.getCurrentPosition()-fL.getCurrentPosition()-bR.getCurrentPosition())<100){
+                if (Math.abs((4*ticks)-fL.getCurrentPosition()-fR.getCurrentPosition()-fL.getCurrentPosition()-bR.getCurrentPosition())<100){
                     working = false;
                 }
             } while (opModeIsActive() && runtim2.seconds()<5 && working );
+
+        // turn the motors off.
+        fL.setPower(0);
+        fR.setPower(0);
+        bL.setPower(0);
+        bR.setPower(0);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        rotation = getAngle();
+
+        // wait for rotation to stop.
+
+        // reset angle tracking on new heading.
+        resetAngle();
+    }
+
+    public void driveSleep(int time, double power){
+        // restart imu angle tracking.
+        resetAngle();
+        int degrees = 0;
+
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        bR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+        pidDrive.reset();
+
+
+        pidDrive.setSetpoint(0);
+        pidDrive.setInputRange(0, degrees);
+        pidDrive.setOutputRange(0, power);
+        pidDrive.setTolerance(1);
+        pidDrive.enable();
+
+        // getAngle() returns + when rotating counter clockwise (left) and - when rotating
+        // clockwise (right).
+
+        // rotate until turn is completed.
+        double pow = 0;
+        runtim2.reset();
+        boolean working = true;
+
+
+
+        do
+        {
+            if(LIFT.getCurrentPosition()>=50){
+                LIFT.setPower(-0.4*scale);
+            }else{
+                LIFT.setPower(0);
+            }
+            pow = pidDrive.performPID(getAngle()); // power will be + on left turn.
+            updateT();
+            fL.setPower(power-pow);
+            fR.setPower(power+pow);
+            bL.setPower(power-pow);
+            bR.setPower(power+pow);
+        } while (opModeIsActive() && runtim2.milliseconds()<time);
 
         // turn the motors off.
         fL.setPower(0);
