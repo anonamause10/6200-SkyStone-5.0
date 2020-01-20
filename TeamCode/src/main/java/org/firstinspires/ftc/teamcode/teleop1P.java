@@ -179,14 +179,20 @@ public class teleop1P extends LinearOpMode {
                 LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             }
+
             if(gamepad1.right_trigger != 0 || gamepad1.left_trigger != 0){
-                if(gamepad1.right_trigger >= 0){
+                if(gamepad1.right_trigger > 0){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     LIFT.setPower(gamepad1.right_trigger);
                 }
                 else if(touch.getState()){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    LIFT.setPower(-gamepad1.left_trigger*.5);
+                    if(gamepad1.left_trigger < .3){
+                        LIFT.setPower(0);
+                    }
+                    else {
+                        LIFT.setPower(-gamepad1.left_trigger * .5);
+                    }
                 }
                 else {
                     LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -211,9 +217,13 @@ public class teleop1P extends LinearOpMode {
             if(gamepad1.dpad_right){
                 YEETER.setPower(-1);
             }
-            if(gamepad1.dpad_left){
+            else if(gamepad1.dpad_left){
                 YEETER.setPower(1);
             }
+            else {
+                YEETER.setPower(0);
+            }
+
             dPadDPrev = gamepad2.dpad_down; dPadUPrev = gamepad2.dpad_up;
             dPadLPrev = gamepad2.dpad_left; dPadRPrev = gamepad2.dpad_right;
 
