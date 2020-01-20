@@ -180,6 +180,8 @@ public class teleop extends LinearOpMode {
                 LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             }
 
+
+
             if(gamepad2.left_stick_y != 0 || gamepad2.right_stick_y != 0) {
                 if (-gamepad2.left_stick_y>=0){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -197,6 +199,9 @@ public class teleop extends LinearOpMode {
                     LIFT.setPower(0);
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }
+            }else if(gamepad2.dpad_down){
+                LIFT.setPower(0);
+                LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             }else{
 
                 if(LIFT.getCurrentPosition()>50){

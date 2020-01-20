@@ -218,7 +218,7 @@ public class bSauto extends LinearOpMode
         int blockPos = 0;
 
         //waitForStart();
-        while (!isStopRequested()&&!opModeIsActive()) {
+        while (!opModeIsActive()&&!isStopRequested()) {
 
             if(usingCamera)
                 telemetry.addData("blockPos", detector.getPos());
