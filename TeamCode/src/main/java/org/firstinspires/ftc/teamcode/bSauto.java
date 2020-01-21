@@ -244,7 +244,7 @@ public class bSauto extends LinearOpMode
             array1 = array2;
         }
         if(blockPos == 2)
-            goV2(3800, 0.5*scale, array1, false);
+            goV2(380, 0.5*scale, array1, false);
         else
             goV2(850, 0.5*scale, array1, false);
         intake();
@@ -256,9 +256,12 @@ public class bSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(900);
+        sleep(500);
+        if(blockPos == 1){
+            sleep(400);
+        }
         if(blockPos==2){
-            sleep(100);
+            sleep(500);
         }
 
         if(sR2.getDistance(DistanceUnit.MM)<70){
@@ -278,11 +281,11 @@ public class bSauto extends LinearOpMode
 
         sleep(50);
         if(blockPos == 2)
-            sleep(500);
+            sleep(510);
         else if(blockPos == 1)
-            sleep(650);
+            sleep(660);
         else
-            sleep(770);
+            sleep(780);
 
         array1 = new double[] {0.5, 0.5, 0.5, 0.5};
         intakeOff();
@@ -290,8 +293,8 @@ public class bSauto extends LinearOpMode
         turn(90, new double[]{0,0,0,0}, true, 2);
         servosUp();
 
-        drive(2000,0.7);
-        moveWithForwardSensor(605, 0.6*scale, true);
+        driveSleep(1300,0.7*scale);
+        moveWithForwardSensor(800, 0.6*scale, true);
 
         turn(180, new double[] {0,0,0,0}, true, 2);
         rotateOut();
@@ -334,88 +337,95 @@ public class bSauto extends LinearOpMode
 
         turn(270, new double[]{0,0,0,0}, getHeading()<=270, 0);
 
-        if(sRR.getDistance(DistanceUnit.MM)<680)
-            moveWithRightSensor(682, 0.3*scale);
-        if(sRR.getDistance(DistanceUnit.MM)>684)
-            moveWithRightSensor(683, 0.3*scale);
+        if(sRR.getDistance(DistanceUnit.MM)<679)
+            moveWithRightSensor(681, 0.3*scale);
+        if(sRR.getDistance(DistanceUnit.MM)>685)
+            moveWithRightSensor(681, 0.3*scale);
         LIFT.setPower(-0.02);
 
         turn(270, new double[]{0,0,0,0}, getHeading()<=270, 0);
 
 
-        drive(900, 0.7);
-        array1 = new double[]{0.24*scale, 0.95*scale, 0.24*scale, 0.95*scale};
+        driveSleep(900, 0.7);
+        array1 = new double[]{0.25*scale, 0.95*scale, 0.25*scale, 0.95*scale};
+
+        if(Math.abs(getHeading()-270)>1)
+            turn(270, new double[]{0,0,0,0}, 270>getHeading(), 0);
 
         if(blockPos == 2)
-            moveWithForwardSensor(700, 0.4*scale, false);
+            moveWithForwardSensor(850, 0.4*scale, false);
         else if(blockPos == 1)
-            moveWithForwardSensor(855, 0.4*scale, false);
+            moveWithForwardSensor(1065, 0.4*scale, false);
         else
-            moveWithForwardSensor(1050, 0.4*scale, false);
+            moveWithForwardSensor(1210, 0.4*scale, false);
+
+        if(sRR.getDistance(DistanceUnit.MM)<679)
+            moveWithRightSensor(681, 0.3*scale);
 
         fL.setPower(array1[0]);
         fR.setPower(array1[1]);
         bL.setPower(array1[2]);
         bR.setPower(array1[3]);
         intake();
-        sleep(700);
-        power = 0.3*scale;
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
-        sleep(600);
+        sleep(830);
+        if(blockPos == 2){
+            power = 0.3;
+            fL.setPower(0.3);
+            fR.setPower(0.3);
+            bL.setPower(0.3);
+            bR.setPower(0.3);
+            sleep(150);
+            intakeOff();
+            closeClaw();
+            power = -0.3*scale;
+            fL.setPower(power);
+            fR.setPower(power);
+            bL.setPower(power);
+            bR.setPower(power);
+            sleep(150);
+        }else {
+            intakeOff();
+            closeClaw();
+        }
         power = -0.5*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(850);
-        intakeOff();
-        closeClaw();
+        sleep(150);
 
         turn(270, new double[]{0,0,0,0}, false, 0);
 
-        if(sRR.getDistance(DistanceUnit.MM)<680)
-            moveWithRightSensor(682, 0.3*scale);
+        if(sRR.getDistance(DistanceUnit.MM)<679)
+            moveWithRightSensor(681, 0.3*scale);
 
-        if(sRR.getDistance(DistanceUnit.MM)>=684)
-            moveWithRightSensor(683, 0.3*scale);
+        if(sRR.getDistance(DistanceUnit.MM)>683)
+            moveWithRightSensor(681, 0.3*scale);
         else
             turn(270, new double[]{0,0,0,0}, 270>getHeading(), 0);
 
-        power = -0.7*scale;
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
+        driveSleep(1350, -0.7);
+        driveSleep(720, -0.55);
 
-        sleep(1350);
-        if(blockPos==1){
-            sleep(200);
-        }else if(blockPos==2){
-            sleep(200);
-        }
-        power = -0.55*scale;
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
-
-        sleep(1310);
-
-        LIFT.setPower(0.7);
+        LIFT.setPower(0.9);
         power = -0.5*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(190);
-        rotateOut();
-        sleep(150);
-        LIFT.setPower(0.2);
-        sleep(150);
+        sleep(300);
 
+        rotateOut();
+        LIFT.setPower(0.2);
+        power = -0.3*scale;
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
+        sleep(120);
+
+
+        sleep(150);
         if(sR.getDistance(DistanceUnit.MM)>100)
             sleep(200);
         motorsOff();
@@ -426,9 +436,9 @@ public class bSauto extends LinearOpMode
         YEETER.setPower(-1);
         power = 0.3*scale;
         fL.setPower(power);
-        fR.setPower(power);
+        fR.setPower(power + 0.01);
         bL.setPower(power);
-        bR.setPower(power);
+        bR.setPower(power + 0.01);
 
         sleep(300);
         YEETER.setPower(0);
@@ -624,6 +634,7 @@ public class bSauto extends LinearOpMode
                 updateT();
             }
         }
+        motorsOff();
     }
     void moveWithRightSensor(int target, double power){
 
@@ -703,6 +714,7 @@ public class bSauto extends LinearOpMode
 
             }
         }
+        motorsOff();
     }
     void moveWithLeftSensor(int target, double power){
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -779,6 +791,7 @@ public class bSauto extends LinearOpMode
 
             }
         }
+        motorsOff();
     }
 
 
@@ -1142,7 +1155,7 @@ public class bSauto extends LinearOpMode
             if (Math.abs((4*ticks)-fL.getCurrentPosition()-fR.getCurrentPosition()-fL.getCurrentPosition()-bR.getCurrentPosition())<100){
                 working = false;
             }
-        } while (opModeIsActive() && runtim2.seconds()<5 && working );
+        } while (opModeIsActive() && runtim2.seconds()<1.5 && working );
 
         // turn the motors off.
         fL.setPower(0);

@@ -55,6 +55,7 @@ public class splinexD extends LinearOpMode {
     private Servo foundServL = null;
     private Servo foundServR = null;
     private DcMotor YEETER = null;
+    private DistanceSensor DSF = null;
     private double[] powers = {0.8, 0.05, 0.8, 0.05};
 
     private int indx = 0;
@@ -131,6 +132,8 @@ public class splinexD extends LinearOpMode {
         IN2 = hardwareMap.get(DcMotor.class, "IN2");
         IN2.setDirection(REVERSE);
 
+        DSF = hardwareMap.get(DistanceSensor.class, "DSF");
+
         rotateServo= hardwareMap.get(Servo.class, "ROTATE");
         clawServo= hardwareMap.get(Servo.class, "CLAW");
         rotateServo.setPosition(0.69); clawServo.setPosition(0.15);
@@ -197,6 +200,8 @@ public class splinexD extends LinearOpMode {
                 FR.setPower(powers[1]);
                 BL.setPower(powers[2]);
                 BR.setPower(powers[3]);
+                IN1.setPower(0.7);
+                IN2.setPower(0.7);
 
                 if(!aPrev)
                     runtime2.reset();
@@ -206,6 +211,8 @@ public class splinexD extends LinearOpMode {
                 FR.setPower(0);
                 BL.setPower(0);
                 BR.setPower(0);
+                IN1.setPower(0);
+                IN2.setPower(0);
                 if(aPrev){
                     secondsToDisplay = runtime2.milliseconds();
                 }
@@ -223,7 +230,7 @@ public class splinexD extends LinearOpMode {
             telemetry.addData("indx", indx);
             telemetry.addData("drive", drive);
             telemetry.addData("seconds2", secondsToDisplay);
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("Distance", "millimeters " + DSF.getDistance(DistanceUnit.MM));
             telemetry.update();
 
         }
