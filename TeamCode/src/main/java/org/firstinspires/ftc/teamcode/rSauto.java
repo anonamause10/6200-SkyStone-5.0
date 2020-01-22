@@ -253,20 +253,15 @@ public class rSauto extends LinearOpMode
             sleep(400);
         sleep(500);
 
-        if(sR2.getDistance(DistanceUnit.MM)<70){
-            intakeOff();
-            closeClaw();}
-
         power = -0.5*scale;
         fL.setPower(power);
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
         sleep(80);
-        if(CLAW.getPosition()>0.1){
+
         intakeOff();
         closeClaw();
-        }
 
         sleep(50);
 
@@ -384,11 +379,11 @@ public class rSauto extends LinearOpMode
         turn(90, new double[]{0,0,0,0}, true, 0);
 
         if(sRL.getDistance(DistanceUnit.MM)<1130)
-            moveWithLeftSensor(1133, 0.3*scale);
+            moveWithLeftSensor(1134, 0.3*scale);
         if(sRL.getDistance(DistanceUnit.MM)>1135){
-            moveWithLeftSensor(1133, 0.3*scale);
-            if(sRL.getDistance(DistanceUnit.MM)<1130)
-                moveWithLeftSensor(1133, 0.3*scale);
+            moveWithLeftSensor(1134, 0.3*scale);
+            if(sRL.getDistance(DistanceUnit.MM)<1131)
+                moveWithLeftSensor(1134, 0.3*scale);
         }
         else
             turn(90, new double[]{0,0,0,0}, 90>getHeading(), 0);
@@ -982,10 +977,10 @@ public class rSauto extends LinearOpMode
                         bL.setPower(-0.19*scale);
                         bR.setPower(0.19*scale);
                     }else{
-                        fL.setPower(-0.155*scale);
-                        fR.setPower(0.155*scale);
-                        bL.setPower(-0.155*scale);
-                        bR.setPower(0.155*scale);
+                        fL.setPower(-0.16*scale);
+                        fR.setPower(0.16*scale);
+                        bL.setPower(-0.16*scale);
+                        bR.setPower(0.16*scale);
                     }
                 }
             }else if (ang > vuAng) {
@@ -1004,10 +999,10 @@ public class rSauto extends LinearOpMode
                         bL.setPower(0.19*scale);
                         bR.setPower(-0.19*scale);
                     }else{
-                        fL.setPower(0.155*scale);
-                        fR.setPower(-0.155*scale);
-                        bL.setPower(0.155*scale);
-                        bR.setPower(-0.155*scale);
+                        fL.setPower(0.16*scale);
+                        fR.setPower(-0.16*scale);
+                        bL.setPower(0.16*scale);
+                        bR.setPower(-0.16*scale);
                     }}
             }
             ang = getHeading();
