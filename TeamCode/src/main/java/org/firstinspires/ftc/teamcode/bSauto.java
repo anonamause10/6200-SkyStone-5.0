@@ -380,10 +380,6 @@ public class bSauto extends LinearOpMode
             turn(310 ,new double[]{0.4,0.4,0.4,0.4}, true, 2);
             intake();
             sleep(300);
-            if(sR2.getDistance(DistanceUnit.MM)<70) {
-                intakeOff();
-                closeClaw();
-            }
         }else{
 
         fL.setPower(array1[0]);
@@ -423,10 +419,15 @@ public class bSauto extends LinearOpMode
         bL.setPower(power);
         bR.setPower(power);
         sleep(150);
-        intakeOff();
-        closeClaw();
+        if(sR2.getDistance(DistanceUnit.MM)<70) {
+            intakeOff();
+            closeClaw();
+        }
 
         turn(270, new double[]{0,0,0,0}, false, 0);
+
+        intakeOff();
+        closeClaw();
 
         if(sRR.getDistance(DistanceUnit.MM)<679)
             moveWithRightSensor(681, 0.3*scale);
