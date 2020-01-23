@@ -37,7 +37,7 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 /**
  * Created by isong on 10/17/18.
  */
-@TeleOp(group = "z", name="help")
+@TeleOp(group = "z", name="spline tester")
 
 public class splinexD extends LinearOpMode {
     // Declare OpMode members.

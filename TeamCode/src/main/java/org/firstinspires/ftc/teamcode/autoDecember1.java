@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Autonomous(name="yeet bois xd", group="ree")
+@Disabled
 
 public class autoDecember1 extends LinearOpMode
 {

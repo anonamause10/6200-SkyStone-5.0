@@ -92,7 +92,6 @@ public class teleop extends LinearOpMode {
 
         int[] positions = {0, 111, 391, 599, 879, 1099, 1299, 1499, 1699};
 
-        int currLiftPos = 0;
 
         Context myApp = hardwareMap.appContext;
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
@@ -128,7 +127,7 @@ public class teleop extends LinearOpMode {
 
         rotateServo= hardwareMap.get(Servo.class, "ROTATE");
         clawServo= hardwareMap.get(Servo.class, "CLAW");
-        rotateServo.setPosition(0.69); clawServo.setPosition(0.15);
+         clawServo.setPosition(0.15);
 
         foundServL = hardwareMap.get(Servo.class, "left");
         foundServR = hardwareMap.get(Servo.class, "right");
