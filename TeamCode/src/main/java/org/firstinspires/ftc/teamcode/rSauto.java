@@ -301,11 +301,6 @@ public class rSauto extends LinearOpMode
         openClaw();
         sleep(400);
 
-        /**moveWithForwardSensor(680, 0.7, true);
-         if(CLAW.getPosition()>0.1)
-         rotateIn();
-         array1 = new double[] {0,0,0,0};
-         turn(270, array1, true, 1);*/
         fL.setPower(0.7*scale);
         fR.setPower(-0.7*scale);
         bL.setPower(-0.7*scale);

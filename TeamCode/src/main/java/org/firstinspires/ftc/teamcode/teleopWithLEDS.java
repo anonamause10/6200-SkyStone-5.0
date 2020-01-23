@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -36,8 +37,7 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 /**
  * Created by isong on 10/17/18.
  */
-@Disabled
-@TeleOp(group = "z", name="TeleOp with LEDS")
+@TeleOp(group = "zz", name="TeleOp WITH LEDS CAUSE IM A CHAD")
 
 public class teleopWithLEDS extends LinearOpMode {
     // Declare OpMode members.
@@ -53,8 +53,8 @@ public class teleopWithLEDS extends LinearOpMode {
     private Servo clawServo = null;
     private Servo foundServL = null;
     private Servo foundServR = null;
-    RevBlinkinLedDriver blinkinLedDriver;
-    private String pattern = "";
+    private DcMotor YEETER = null;
+    boolean lightsaber = false;
 
     boolean clawClosed = false;
 
@@ -68,12 +68,15 @@ public class teleopWithLEDS extends LinearOpMode {
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
     private DistanceSensor intSens = null;
-    private TouchSensor touch = null;
+    private DigitalChannel touch = null;
     // List of available sound resources
     String  sounds[] =  {"ss_alarm", "ss_bb8_down", "ss_bb8_up", "ss_darth_vader", "ss_fly_by",
             "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
             "ss_light_speed", "ss_mine", "ss_power_up", "ss_r2d2_up", "ss_roger_roger", "ss_siren", "ss_wookie" };
     boolean soundPlaying = false;
+    RevBlinkinLedDriver blink;
+    String pattern = "";
+    String team = "red";
     // The IMU sensor object
     BNO055IMU imu;
 
@@ -84,8 +87,7 @@ public class teleopWithLEDS extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         // Variables for choosing from the available sounds
-        int     soundIndex      = 0;
-        int     soundID         = -1;
+        int     soundIndex      = 8;
         boolean yPrev     = false;
         boolean xPrev   = false;
         boolean liftRunning = false;
@@ -93,14 +95,11 @@ public class teleopWithLEDS extends LinearOpMode {
 
         int[] positions = {0, 111, 391, 599, 879, 1099, 1299, 1499, 1699};
 
-        int currLiftPos = 0;
 
         Context myApp = hardwareMap.appContext;
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
         params.loopControl = 0;
         params.waitForNonLoopingSoundsToFinish = true;
-
-        blinkinLedDriver = hardwareMap.get(RevBlinkinLedDriver.class, "blink");
 
         FL = hardwareMap.get(DcMotor.class, "fL");FR = hardwareMap.get(DcMotor.class, "fR");
         BL = hardwareMap.get(DcMotor.class, "bL");BR = hardwareMap.get(DcMotor.class, "bR");
@@ -122,6 +121,8 @@ public class teleopWithLEDS extends LinearOpMode {
         LIFT.setPower(0);
         LIFT.setTargetPosition(LIFT.getCurrentPosition());
 
+        YEETER = hardwareMap.get(DcMotor.class, "YEET");
+
         IN1 = hardwareMap.get(DcMotor.class, "IN1");
         IN1.setDirection(FORWARD);
         IN2 = hardwareMap.get(DcMotor.class, "IN2");
@@ -129,19 +130,22 @@ public class teleopWithLEDS extends LinearOpMode {
 
         rotateServo= hardwareMap.get(Servo.class, "ROTATE");
         clawServo= hardwareMap.get(Servo.class, "CLAW");
-        rotateServo.setPosition(0.69); clawServo.setPosition(0.15);
+        clawServo.setPosition(0.15);
 
         foundServL = hardwareMap.get(Servo.class, "left");
         foundServR = hardwareMap.get(Servo.class, "right");
-        foundServL.setPosition(.7);
-        foundServR.setPosition(.3);
+        foundServL.setPosition(0);
+        foundServR.setPosition(.4);
 
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
-        touch = hardwareMap.get(TouchSensor.class, "touch");
+        touch = hardwareMap.get(DigitalChannel.class, "touch");
+        touch.setMode(DigitalChannel.Mode.INPUT);
+        blink = hardwareMap.get(RevBlinkinLedDriver.class, "blink");
 
         //initIMU();
-        blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_END_TO_END_BLEND);
+        blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_END_TO_END_BLEND);
         pattern = "CP1_2_END_TO_END_BLEND";
+
         telemetry.addData("Robot", "Initialized");
         telemetry.update();
 
@@ -158,39 +162,31 @@ public class teleopWithLEDS extends LinearOpMode {
             //DRIVE + MAYBE LED + PROBABLY NOT SOUND STUFF
             drive();
 
+            if(gamepad2.start){
+                team = "blue";
+            }else if(gamepad2.back){
+                team = "red";
+            }
+
             //CLAW STUFF
             if (gamepad2.a) {
                 rotateServo.setPosition(0.69);
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_END_TO_END_BLEND);
+                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_END_TO_END_BLEND);
                 pattern = "CP1_2_END_TO_END_BLEND";
             }else if(gamepad2.b){
                 rotateServo.setPosition(0.025);
-
-                // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
-                if ((soundID = myApp.getResources().getIdentifier(sounds[soundIndex], "raw", myApp.getPackageName())) != 0){
-
-                    // Signal that the sound is now playing.
-                    soundPlaying = true;
-
-                    // Start playing, and also Create a callback that will clear the playing flag when the sound is complete.
-                    SoundPlayer.getInstance().startPlaying(myApp, soundID, params, null,
-                            new Runnable() {
-                                public void run() {
-                                    soundPlaying = false;
-                                }} );
-                }
-
+                playSound( 0, myApp, params);
             }
 
             if(gamepad2.left_bumper) {
                 clawServo.setPosition(0.15);
             }else if(gamepad2.right_bumper){
                 clawServo.setPosition(0);
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_COLOR_GRADIENT);
+                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_COLOR_GRADIENT);
                 pattern = "CP1_2_COLOR_GRADIENT";
             }else if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<30 && clawServo.getPosition()!=0){
                 clawServo.setPosition(0);
-                blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
                 pattern = "GREEN";
             }
 
@@ -201,38 +197,70 @@ public class teleopWithLEDS extends LinearOpMode {
                 LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             }
 
+
+
             if(gamepad2.left_stick_y != 0 || gamepad2.right_stick_y != 0) {
-                if(touch.isPressed()){
-                    LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    LIFT.setPower(0);
-                }else if (-gamepad2.left_stick_y>=0){
-                    if(!pattern.equals("CP1_2_SINELON")) {
-                        blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_SINELON);
-                        pattern = "CP1_2_SINELON";
-                    }
+                if (-gamepad2.left_stick_y>=0){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     LIFT.setPower(-gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25);
-                }else{
+                    if(!pattern.equals("CP1_2_SINELON")) {
+                        blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_SINELON);
+                        pattern = "CP1_2_SINELON";
+                    }
+                }else if(touch.getState()) {
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    if(pattern.equals("CP1_2_SINELON")) {
+                        if(team.equals("blue")) {
+                            blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_BLUE);
+                            pattern = "H_BLUE";
+                        }else{
+                            blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_RED);
+                            pattern = "H_RED";
+                        }
+                    }
                     LIFT.setPower(-0.5 * gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25 + 0.2);
+                }else{
+                    LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                    LIFT.setPower(0);
+                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }
+            }else if(gamepad2.dpad_down){
+                LIFT.setPower(0);
+                LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             }else{
 
                 if(LIFT.getCurrentPosition()>50){
                     LIFT.setTargetPosition(LIFT.getCurrentPosition()); //STALL
                     LIFT.setPower(0.2);
 
-                    if(pattern.equals("CP1_2_SINELON")) {
-                        blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP2_BREATH_SLOW);
-                        pattern = "CP2_BREATH_SLOW";
-                    }
-
                 }else if(LIFT.getCurrentPosition()<=5 && LIFT.getMode()==DcMotor.RunMode.RUN_TO_POSITION){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }else{
                     LIFT.setPower(0);
                 }
+            }
+            if(gamepad2.right_trigger!=0){
+                YEETER.setPower(-gamepad2.right_trigger);
+                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_RAINBOW_PALETTE);
+                pattern = "WAVES_RAINBOW";
+                if(!lightsaber) {
+                    playSound(8, myApp, params);
+                    lightsaber = true;
+                }
+            }else if(gamepad2.left_trigger!=0){
+                YEETER.setPower(gamepad2.left_trigger);
+
+                if(lightsaber) lightsaber = false;
+
+                if(team.equals("blue")) {
+                    blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_BLUE);
+                    pattern = "H_BLUE";
+                }else{
+                    blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_RED);
+                    pattern = "H_RED";
+                }
+            }else{
+                YEETER.setPower(0);
             }
             dPadDPrev = gamepad2.dpad_down; dPadUPrev = gamepad2.dpad_up;
             dPadLPrev = gamepad2.dpad_left; dPadRPrev = gamepad2.dpad_right;
@@ -245,19 +273,30 @@ public class teleopWithLEDS extends LinearOpMode {
             }else if(gamepad1.right_bumper && intSens.getDistance(DistanceUnit.MM)>70){
                 IN1.setPower(0.7);
                 IN2.setPower(0.7);
-                if(!pattern.equals("CP1_SHOT")) {
-                    blinkinLedDriver.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_SHOT);
-                    pattern = "CP1_SHOT";
+                if(!pattern.equals("FIRE_L")) {
+                    blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_LARGE);
+                    pattern = "FIRE_L";
                 }
             }else{
+                if(pattern.equals("FIRE_L")){
+                    if(team.equals("blue")) {
+                        blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_BLUE);
+                        pattern = "H_BLUE";
+                    }else{
+                        blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.HEARTBEAT_RED);
+                        pattern = "H_RED";
+                    }
+                }
                 IN1.setPower(0);
                 IN2.setPower(0);
             }
 
-            /**if(gamepad1.left_trigger != 0){
-             IN1.setPower(-gamepad1.left_trigger);
-             IN2.setPower(-gamepad1.left_trigger);
-             }else if(gamepad1.right_trigger != 0){
+            if(gamepad1.left_trigger != 0){
+                IN1.setPower(gamepad1.left_trigger);
+                IN2.setPower(gamepad1.left_trigger);
+            }
+
+            /**}else if(gamepad1.right_trigger != 0){
              IN1.setPower(gamepad1.right_trigger);
              IN2.setPower(gamepad1.right_trigger);
              }*/
@@ -265,11 +304,11 @@ public class teleopWithLEDS extends LinearOpMode {
             //FOUNDATION
 
             if(gamepad1.dpad_up){
-                foundServL.setPosition(0.5);
-                foundServR.setPosition(0.5);
+                foundServL.setPosition(0.4);
+                foundServR.setPosition(0.65);
             }else if(gamepad1.dpad_down){
-                foundServL.setPosition(0.7);
-                foundServR.setPosition(0.3);
+                foundServL.setPosition(0);
+                foundServR.setPosition(0.4);
             }
 
             //VARIABLE CHECKS
@@ -285,7 +324,9 @@ public class teleopWithLEDS extends LinearOpMode {
             telemetry.addData("Lift:", LIFT.getPower());
             telemetry.addData("Lif2:",LIFT.getCurrentPosition());
             telemetry.addData("DISTANCE", intSens.getDistance(DistanceUnit.MM));
+            telemetry.addData("blink", pattern);
             telemetry.addData("Status", "Run Time: " + runtime.toString());
+            telemetry.addData("touch", touch.getState());
             telemetry.update();
 
         }
@@ -337,6 +378,22 @@ public class teleopWithLEDS extends LinearOpMode {
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters2);
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
+    }
+    private void playSound(int soundIndex, Context myApp, SoundPlayer.PlaySoundParams params){
+        // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
+        int soundID = -1;
+        if ((soundID = myApp.getResources().getIdentifier(sounds[soundIndex], "raw", myApp.getPackageName())) != 0){
+
+            // Signal that the sound is now playing.
+            soundPlaying = true;
+
+            // Start playing, and also Create a callback that will clear the playing flag when the sound is complete.
+            SoundPlayer.getInstance().startPlaying(myApp, soundID, params, null,
+                    new Runnable() {
+                        public void run() {
+                            soundPlaying = false;
+                        }} );
+        }
     }
 }
 

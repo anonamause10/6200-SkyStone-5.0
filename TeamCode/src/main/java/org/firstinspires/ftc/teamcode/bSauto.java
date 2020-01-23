@@ -369,57 +369,24 @@ public class bSauto extends LinearOpMode
 
 
         driveSleep(900, 0.7);
-        array1 = new double[]{0.25*scale, 0.95*scale, 0.25*scale, 0.95*scale};
 
         if(Math.abs(getHeading()-270)>1)
             turn(270, new double[]{0,0,0,0}, 270>getHeading(), 0);
 
         if(blockPos == 2)
-            moveWithForwardSensor(900, 0.4*scale);
+            moveWithForwardSensor(500, 0.4*scale);
         else if(blockPos == 1)
-            moveWithForwardSensor(1145, 0.4*scale);
+            moveWithForwardSensor(680, 0.4*scale);
         else
-            moveWithForwardSensor(1000, 0.4*scale);
+            moveWithForwardSensor(880, 0.4*scale);
 
         if(sRR.getDistance(DistanceUnit.MM)<679)
             moveWithRightSensor(681, 0.3*scale);
 
-        if(blockPos==0){
-            turn(310 ,new double[]{0.4,0.4,0.4,0.4}, true, 2);
-            intake();
-            sleep(300);
-        }else{
-
-        fL.setPower(array1[0]);
-        fR.setPower(array1[1]);
-        bL.setPower(array1[2]);
-        bR.setPower(array1[3]);
+        turn(315 ,new double[]{0.4,0.4,0.4,0.4}, true, 2);
         intake();
-        sleep(830);
-        if(blockPos == 2){
-            power = 0.3;
-            fL.setPower(0.3);
-            fR.setPower(0.3);
-            bL.setPower(0.3);
-            bR.setPower(0.3);
-            sleep(150);
-            if(sR2.getDistance(DistanceUnit.MM)<70) {
-                intakeOff();
-                closeClaw();
-            }
-            power = -0.3*scale;
-            fL.setPower(power);
-            fR.setPower(power);
-            bL.setPower(power);
-            bR.setPower(power);
-            sleep(150);
-            if(CLAW.getPosition()>=0.1) {
-            intakeOff();
-            closeClaw();
-            }
-        }else {
-        }
-        }
+        sleep(442);
+
 
         power = -0.5*scale;
         fL.setPower(power);
@@ -444,7 +411,7 @@ public class bSauto extends LinearOpMode
                 moveWithRightSensor(distanceFromWall, 0.3 * scale);
                 if (sRR.getDistance(DistanceUnit.MM) < 679)
                     moveWithRightSensor(distanceFromWall, 0.3 * scale);
-            } else
+            }else
                 turn(270, new double[]{0, 0, 0, 0}, 270 > getHeading(), 0);
 
             driveSleep(1350, -0.7);
