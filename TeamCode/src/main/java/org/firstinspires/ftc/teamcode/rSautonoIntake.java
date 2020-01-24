@@ -106,7 +106,7 @@ public class rSautonoIntake extends LinearOpMode
 
 
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException{
         // Variables for choosing from the available sounds
         int     soundIndex      = 0;
         int     soundID         = -1;

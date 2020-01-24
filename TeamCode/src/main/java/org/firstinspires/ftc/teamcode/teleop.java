@@ -164,12 +164,12 @@ public class teleop extends LinearOpMode {
                 playSound( 0, myApp, params);
             }
 
-            if(gamepad2.left_bumper) {
+            if(gamepad2.left_bumper || gamepad2.y) {
                 clawServo.setPosition(0.15);
-            }else if(gamepad2.right_bumper){
-                clawServo.setPosition(0);
+            }else if(gamepad2.right_bumper || gamepad2.x){
+                clawServo.setPosition(0.04);
             }else if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<30 && clawServo.getPosition()!=0){
-                clawServo.setPosition(0);
+                clawServo.setPosition(0.04);
             }
 
             //ARM STUFF

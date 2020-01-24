@@ -37,9 +37,9 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 /**
  * Created by isong on 10/17/18.
  */
-@TeleOp(group = "zz", name="TeleOp WITH LEDS CAUSE IM A CHAD")
+@TeleOp(group = "a", name="TeleOp 1P LEDS")
 
-public class teleopWithLEDS extends LinearOpMode {
+public class teleop1PLEDS extends LinearOpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor FL = null;
@@ -63,12 +63,11 @@ public class teleopWithLEDS extends LinearOpMode {
     private boolean dPadLPrev = false;
     private boolean dPadRPrev = false;
     private boolean sPrev = false;
-    boolean backPrev = false;
 
 
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
-    private DistanceSensor intSens = null;
+    boolean backPrev = false;
     private DigitalChannel touch = null;
     // List of available sound resources
     String  sounds[] =  {"ss_alarm", "ss_bb8_down", "ss_bb8_up", "ss_darth_vader", "ss_fly_by",
@@ -86,7 +85,7 @@ public class teleopWithLEDS extends LinearOpMode {
      */
 
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
         // Variables for choosing from the available sounds
         int     soundIndex      = 8;
         boolean yPrev     = false;
@@ -96,6 +95,7 @@ public class teleopWithLEDS extends LinearOpMode {
 
         int[] positions = {0, 111, 391, 599, 879, 1099, 1299, 1499, 1699};
 
+        int currLiftPos = 0;
 
         Context myApp = hardwareMap.appContext;
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
@@ -131,19 +131,18 @@ public class teleopWithLEDS extends LinearOpMode {
 
         rotateServo= hardwareMap.get(Servo.class, "ROTATE");
         clawServo= hardwareMap.get(Servo.class, "CLAW");
-        clawServo.setPosition(0.15);
+        rotateServo.setPosition(0.69); clawServo.setPosition(0.15);
 
         foundServL = hardwareMap.get(Servo.class, "left");
         foundServR = hardwareMap.get(Servo.class, "right");
         foundServL.setPosition(0);
         foundServR.setPosition(.4);
 
-        intSens = hardwareMap.get(DistanceSensor.class, "DS2");
         touch = hardwareMap.get(DigitalChannel.class, "touch");
         touch.setMode(DigitalChannel.Mode.INPUT);
-        blink = hardwareMap.get(RevBlinkinLedDriver.class, "blink");
 
         //initIMU();
+        blink = hardwareMap.get(RevBlinkinLedDriver.class, "blink");
         blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_END_TO_END_BLEND);
         pattern = "CP1_2_END_TO_END_BLEND";
 
@@ -163,7 +162,31 @@ public class teleopWithLEDS extends LinearOpMode {
             //DRIVE + MAYBE LED + PROBABLY NOT SOUND STUFF
             drive();
 
-            if(gamepad2.back&& !backPrev){
+            //CLAW STUFF
+            if (gamepad1.a) {
+                rotateServo.setPosition(0.69);
+            }else if(gamepad1.b){
+                rotateServo.setPosition(0.025);
+                playSound( 0, myApp, params);
+                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_SINELON);
+                pattern = "CP1_2_SINELON";
+            }
+
+            if(gamepad1.x) {
+                clawServo.setPosition(0.15);
+            }else if(gamepad1.y){
+                clawServo.setPosition(0.04);
+                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+                pattern = "GREEN";
+            }
+
+            //aARM STUFF
+
+            if(gamepad1.start && gamepad1.back){
+                LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            }
+            if(gamepad1.back&& !backPrev){
                 if(team.equals("blue")){
                     team = "red";
                     blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
@@ -174,50 +197,12 @@ public class teleopWithLEDS extends LinearOpMode {
                     pattern = "H_BLUE";
                 }
             }
-            backPrev = gamepad2.back;
+            backPrev = gamepad1.back;
 
-            //CLAW STUFF
-            if (gamepad2.a) {
-                rotateServo.setPosition(0.69);
-                if(team.equals("blue")) {
-                    blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
-                    pattern = "H_BLUE";
-                }else{
-                    blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
-                    pattern = "H_RED";
-                }
-            }else if(gamepad2.b){
-                rotateServo.setPosition(0.025);
-                playSound( 0, myApp, params);
-                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_SINELON);
-                pattern = "CP1_2_SINELON";
-            }
-
-            if(gamepad2.left_bumper || gamepad2.y) {
-                clawServo.setPosition(0.15);
-                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.SINELON_RAINBOW_PALETTE);
-                pattern = "SINE_RAINBOW";
-            }else if(gamepad2.right_bumper || gamepad2.x){
-                clawServo.setPosition(0.04);
-            }else if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<30 && clawServo.getPosition()!=0){
-                clawServo.setPosition(0.04);
-                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-                pattern = "GREEN";
-            }
-
-            //ARM STUFF
-
-            if(gamepad2.start && gamepad2.back){
-                LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            }
-
-
-
-            if(gamepad2.left_stick_y != 0 || gamepad2.right_stick_y != 0) {
-                if (-gamepad2.left_stick_y>=0){
+            if(gamepad1.right_trigger != 0 || gamepad1.left_trigger != 0){
+                if(gamepad1.right_trigger > 0){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    LIFT.setPower(-gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25);
+                    LIFT.setPower(gamepad1.right_trigger);
                     if(!(pattern.equals("e"))) {
                         if (team.equals("blue")) {
                             blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.SHOT_BLUE);
@@ -227,26 +212,31 @@ public class teleopWithLEDS extends LinearOpMode {
                             pattern = "e";
                         }
                     }
-                }else if(touch.getState()) {
+
+                }
+                else if(touch.getState()){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    if(team.equals("blue") && !(pattern.equals("H_BLUE"))) {
-                        blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
-                        pattern = "H_BLUE";
-                    }else if(!(pattern.equals("H_RED"))){
-                        blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
-                        pattern = "H_RED";
+                        if(team.equals("blue")) {
+                            blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
+                            pattern = "H_BLUE";
+                        }else{
+                            blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
+                            pattern = "H_RED";
+                        }
+                    if(gamepad1.left_trigger < .3){
+                        LIFT.setPower(0);
                     }
-                    LIFT.setPower(-0.5 * gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25 + 0.2);
-                }else{
+                    else {
+                        LIFT.setPower(-gamepad1.left_trigger * .5);
+                    }
+                }
+                else {
                     LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     LIFT.setPower(0);
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }
-            }else if(gamepad2.dpad_down){
-                LIFT.setPower(0);
-                LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-            }else{
+            }
+            else{
 
                 if(LIFT.getCurrentPosition()>50){
                     LIFT.setTargetPosition(LIFT.getCurrentPosition()); //STALL
@@ -258,29 +248,33 @@ public class teleopWithLEDS extends LinearOpMode {
                     LIFT.setPower(0);
                 }
             }
-            if(gamepad2.right_trigger!=0){
-                YEETER.setPower(-gamepad2.right_trigger);
+
+            //Yeeter
+            if(gamepad1.dpad_right){
+                YEETER.setPower(-1);
                 blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_RAINBOW_PALETTE);
                 pattern = "WAVES_RAINBOW";
                 if(!lightsaber) {
                     playSound(8, myApp, params);
                     lightsaber = true;
                 }
-            }else if(gamepad2.left_trigger!=0){
-                YEETER.setPower(gamepad2.left_trigger);
+            }
+            else if(gamepad1.dpad_left){
+                YEETER.setPower(1);
 
                 if(lightsaber) lightsaber = false;
-
-                if(team.equals("blue") && !(pattern.equals("H_BLUE"))) {
+                if(team.equals("blue")) {
                     blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
                     pattern = "H_BLUE";
-                }else if(!(pattern.equals("H_RED"))){
+                }else{
                     blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
                     pattern = "H_RED";
                 }
-            }else{
+            }
+            else {
                 YEETER.setPower(0);
             }
+
             dPadDPrev = gamepad2.dpad_down; dPadUPrev = gamepad2.dpad_up;
             dPadLPrev = gamepad2.dpad_left; dPadRPrev = gamepad2.dpad_right;
 
@@ -289,7 +283,7 @@ public class teleopWithLEDS extends LinearOpMode {
             if(gamepad1.left_bumper){
                 IN1.setPower(-0.4);
                 IN2.setPower(-0.4);
-            }else if(gamepad1.right_bumper && intSens.getDistance(DistanceUnit.MM)>70){
+            }else if(gamepad1.right_bumper){
                 IN1.setPower(0.7);
                 IN2.setPower(0.7);
                 if(!pattern.equals("FIRE_L")) {
@@ -308,11 +302,6 @@ public class teleopWithLEDS extends LinearOpMode {
                 }
                 IN1.setPower(0);
                 IN2.setPower(0);
-            }
-
-            if(gamepad1.left_trigger != 0){
-                IN1.setPower(gamepad1.left_trigger);
-                IN2.setPower(gamepad1.left_trigger);
             }
 
             /**}else if(gamepad1.right_trigger != 0){
@@ -342,8 +331,7 @@ public class teleopWithLEDS extends LinearOpMode {
                     BL.getPower(), BR.getPower());
             telemetry.addData("Lift:", LIFT.getPower());
             telemetry.addData("Lif2:",LIFT.getCurrentPosition());
-            telemetry.addData("DISTANCE", intSens.getDistance(DistanceUnit.MM));
-            telemetry.addData("blink", pattern);
+            telemetry.addData("LED Pattern", pattern);
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("touch", touch.getState());
             telemetry.update();
@@ -364,17 +352,11 @@ public class teleopWithLEDS extends LinearOpMode {
         double v2 = r * Math.sin(robotAngle) - rightX;
         double v3 = r * Math.sin(robotAngle) + rightX;
         double v4 = r * Math.cos(robotAngle) - rightX;
-        if (gamepad1.x) {
-            v1 *= 2.85;
-            v2 *= 2.85;
-            v3 *= 2.85;
-            v4 *= 2.85;
-        }
-        if(gamepad1.left_stick_button || gamepad1.right_stick_button || gamepad1.left_trigger!=0 || gamepad1.right_trigger!=0){
-            v1 *= .5;
-            v2 *= .5;
-            v3 *= .5;
-            v4 *= .5;
+        if(gamepad1.left_stick_button){
+            v1 = v1 * .5;
+            v2 = v2 * .5;
+            v3 = v3 * .5;
+            v4 = v4 * .5;
         }
         FL.setPower(v1);
         FR.setPower(v2);

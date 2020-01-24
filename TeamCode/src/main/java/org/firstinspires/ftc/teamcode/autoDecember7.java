@@ -61,7 +61,7 @@ public class autoDecember7 extends LinearOpMode {
     private boolean rbPrev = false;
 
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException{
         // Variables for choosing from the available sounds
         int     soundIndex      = 0;
         int     soundID         = -1;

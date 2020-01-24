@@ -74,6 +74,9 @@ public class teleop1P extends LinearOpMode {
             "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
             "ss_light_speed", "ss_mine", "ss_power_up", "ss_r2d2_up", "ss_roger_roger", "ss_siren", "ss_wookie" };
     boolean soundPlaying = false;
+    RevBlinkinLedDriver blink;
+    String pattern = "";
+    String team = "red";
     // The IMU sensor object
     BNO055IMU imu;
 
@@ -127,8 +130,7 @@ public class teleop1P extends LinearOpMode {
         IN2.setDirection(REVERSE);
 
         rotateServo= hardwareMap.get(Servo.class, "ROTATE");
-        clawServo= hardwareMap.get(Servo.class, "CLAW");
-        rotateServo.setPosition(0.69); clawServo.setPosition(0.15);
+        clawServo= hardwareMap.get(Servo.class, "CLAW");clawServo.setPosition(0.15);
 
         foundServL = hardwareMap.get(Servo.class, "left");
         foundServR = hardwareMap.get(Servo.class, "right");
@@ -138,7 +140,7 @@ public class teleop1P extends LinearOpMode {
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
         touch = hardwareMap.get(DigitalChannel.class, "touch");
         touch.setMode(DigitalChannel.Mode.INPUT);
-
+        blink = hardwareMap.get(RevBlinkinLedDriver.class, "blink");
         //initIMU();
 
         telemetry.addData("Robot", "Initialized");
@@ -168,9 +170,9 @@ public class teleop1P extends LinearOpMode {
             if(gamepad1.x) {
                 clawServo.setPosition(0.15);
             }else if(gamepad1.y){
-                clawServo.setPosition(0);
+                clawServo.setPosition(0.04);
             }else if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<30 && clawServo.getPosition()!=0){
-                clawServo.setPosition(0);
+                clawServo.setPosition(0.04);
             }
 
             //aARM STUFF

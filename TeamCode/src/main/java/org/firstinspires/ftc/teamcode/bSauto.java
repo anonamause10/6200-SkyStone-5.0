@@ -105,7 +105,7 @@ public class bSauto extends LinearOpMode
     SkystoneDetectorNew detector = null;
 
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException{
 
         int distanceFromWall = 683;
 
