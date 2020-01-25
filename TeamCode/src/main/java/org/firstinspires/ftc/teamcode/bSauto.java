@@ -282,8 +282,7 @@ public class bSauto extends LinearOpMode
             sleep(630);
 
         array1 = new double[] {0.5, 0.5, 0.5, 0.5};
-        intakeOff();
-        closeClaw();
+
         turn(270, new double[]{0,0,0,0}, false, 2);
         if(sRR.getDistance(DistanceUnit.MM)<8000){
             distanceFromWall = (int)sRR.getDistance(DistanceUnit.MM);

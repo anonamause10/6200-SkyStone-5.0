@@ -176,6 +176,11 @@ public class teleopWithLEDS extends LinearOpMode {
             }
             backPrev = gamepad2.back;
 
+            if(gamepad2.start){
+                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+                pattern = "BLACK";
+            }
+
             //CLAW STUFF
             if (gamepad2.a) {
                 rotateServo.setPosition(0.69);
@@ -260,8 +265,10 @@ public class teleopWithLEDS extends LinearOpMode {
             }
             if(gamepad2.right_trigger!=0){
                 YEETER.setPower(-gamepad2.right_trigger);
-                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_RAINBOW_PALETTE);
-                pattern = "WAVES_RAINBOW";
+                if(!(pattern.equals("WAVES_RAINBOW"))) {
+                    blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_RAINBOW_PALETTE);
+                    pattern = "WAVES_RAINBOW";
+                }
                 if(!lightsaber) {
                     playSound(8, myApp, params);
                     lightsaber = true;
@@ -274,7 +281,7 @@ public class teleopWithLEDS extends LinearOpMode {
                 if(team.equals("blue") && !(pattern.equals("H_BLUE"))) {
                     blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
                     pattern = "H_BLUE";
-                }else if(!(pattern.equals("H_RED"))){
+                }else if(team.equals("red") && !(pattern.equals("H_RED"))){
                     blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
                     pattern = "H_RED";
                 }
@@ -314,11 +321,6 @@ public class teleopWithLEDS extends LinearOpMode {
                 IN1.setPower(gamepad1.left_trigger);
                 IN2.setPower(gamepad1.left_trigger);
             }
-
-            /**}else if(gamepad1.right_trigger != 0){
-             IN1.setPower(gamepad1.right_trigger);
-             IN2.setPower(gamepad1.right_trigger);
-             }*/
 
             //FOUNDATION
 
