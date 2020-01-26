@@ -57,7 +57,6 @@ public class autoDecember1 extends LinearOpMode {
     private Servo foundServR = null;
     private DcMotor YEETER = null;
     private DistanceSensor DSF = null;
-    private double[] powers = {0.8, 0.05, 0.8, 0.05};
 
     private int indx = 0;
     private int indx2 = 0;
@@ -73,11 +72,7 @@ public class autoDecember1 extends LinearOpMode {
     private double voltage = 0.0;
     private double scale = 0.0;
 
-
-    double[] array1 = {0.68*scale, 0.2*scale, 0.68*scale, 0.2*scale, 850};
-    double[] array0 = {0.1*scale, 0.88*scale, 0.1*scale, 0.88*scale, 850};
-    double[] array2 = {0.9*scale, 0.1*scale, 0.9*scale, 0.1*scale, 380};
-    double[][] arrays = new double[][]{array0, array1, array2};
+    double[][] arrays = new double[1][3];
 
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
@@ -105,7 +100,12 @@ public class autoDecember1 extends LinearOpMode {
         boolean xPrev   = false;
         boolean liftRunning = false;
         voltage = getBatteryVoltage();
-        scale = 12.8 / voltage;
+        scale = 1;
+
+        double[] array1 = {0.68*scale, 0.2*scale, 0.68*scale, 0.2*scale, 850};
+        double[] array0 = {0.1*scale, 0.88*scale, 0.1*scale, 0.88*scale, 850};
+        double[] array2 = {0.9*scale, 0.1*scale, 0.9*scale, 0.1*scale, 380};
+        arrays = new double[][]{array0, array1, array2};
 
 
 
@@ -117,8 +117,8 @@ public class autoDecember1 extends LinearOpMode {
         params.loopControl = 0;
         params.waitForNonLoopingSoundsToFinish = true;
 
-        FL = hardwareMap.get(DcMotor.class, "FL");FR = hardwareMap.get(DcMotor.class, "FR");
-        BL = hardwareMap.get(DcMotor.class, "BL");BR = hardwareMap.get(DcMotor.class, "BR");
+        FL = hardwareMap.get(DcMotor.class, "fL");FR = hardwareMap.get(DcMotor.class, "fR");
+        BL = hardwareMap.get(DcMotor.class, "bL");BR = hardwareMap.get(DcMotor.class, "bR");
         FL.setDirection(REVERSE);FR.setDirection(FORWARD);
         BL.setDirection(REVERSE);BR.setDirection(FORWARD);
         FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -234,6 +234,9 @@ public class autoDecember1 extends LinearOpMode {
             if(gamepad2.left_trigger>0){
                 IN1.setPower(-0.4);
                 IN2.setPower(-0.4);
+            }else if(IN1.getPower()<0){
+                IN1.setPower(0);
+                IN2.setPower(0);
             }
             if(gamepad2.start){
                 resetEncoders();
@@ -260,19 +263,21 @@ public class autoDecember1 extends LinearOpMode {
                     secondsToDisplay = runtime2.milliseconds();
                 }
             }
-            if(gamepad2.right_bumper){
+            if(gamepad2.right_bumper&&!rbumpprev){
                 go((int)(arrays[indx2][4]), 0.5*scale);
                 secondsToDisplay = runtime2.milliseconds();
             }
+            rbumpprev = gamepad2.right_bumper;
             aPrev = gamepad2.a;
 
             //TELEMETRY
 
             telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
-                            "back left (%.1f), back right (%.1f)", FL.getCurrentPosition(), FR.getCurrentPosition(),
-                    BL.getCurrentPosition(), BR.getCurrentPosition());
+                            "back left (%.1f), back right (%.1f)", (float)FL.getCurrentPosition(), (float)FR.getCurrentPosition(),
+                    (float)BL.getCurrentPosition(), (float)BR.getCurrentPosition());
             telemetry.addData("Wheel Powers", "front left (%.2f), front right (%.2f), " +
                     "back left (%.2f), back right (%.2f)", arrays[indx2][0], arrays[indx2][1], arrays[indx2][2], arrays[indx2][3]);
+            telemetry.addData("number five", arrays[indx2][4]);
             telemetry.addData("indx", indx);
             telemetry.addData("indx2", indx2);
             telemetry.addData("drive", drive);
@@ -347,9 +352,9 @@ public class autoDecember1 extends LinearOpMode {
         }
     }
     private void updateT(){
-        telemetry.addData("Wheel Position", "front left (%1f), front right (%1f), " +
-                        "back left (%1f), back right (%1f)", FL.getCurrentPosition(), FR.getCurrentPosition(),
-                BL.getCurrentPosition(), BR.getCurrentPosition());
+        telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
+                        "back left (%.1f), back right (%.1f)", (float)FL.getCurrentPosition(), (float)FR.getCurrentPosition(),
+                (float)BL.getCurrentPosition(), (float)BR.getCurrentPosition());
         telemetry.addData("target pos", arrays[indx2][4]);
         telemetry.addData("indx", indx);
         telemetry.addData("indx2", indx2);
@@ -381,11 +386,11 @@ public class autoDecember1 extends LinearOpMode {
         motorsOff();
     }
     private void resetEncoders(){
-        FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
