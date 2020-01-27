@@ -391,7 +391,7 @@ public class rSauto extends LinearOpMode
         else if(blockPos == 1)
             moveWithForwardSensor(960, 0.4*scale);
         else
-            moveWithForwardSensor(1070, 0.4*scale);
+            moveWithForwardSensor(1000, 0.4*scale);
 
         strafeRight(700, 0.5 , new double[]{0.3,0.3,0.3,0.3});
         intake();
@@ -408,7 +408,9 @@ public class rSauto extends LinearOpMode
             sleep(120);
         }
 
-        moveWithLeftSensor(1112, 0.5*scale);
+
+        strafeLeft(270, 0.5, new double[]{0,0,0,0});
+
         if(sR2.getDistance(DistanceUnit.MM)<70) {
             intakeOff();
             closeClaw();
@@ -420,7 +422,9 @@ public class rSauto extends LinearOpMode
         if(blockPos!=2)
             outtake();
 
+
         if(sRL.getDistance(DistanceUnit.MM)<7000) {
+
             if (sRL.getDistance(DistanceUnit.MM) < distanceFromWall + 1)
                 moveWithLeftSensor(distanceFromWall+3, 0.3 * scale);
 
@@ -509,6 +513,20 @@ public class rSauto extends LinearOpMode
         bL.setPower(-power);
         bR.setPower(power);
         while(opModeIsActive()&&fL.getCurrentPosition()<ticks){
+            updateT();
+        }
+        fL.setPower(endPowers[0]);
+        fR.setPower(endPowers[1]);
+        bL.setPower(endPowers[2]);
+        bR.setPower(endPowers[3]);
+    }
+    private void strafeLeft(int ticks, double power, double[] endPowers){
+        resetEncoders();
+        fL.setPower(-power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(-power);
+        while(opModeIsActive()&&fL.getCurrentPosition()>(-ticks)){
             updateT();
         }
         fL.setPower(endPowers[0]);
