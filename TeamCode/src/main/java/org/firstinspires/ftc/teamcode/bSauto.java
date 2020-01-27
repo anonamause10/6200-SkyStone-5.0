@@ -116,7 +116,7 @@ public class bSauto extends LinearOpMode
         scale = 12.8 / voltage;
         double scale2 = 1;
         if (voltage <= 13.2) {
-            scale2 = 1.15;
+            scale2 = 1.08;
             scale = scale * scale2;
         }
 
@@ -260,7 +260,7 @@ public class bSauto extends LinearOpMode
             outtake();
             turn(330, array1, false, 2);
         }else{
-            turn(315, array1, false, 2);
+            turn(328, array1, false, 2);
         }
         intake();
 
@@ -275,13 +275,12 @@ public class bSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        sleep(470);
+        if(blockPos!=2)
+            sleep(100);
+        sleep(355);
 
         intakeOff();
         closeClaw();
-
-        if(blockPos == 2)
-            sleep(110);
 
         array1 = new double[] {0.5, 0.5, 0.5, 0.5};
 
@@ -292,26 +291,20 @@ public class bSauto extends LinearOpMode
         }else{
             sensorWorking = false;
         }
-        servosUp();
 
-        if(blockPos==0){
+        servosUp();
+        if(blockPos!=1)
             driveSleep(1200,-0.7*scale);
-        }else if(blockPos == 1){
-            driveSleep(1200,-0.7*scale);
-        }else{
-            driveSleep(1300,-0.7*scale);
-        }
+        else
+            driveSleep(900,-0.7*scale);
         LIFT.setPower(0.9);
         liftgoingup = true;
         driveSleep(300,-0.7*scale);
-        liftgoingup = false;
         rotateOut();
         LIFT.setPower(0.2);
-        if(sR.getDistance(DistanceUnit.MM)>680)
-            moveWithBackSensor(680, 0.6*scale);
-        else if(sR.getDistance(DistanceUnit.MM)<200){
-            moveWithBackSensor(600, 0.5*scale);
-        }
+
+        driveSleep(340, -0.7*scale);
+        liftgoingup = false;
 
         turn(180, new double[] {0,0,0,0}, false, 2);
         rotateOut();
@@ -373,21 +366,24 @@ public class bSauto extends LinearOpMode
         turn(270, new double[]{0,0,0,0}, getHeading()<=270, 0);
 
 
-        driveSleep(900, 0.7);
+        driveSleep(1400, 0.7);
 
         if(Math.abs(getHeading()-270)>1)
             turn(270, new double[]{0,0,0,0}, 270>getHeading(), 0);
 
+
+
         if(blockPos == 2)
-            moveWithForwardSensor(700, 0.4*scale);
+            moveWithForwardSensor(740, 0.4*scale);
         else if(blockPos == 1)
-            moveWithForwardSensor(880, 0.4*scale);
+            moveWithForwardSensor(960, 0.4*scale);
         else
             moveWithForwardSensor(1070, 0.4*scale);
+
         if(blockPos==0)
-            moveWithRightSensor(distanceFromWall+440, 0.5*scale);
+            moveWithRightSensor(distanceFromWall+420, 0.6*scale);
         else
-            moveWithRightSensor(distanceFromWall+460, 0.5*scale);
+            moveWithRightSensor(distanceFromWall+460, 0.6*scale);
 
         intake();
         power = 0.3*scale;
@@ -395,10 +391,19 @@ public class bSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
+        if(blockPos!=2)
         sleep(530);
+        else {
+            sleep(330);
+            power = -0.3*scale;
+            fL.setPower(power);
+            fR.setPower(power);
+            bL.setPower(power);
+            bR.setPower(power);
+            sleep(120);
+        }
 
-
-        moveWithRightSensor(681, 0.3*scale);
+        moveWithRightSensor(681, 0.5*scale);
         if(sR2.getDistance(DistanceUnit.MM)<70) {
             intakeOff();
             closeClaw();
@@ -406,16 +411,18 @@ public class bSauto extends LinearOpMode
 
         turn(270, new double[]{0,0,0,0}, getHeading()<270, 0);
         closeClaw();
-        outtake();
+
+        if(blockPos!=2)
+            outtake();
 
         if(sRR.getDistance(DistanceUnit.MM)<7000) {
-            if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall - 2)
-                moveWithRightSensor(distanceFromWall+1, 0.3 * scale);
+            if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall + 1)
+                moveWithRightSensor(distanceFromWall+3, 0.3 * scale);
 
-            if (sRR.getDistance(DistanceUnit.MM) > distanceFromWall + 3) {
-                moveWithRightSensor(distanceFromWall+1, 0.3 * scale);
-                if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall-2)
-                    moveWithRightSensor(distanceFromWall+1, 0.3 * scale);
+            if (sRR.getDistance(DistanceUnit.MM) > distanceFromWall + 5) {
+                moveWithRightSensor(distanceFromWall+3, 0.3 * scale);
+                if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall+1)
+                    moveWithRightSensor(distanceFromWall+3, 0.3 * scale);
             }else
                 turn(270, new double[]{0, 0, 0, 0}, 270 > getHeading(), 0);
 
@@ -451,7 +458,7 @@ public class bSauto extends LinearOpMode
             sleep(200);
 
             YEETER.setPower(-1);
-            power = 0.3 * scale;
+            power = 0.15 * scale;
             fL.setPower(power);
             fR.setPower(power + 0.01);
             bL.setPower(power);
@@ -460,7 +467,9 @@ public class bSauto extends LinearOpMode
             sleep(300);
             YEETER.setPower(0);
             rotateIn();
+            outtake();
             sleep(600);
+            intakeOff();
             motorsOff();
 
             LIFT.setPower(-0.3);
@@ -639,14 +648,14 @@ public class bSauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         runtim2.reset();
         if(sRF.getDistance(DistanceUnit.MM)>target){
-            while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
+            while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<3.5){
                 fL.setPower(power);
                 fR.setPower(power);
                 bL.setPower(power);
                 bR.setPower(power);
                 updateT();
             }}else{
-            while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
+            while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<3.5){
                 fL.setPower(-power);
                 fR.setPower(-power);
                 bL.setPower(-power);
