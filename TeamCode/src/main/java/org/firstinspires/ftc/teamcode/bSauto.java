@@ -102,7 +102,7 @@ public class bSauto extends LinearOpMode
     Orientation angles;
     Acceleration gravity;
     boolean usingCamera = true;
-    SkystoneDetectorNew detector = null;
+    //SkystoneDetectorNew detector = null;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -110,7 +110,7 @@ public class bSauto extends LinearOpMode
         int distanceFromWall = 683;
 
 
-        detector = new SkystoneDetectorNew(hardwareMap, true, false, true);
+        //detector = new SkystoneDetectorNew(hardwareMap, true, false, true);
 
         voltage = getBatteryVoltage();
         scale = 12.8 / voltage;
@@ -166,7 +166,7 @@ public class bSauto extends LinearOpMode
         servo = hardwareMap.get(Servo.class, "left");
         servo2 = hardwareMap.get(Servo.class, "right");
         servo.setPosition(0);
-        servo2.setPosition(.4);
+        servo2.setPosition(.45);
 
         //SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, false, false);
 
@@ -206,31 +206,31 @@ public class bSauto extends LinearOpMode
         while (!opModeIsActive() && !isStopRequested()) {
 
             if (usingCamera)
-                telemetry.addData("blockPos", detector.getPos());
+                telemetry.addData("camera", blockPos);
             else
                 telemetry.addData("blockPOs", blockPos);
             if (gamepad1.x && gamepad1.right_bumper) {
                 blockPos = 0;
                 usingCamera = false;
-                detector.stop();
+                //detector.stop();
             }
             if (gamepad1.a && gamepad1.right_bumper) {
                 blockPos = 1;
                 usingCamera = false;
-                detector.stop();
+                //detector.stop();
             }
             if (gamepad1.b &&gamepad1.right_bumper) {
                 blockPos = 2;
                 usingCamera = false;
-                detector.stop();
+                //detector.stop();
             }
 
             telemetry.update();
         }
         runtime.reset();
         if (usingCamera) {
-            blockPos = (int) detector.getPos();
-            detector.stop();
+            //blockPos = (int) detector.getPos();
+            //detector.stop();
         }
 
         double[] array1 = {0.7, -0.7, -0.7, 0.7};
@@ -596,7 +596,7 @@ public class bSauto extends LinearOpMode
     }
     private void servosDown(){
         servo.setPosition(0);
-        servo2.setPosition(.4);
+        servo2.setPosition(.45);
         sleep(100);
     }
 
@@ -1235,6 +1235,11 @@ public class bSauto extends LinearOpMode
             }
         }
         return result;
+    }
+    private void sleep(int millis){
+        runtim2.reset();
+        while(opModeIsActive() && runtim2.milliseconds()<millis){
+        }
     }
 
 

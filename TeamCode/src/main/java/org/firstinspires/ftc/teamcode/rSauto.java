@@ -113,7 +113,7 @@ public class rSauto extends LinearOpMode
     Orientation angles;
     Acceleration gravity;
     boolean usingCamera = true;
-    SkystoneDetectorNew detector = null;
+    //SkystoneDetectorNew detector = null;
     private boolean liftgoingup = false;
 
     @Override
@@ -121,7 +121,7 @@ public class rSauto extends LinearOpMode
 
         int distanceFromWall = 1112;
 
-        detector = new SkystoneDetectorNew(hardwareMap, true, true,true);
+        //detector = new SkystoneDetectorNew(hardwareMap, true, true,true);
 
         voltage = getBatteryVoltage();
         scale = 12.8 / voltage;
@@ -176,7 +176,7 @@ public class rSauto extends LinearOpMode
         servo = hardwareMap.get(Servo.class, "left");
         servo2 = hardwareMap.get(Servo.class, "right");
         servo.setPosition(0);
-        servo2.setPosition(.4);
+        servo2.setPosition(.45);
 
         sR = hardwareMap.get(DistanceSensor.class, "DSB");
         sR2 = hardwareMap.get(DistanceSensor.class, "DS2");
@@ -216,32 +216,32 @@ public class rSauto extends LinearOpMode
         //waitForStart();
         while (!opModeIsActive() && !isStopRequested()) {
 
-            if (usingCamera)
-                telemetry.addData("blockPos", detector.getPos());
+            if (usingCamera){}
+                //telemetry.addData("blockPos", detector.getPos());
             else
                 telemetry.addData("blockPOs", blockPos);
             if (gamepad1.x && gamepad1.right_bumper) {
                 blockPos = 0;
                 usingCamera = false;
-                detector.stop();
+                //detector.stop();
             }
             if (gamepad1.a && gamepad1.right_bumper) {
                 blockPos = 1;
                 usingCamera = false;
-                detector.stop();
+                //detector.stop();
             }
             if (gamepad1.b &&gamepad1.right_bumper) {
                 blockPos = 2;
                 usingCamera = false;
-                detector.stop();
+                //detector.stop();
             }
 
             telemetry.update();
         }
         runtime.reset();
         if (usingCamera) {
-            blockPos = (int) detector.getPos();
-            detector.stop();
+            blockPos = (int) 0;//detector.getPos();
+            //detector.stop();
         }
 
         double[] array1 = {0.7, -0.7, -0.7, 0.7};
@@ -286,9 +286,11 @@ public class rSauto extends LinearOpMode
         fR.setPower(power);
         bL.setPower(power);
         bR.setPower(power);
-        if(blockPos!=2)
-            sleep(170);
-        sleep(355);
+        if(blockPos==0)
+            sleep(150);
+        if(blockPos == 1)
+            sleep(50);
+        sleep(375);
 
         intakeOff();
         closeClaw();
@@ -305,11 +307,11 @@ public class rSauto extends LinearOpMode
 
         servosUp();
         if(blockPos==1)
-            driveSleep(1100,-0.7*scale);
+            driveSleep(900,-0.7*scale);
         else if(blockPos == 0)
             driveSleep(1200, -0.7*scale);
         else
-            driveSleep(900,-0.7*scale);
+            driveSleep(980,-0.7*scale);
         LIFT.setPower(0.9);
         liftgoingup = true;
         driveSleep(300,-0.7*scale);
@@ -370,10 +372,10 @@ public class rSauto extends LinearOpMode
 
         turn(90, new double[]{0,0,0,0}, getHeading()<=90, 0);
 
-        if(sRL.getDistance(DistanceUnit.MM)<1110)
-            moveWithLeftSensor(1112, 0.3*scale);
-        if(sRL.getDistance(DistanceUnit.MM)>1115)
-            moveWithLeftSensor(1112, 0.3*scale);
+        if(sRL.getDistance(DistanceUnit.MM)<distanceFromWall-2)
+            moveWithLeftSensor(distanceFromWall, 0.3*scale);
+        if(sRL.getDistance(DistanceUnit.MM)>distanceFromWall+2)
+            moveWithLeftSensor(distanceFromWall, 0.3*scale);
         LIFT.setPower(-0.02);
 
         turn(90, new double[]{0,0,0,0}, getHeading()<=90, 0);
@@ -381,8 +383,8 @@ public class rSauto extends LinearOpMode
 
         driveSleep(1400, 0.7);
 
-        if(Math.abs(getHeading()-90)>1)
-            turn(90, new double[]{0,0,0,0}, 90>getHeading(), 0);
+        if(Math.abs(getHeading()-88)>1)
+            turn(88, new double[]{0,0,0,0}, 88>getHeading(), 0);
 
 
 
@@ -391,7 +393,7 @@ public class rSauto extends LinearOpMode
         else if(blockPos == 1)
             moveWithForwardSensor(960, 0.4*scale);
         else
-            moveWithForwardSensor(1000, 0.4*scale);
+            moveWithForwardSensor(1150, 0.4*scale);
 
         strafeRight(700, 0.5 , new double[]{0.3,0.3,0.3,0.3});
         intake();
@@ -409,7 +411,7 @@ public class rSauto extends LinearOpMode
         }
 
 
-        strafeLeft(270, 0.5, new double[]{0,0,0,0});
+        strafeLeft(700, 0.5, new double[]{0,0,0,0});
 
         if(sR2.getDistance(DistanceUnit.MM)<70) {
             intakeOff();
@@ -419,19 +421,18 @@ public class rSauto extends LinearOpMode
         turn(90, new double[]{0,0,0,0}, getHeading()<90, 0);
         closeClaw();
 
-        if(blockPos!=2)
-            outtake();
+        outtake();
 
 
         if(sRL.getDistance(DistanceUnit.MM)<7000) {
 
-            if (sRL.getDistance(DistanceUnit.MM) < distanceFromWall + 1)
-                moveWithLeftSensor(distanceFromWall+3, 0.3 * scale);
+            if (sRL.getDistance(DistanceUnit.MM) < distanceFromWall - 2)
+                moveWithLeftSensor(distanceFromWall, 0.3 * scale);
 
-            if (sRL.getDistance(DistanceUnit.MM) > distanceFromWall + 5) {
-                moveWithLeftSensor(distanceFromWall+3, 0.3 * scale);
-                if (sRL.getDistance(DistanceUnit.MM) < distanceFromWall+1)
-                    moveWithLeftSensor(distanceFromWall+3, 0.3 * scale);
+            if (sRL.getDistance(DistanceUnit.MM) > distanceFromWall + 2) {
+                moveWithLeftSensor(distanceFromWall, 0.3 * scale);
+                if (sRL.getDistance(DistanceUnit.MM) < distanceFromWall-2)
+                    moveWithLeftSensor(distanceFromWall, 0.3 * scale);
             }else
                 turn(90, new double[]{0, 0, 0, 0}, 90 > getHeading(), 0);
 
@@ -465,6 +466,8 @@ public class rSauto extends LinearOpMode
             sleep(300);
             openClaw();
             sleep(200);
+
+            turn(92, new double[]{0,0,0,0}, 93 >getHeading(), 2);
 
             YEETER.setPower(-1);
             power = 0.15 * scale;
@@ -609,7 +612,7 @@ public class rSauto extends LinearOpMode
     }
     private void servosDown(){
         servo.setPosition(0);
-        servo2.setPosition(.4);
+        servo2.setPosition(.45);
         sleep(100);
     }
 
@@ -992,7 +995,7 @@ public class rSauto extends LinearOpMode
         double vuAng = tun;
         boolean turned = false;
         runtim2.reset();
-        while (!turned && opModeIsActive() && runtim2.seconds() < 4) {
+        while (!turned && opModeIsActive() && runtim2.seconds() < 3) {
             double ang = getHeading();
             telemetry.addData("Angle", ang);
             telemetry.addData("TurnTo", vuAng);
@@ -1108,6 +1111,12 @@ public class rSauto extends LinearOpMode
         fR.setPower(0);
         bL.setPower(0);
         bR.setPower(0);
+    }
+    private void sleep(int millis){
+        runtim2.reset();
+        while(opModeIsActive() && runtim2.milliseconds()<=millis){
+
+        }
     }
     private double averageTicks(){
         return (fL.getCurrentPosition()+fR.getCurrentPosition()+bL.getCurrentPosition()+bR.getCurrentPosition())/4;
