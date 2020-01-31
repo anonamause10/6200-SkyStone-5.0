@@ -137,7 +137,7 @@ public class teleop1PLEDS extends LinearOpMode {
         foundServL = hardwareMap.get(Servo.class, "left");
         foundServR = hardwareMap.get(Servo.class, "right");
         foundServL.setPosition(0);
-        foundServR.setPosition(.4);
+        foundServR.setPosition(.65);
 
         touch = hardwareMap.get(DigitalChannel.class, "touch");
         touch.setMode(DigitalChannel.Mode.INPUT);
@@ -314,10 +314,10 @@ public class teleop1PLEDS extends LinearOpMode {
 
             if(gamepad1.dpad_up){
                 foundServL.setPosition(0.4);
-                foundServR.setPosition(0.65);
+                foundServR.setPosition(0.4);
             }else if(gamepad1.dpad_down){
                 foundServL.setPosition(0);
-                foundServR.setPosition(0.4);
+                foundServR.setPosition(0.65);
             }
 
             //VARIABLE CHECKS

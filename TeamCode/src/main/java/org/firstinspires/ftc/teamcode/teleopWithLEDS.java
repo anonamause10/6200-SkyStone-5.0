@@ -136,7 +136,7 @@ public class teleopWithLEDS extends LinearOpMode {
         foundServL = hardwareMap.get(Servo.class, "left");
         foundServR = hardwareMap.get(Servo.class, "right");
         foundServL.setPosition(0);
-        foundServR.setPosition(.45);
+        foundServR.setPosition(.65);
 
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
         touch = hardwareMap.get(DigitalChannel.class, "touch");
@@ -326,10 +326,10 @@ public class teleopWithLEDS extends LinearOpMode {
 
             if(gamepad1.dpad_up){
                 foundServL.setPosition(0.4);
-                foundServR.setPosition(0.65);
+                foundServR.setPosition(0.4);
             }else if(gamepad1.dpad_down){
                 foundServL.setPosition(0);
-                foundServR.setPosition(0.45);
+                foundServR.setPosition(0.65);
             }
 
             //VARIABLE CHECKS

@@ -162,11 +162,11 @@ public class bSauto extends LinearOpMode
         CLAW = hardwareMap.get(Servo.class, "CLAW");
         CLAW.setPosition(.25);
         ROTATE = hardwareMap.get(Servo.class, "ROTATE");
-        ROTATE.setPosition(.69);
+        ROTATE.setPosition(.725);
         servo = hardwareMap.get(Servo.class, "left");
         servo2 = hardwareMap.get(Servo.class, "right");
         servo.setPosition(0);
-        servo2.setPosition(.45);
+        servo2.setPosition(.6);
 
         //SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, false, false);
 
@@ -287,23 +287,34 @@ public class bSauto extends LinearOpMode
         turn(270, new double[]{0,0,0,0}, false, 2);
 
         if(sRR.getDistance(DistanceUnit.MM)<8000){
+            int numberOfTimes = 1;
             distanceFromWall = (int)sRR.getDistance(DistanceUnit.MM);
+            for(int i = 0; i<6; i++){
+                int addition = (int)sRR.getDistance(DistanceUnit.MM);
+                if(addition<7000) {
+                    distanceFromWall = (addition + distanceFromWall);
+                    numberOfTimes++;
+                }
+            }
+            distanceFromWall /= numberOfTimes;
         }else{
             sensorWorking = false;
         }
 
         servosUp();
-        if(blockPos!=1)
-            driveSleep(1200,-0.7*scale);
+
+        if(blockPos==1)
+            driveSleep(850,-0.7*scale);
+        else if(blockPos == 0)
+            driveSleep(1100, -0.7*scale);
         else
-            driveSleep(900,-0.7*scale);
+            driveSleep(1050,-0.7*scale);
         LIFT.setPower(0.9);
         liftgoingup = true;
         driveSleep(300,-0.7*scale);
-        rotateOut();
         LIFT.setPower(0.2);
 
-        driveSleep(340, -0.7*scale);
+        driveSleep(570, -0.55*scale);
         liftgoingup = false;
 
         turn(180, new double[] {0,0,0,0}, false, 2);
@@ -314,7 +325,6 @@ public class bSauto extends LinearOpMode
         fR.setPower(0.3*scale);
         bL.setPower(0.3*scale);
         bR.setPower(0.3*scale);
-        openClaw();
         if(blockPos!=0){
             sleep(200);
         }
@@ -329,24 +339,22 @@ public class bSauto extends LinearOpMode
         fR.setPower(0.7*scale);
         bL.setPower(0.7*scale);
         bR.setPower(0.7*scale);
-        rotateIn();
-        sleep(370);
+
+        sleep(390);
         fL.setPower(-0.7*scale);
         fR.setPower(0.7*scale);
         bL.setPower(-0.7*scale);
         bR.setPower(0.7*scale);
 
         while(opModeIsActive()&&getHeading()<270){
-            if(getHeading()>235 && ROTATE.getPosition()>0.6 && LIFT.getCurrentPosition()>5){
-                LIFT.setPower(-0.2*scale);
-            }else if(getHeading()>235){
-                LIFT.setPower(-0.01*scale);
-            }
             updateT();
         }
         motorsOff();
+        openClaw();
         servosUp();
-        LIFT.setPower(-0.01*scale);
+        sleep(300);
+        rotateIn();
+        sleep(200);
 
         power = 0.3*scale;
         fL.setPower(power);
@@ -368,22 +376,23 @@ public class bSauto extends LinearOpMode
 
         driveSleep(1400, 0.7);
 
-        if(Math.abs(getHeading()-270)>1)
-            turn(270, new double[]{0,0,0,0}, 270>getHeading(), 0);
+        if(Math.abs(getHeading()-272)>1)
+            turn(272, new double[]{0,0,0,0}, 272>getHeading(), 0);
 
 
 
         if(blockPos == 2)
             moveWithForwardSensor(740, 0.4*scale);
         else if(blockPos == 1)
-            moveWithForwardSensor(960, 0.4*scale);
+            moveWithForwardSensor(910, 0.4*scale);
         else
-            moveWithForwardSensor(1070, 0.4*scale);
+            moveWithForwardSensor(1090, 0.4*scale);
 
         if(sRR.getDistance(DistanceUnit.MM) < distanceFromWall-50){
             moveWithRightSensor(distanceFromWall, 0.5);
         }
-        strafeLeft(700, 0.5, new double[]{0,0,0,0});
+
+        strafeLeft(630, 0.5*scale, new double[]{0,0,0,0});
 
         intake();
         power = 0.3*scale;
@@ -403,7 +412,7 @@ public class bSauto extends LinearOpMode
             sleep(120);
         }
 
-        strafeRight(700, 0.5, new double[]{0,0,0,0});
+        strafeRight(690, 0.5*scale, new double[]{0,0,0,0});
         if(sR2.getDistance(DistanceUnit.MM)<70) {
             intakeOff();
             closeClaw();
@@ -412,17 +421,18 @@ public class bSauto extends LinearOpMode
         turn(270, new double[]{0,0,0,0}, getHeading()<270, 0);
         closeClaw();
 
-        if(blockPos!=2)
-            outtake();
+        outtake();
+
+        servosDown();
 
         if(sRR.getDistance(DistanceUnit.MM)<7000) {
-            if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall + 1)
-                moveWithRightSensor(distanceFromWall+3, 0.3 * scale);
+            if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall - 2)
+                moveWithRightSensor(distanceFromWall, 0.3 * scale);
 
-            if (sRR.getDistance(DistanceUnit.MM) > distanceFromWall + 5) {
-                moveWithRightSensor(distanceFromWall+3, 0.3 * scale);
-                if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall+1)
-                    moveWithRightSensor(distanceFromWall+3, 0.3 * scale);
+            if (sRR.getDistance(DistanceUnit.MM) > distanceFromWall + 2) {
+                moveWithRightSensor(distanceFromWall, 0.3 * scale);
+                if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall-2)
+                    moveWithRightSensor(distanceFromWall, 0.3 * scale);
             }else
                 turn(270, new double[]{0, 0, 0, 0}, 270 > getHeading(), 0);
 
@@ -478,6 +488,12 @@ public class bSauto extends LinearOpMode
             intakeOff();
             YEETER.setPower(-1);
             sleep(300);
+            if(blockPos>=1){
+                sleep(100);
+            }
+            if(blockPos==2){
+                sleep(100);
+            }
             YEETER.setPower(0);
         }
 
@@ -485,7 +501,6 @@ public class bSauto extends LinearOpMode
             LIFT.setPower(0);
         }
         //goV2(1000, 0.7, new double[]{0,0,0,0}, true);
-        servosDown();
 
         while(opModeIsActive()){
             if(LIFT.getCurrentPosition()<10 || !touch.getState()){
@@ -578,10 +593,10 @@ public class bSauto extends LinearOpMode
         return (angles.firstAngle+360)%360;
     }
     private void rotateIn(){
-        ROTATE.setPosition(0.69);
+        ROTATE.setPosition(0.725);
     }
     private void rotateOut(){
-        ROTATE.setPosition(0.025);
+        ROTATE.setPosition(0.06);
     }
     private void closeClaw(){
         CLAW.setPosition(0);
@@ -590,14 +605,13 @@ public class bSauto extends LinearOpMode
         CLAW.setPosition(0.15);
     }
     private void servosUp(){
-        servo.setPosition(.4);
-        servo2.setPosition(.65);
+        servo.setPosition(.2);
+        servo2.setPosition(.4);
         sleep(100);
     }
     private void servosDown(){
         servo.setPosition(0);
-        servo2.setPosition(.45);
-        sleep(100);
+        servo2.setPosition(.6);
     }
 
     private void intake(){

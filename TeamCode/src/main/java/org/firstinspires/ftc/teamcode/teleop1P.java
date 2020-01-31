@@ -135,7 +135,7 @@ public class teleop1P extends LinearOpMode {
         foundServL = hardwareMap.get(Servo.class, "left");
         foundServR = hardwareMap.get(Servo.class, "right");
         foundServL.setPosition(0);
-        foundServR.setPosition(.45);
+        foundServR.setPosition(.6);
 
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
         touch = hardwareMap.get(DigitalChannel.class, "touch");
@@ -161,9 +161,9 @@ public class teleop1P extends LinearOpMode {
 
             //CLAW STUFF
             if (gamepad1.a) {
-                rotateServo.setPosition(0.69);
+                rotateServo.setPosition(0.725);
             }else if(gamepad1.b){
-                rotateServo.setPosition(0.025);
+                rotateServo.setPosition(0.06);
                 playSound( 0, myApp, params);
             }
 
@@ -250,11 +250,11 @@ public class teleop1P extends LinearOpMode {
             //FOUNDATION
 
             if(gamepad1.dpad_up){
-                foundServL.setPosition(0.4);
-                foundServR.setPosition(0.65);
+                foundServL.setPosition(0.2);
+                foundServR.setPosition(0.4);
             }else if(gamepad1.dpad_down){
                 foundServL.setPosition(0);
-                foundServR.setPosition(0.45);
+                foundServR.setPosition(0.6);
             }
 
             //VARIABLE CHECKS

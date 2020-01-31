@@ -133,8 +133,7 @@ public class sensorCodeForPres extends LinearOpMode {
 
         foundServL = hardwareMap.get(Servo.class, "left");
         foundServR = hardwareMap.get(Servo.class, "right");
-        foundServL.setPosition(0);
-        foundServR.setPosition(.4);
+
 
         sRL = hardwareMap.get(DistanceSensor.class, "DSL");
         sRR = hardwareMap.get(DistanceSensor.class, "DSR");
@@ -156,7 +155,7 @@ public class sensorCodeForPres extends LinearOpMode {
         }
         runtime.reset();
         while (opModeIsActive()) {
-            if(sRL.getDistance(DistanceUnit.MM) < 1000){
+            if(sRL.getDistance(DistanceUnit.MM) < 500){
                 startAngle = getHeading();
                 powers = new double[]{0.5,-0.5,-0.5,0.5};
                 if(startAngle==0) {
@@ -187,7 +186,7 @@ public class sensorCodeForPres extends LinearOpMode {
                 }else{}
                 }
 
-            }else if(sRR.getDistance(DistanceUnit.MM)<1000){
+            }else if(sRR.getDistance(DistanceUnit.MM)<200){
                 startAngle = getHeading();
                 powers = new double[]{-0.5,0.5,0.5,-0.5};
                 if(startAngle==0) {
