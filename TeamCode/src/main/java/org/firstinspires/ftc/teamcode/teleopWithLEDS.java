@@ -38,6 +38,7 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
  * Created by isong on 10/17/18.
  */
 @TeleOp(group = "zz", name="TeleOp WITH LEDS CAUSE IM A CHAD")
+@Disabled
 
 public class teleopWithLEDS extends LinearOpMode {
     // Declare OpMode members.

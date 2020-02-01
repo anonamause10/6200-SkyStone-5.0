@@ -51,6 +51,7 @@ import java.io.File;
  */
 
 @TeleOp(name="Sounds", group="Concept")
+@Disabled
 public class autoDecember7 extends LinearOpMode {
 
     // List of available sound resources

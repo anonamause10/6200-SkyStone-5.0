@@ -39,6 +39,7 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
  * Created by isong on 10/17/18.
  */
 @TeleOp(group = "z", name="tester 2")
+@Disabled
 
 public class autoDecember1 extends LinearOpMode {
     // Declare OpMode members.
