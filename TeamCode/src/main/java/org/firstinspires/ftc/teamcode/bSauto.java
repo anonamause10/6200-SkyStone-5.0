@@ -205,7 +205,7 @@ public class bSauto extends LinearOpMode
         while (!opModeIsActive() && !isStopRequested()) {
 
             if (usingCamera)
-                telemetry.addData("camera", blockPos);
+                telemetry.addData("camera", detector.getPos());
             else
                 telemetry.addData("blockPOs", blockPos);
             if (gamepad1.x && gamepad1.right_bumper) {
@@ -321,7 +321,7 @@ public class bSauto extends LinearOpMode
             driveSleep(1050, -0.7*scale);
         else
             driveSleep(1050,-0.7*scale);
-        LIFT.setPower(0.82);
+        LIFT.setPower(0.79);
         liftgoingup = true;
         driveSleep(300,-0.7*scale);
         LIFT.setPower(0.2);
@@ -338,11 +338,13 @@ public class bSauto extends LinearOpMode
         fR.setPower(0.3*scale);
         bL.setPower(0.3*scale);
         bR.setPower(0.3*scale);
-        openClaw();
         if(blockPos!=0){
             sleep(200);
         }
         sleep(200);
+        openClaw();
+        motorsOff();
+        sleep(300);
         fL.setPower(-0.7*scale);
         fR.setPower(0.7*scale);
         bL.setPower(0.7*scale);
@@ -353,7 +355,7 @@ public class bSauto extends LinearOpMode
         bL.setPower(0.7*scale);
         bR.setPower(0.7*scale);
         rotateIn();
-        sleep(370);
+        sleep(270);
         fL.setPower(-0.7*scale);
         fR.setPower(0.7*scale);
         bL.setPower(-0.7*scale);
@@ -396,9 +398,9 @@ public class bSauto extends LinearOpMode
 
 
         if(blockPos == 2)
-            moveWithForwardSensor(740, 0.4*scale);
+            moveWithForwardSensor(710, 0.4*scale);
         else if(blockPos == 1)
-            moveWithForwardSensor(910, 0.4*scale);
+            moveWithForwardSensor(890, 0.4*scale);
         else
             moveWithForwardSensor(1090, 0.4*scale);
 
@@ -417,7 +419,7 @@ public class bSauto extends LinearOpMode
         if(blockPos!=2)
         sleep(530);
         else {
-            sleep(330);
+            sleep(530);
             power = -0.3*scale;
             fL.setPower(power);
             fR.setPower(power);
@@ -453,7 +455,7 @@ public class bSauto extends LinearOpMode
             intakeOff();
 
             driveSleep(1150, -0.7);
-            driveSleep(720, -0.55);
+            driveSleep(820, -0.55);
 
             LIFT.setPower(0.9);
             power = -0.5 * scale;
@@ -474,8 +476,7 @@ public class bSauto extends LinearOpMode
 
 
             sleep(150);
-            if (sR.getDistance(DistanceUnit.MM) > 100)
-                sleep(200);
+            sleep(200);
             motorsOff();
             sleep(300);
             openClaw();

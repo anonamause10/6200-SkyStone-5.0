@@ -324,7 +324,7 @@ public class rSauto extends LinearOpMode
             driveSleep(1300, -0.7*scale);
         else
             driveSleep(1150,-0.7*scale);
-        LIFT.setPower(0.82);
+        LIFT.setPower(0.79);
         liftgoingup = true;
         driveSleep(300,-0.7*scale);
         LIFT.setPower(0.2);
@@ -341,11 +341,11 @@ public class rSauto extends LinearOpMode
         fR.setPower(0.3*scale);
         bL.setPower(0.3*scale);
         bR.setPower(0.3*scale);
-        openClaw();
         if(blockPos!=0){
             sleep(200);
         }
         sleep(200);
+        openClaw();
         motorsOff();
         sleep(300);
         fL.setPower(0.7*scale);
@@ -482,11 +482,8 @@ public class rSauto extends LinearOpMode
             bL.setPower(power);
             bR.setPower(power);
             sleep(120);
-
-
             sleep(150);
-            if (sR.getDistance(DistanceUnit.MM) > 100)
-                sleep(200);
+            sleep(200);
             motorsOff();
             sleep(300);
             openClaw();

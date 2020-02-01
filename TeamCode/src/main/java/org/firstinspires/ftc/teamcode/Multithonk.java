@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Autonomous(name="MultiThonk", group="ree")
+@Disabled
 
 public class Multithonk extends LinearOpMode
 {
