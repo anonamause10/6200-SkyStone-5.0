@@ -309,13 +309,14 @@ public class bSauto extends LinearOpMode
             driveSleep(1100, -0.7*scale);
         else
             driveSleep(1050,-0.7*scale);
-        LIFT.setPower(0.9);
+        LIFT.setPower(0.82);
         liftgoingup = true;
         driveSleep(300,-0.7*scale);
         LIFT.setPower(0.2);
 
         driveSleep(570, -0.55*scale);
         liftgoingup = false;
+
 
         turn(180, new double[] {0,0,0,0}, false, 2);
         rotateOut();
@@ -325,11 +326,11 @@ public class bSauto extends LinearOpMode
         fR.setPower(0.3*scale);
         bL.setPower(0.3*scale);
         bR.setPower(0.3*scale);
+        openClaw();
         if(blockPos!=0){
             sleep(200);
         }
         sleep(200);
-
         fL.setPower(-0.7*scale);
         fR.setPower(0.7*scale);
         bL.setPower(0.7*scale);
@@ -339,23 +340,24 @@ public class bSauto extends LinearOpMode
         fR.setPower(0.7*scale);
         bL.setPower(0.7*scale);
         bR.setPower(0.7*scale);
-
-        sleep(390);
+        rotateIn();
+        sleep(370);
         fL.setPower(-0.7*scale);
         fR.setPower(0.7*scale);
         bL.setPower(-0.7*scale);
         bR.setPower(0.7*scale);
-
         while(opModeIsActive()&&getHeading()<270){
+            if(getHeading()>235 && ROTATE.getPosition()>0.6 && LIFT.getCurrentPosition()>5){
+                LIFT.setPower(-0.2*scale);
+            }else if(getHeading()>235){
+                LIFT.setPower(-0.01*scale);
+            }
             updateT();
         }
         motorsOff();
-        openClaw();
         servosUp();
-        sleep(300);
-        rotateIn();
-        sleep(200);
 
+        LIFT.setPower(-0.01*scale);
         power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);

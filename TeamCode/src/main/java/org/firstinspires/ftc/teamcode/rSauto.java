@@ -258,7 +258,7 @@ public class rSauto extends LinearOpMode
             sleep(240);
         }else{
             goV2(765, 0.5 * scale, array1, false);
-            sleep(150);
+            sleep(200);
         }
 
         if (LIFT.getPower() > 0) {
@@ -268,7 +268,7 @@ public class rSauto extends LinearOpMode
 
         if (blockPos == 0){
             outtake();
-            turn(330, array1, false, 2);
+            turn(325, array1, false, 2);
         }else if(blockPos==1){
             outtake();
             turn(30, array1, true, 2);
@@ -290,7 +290,10 @@ public class rSauto extends LinearOpMode
         bR.setPower(power);
         if(blockPos==0)
             sleep(100);
-        sleep(430);
+        if(blockPos!=2)
+        sleep(440);
+        else
+        sleep(420);
 
         intakeOff();
         closeClaw();
@@ -316,32 +319,35 @@ public class rSauto extends LinearOpMode
 
         servosUp();
         if(blockPos==1)
-            driveSleep(850,-0.7*scale);
+            driveSleep(950,-0.7*scale);
         else if(blockPos == 0)
-            driveSleep(1100, -0.7*scale);
+            driveSleep(1300, -0.7*scale);
         else
-            driveSleep(1050,-0.7*scale);
-        LIFT.setPower(0.9);
+            driveSleep(1150,-0.7*scale);
+        LIFT.setPower(0.82);
         liftgoingup = true;
         driveSleep(300,-0.7*scale);
         LIFT.setPower(0.2);
-
-        driveSleep(470, -0.55*scale);
+        driveSleep(270, -0.55*scale);
         liftgoingup = false;
+        outtake();
 
         turn(180, new double[] {0,0,0,0}, true, 2);
         rotateOut();
         goV2(-350, 0.3, new double[] {-0.25, -0.25, -0.25, -0.25}, true);
+        intakeOff();
         servosDown();
         fL.setPower(0.3*scale);
         fR.setPower(0.3*scale);
         bL.setPower(0.3*scale);
         bR.setPower(0.3*scale);
+        openClaw();
         if(blockPos!=0){
             sleep(200);
         }
         sleep(200);
-
+        motorsOff();
+        sleep(300);
         fL.setPower(0.7*scale);
         fR.setPower(-0.7*scale);
         bL.setPower(-0.7*scale);
@@ -351,22 +357,23 @@ public class rSauto extends LinearOpMode
         fR.setPower(0.7*scale);
         bL.setPower(0.7*scale);
         bR.setPower(0.7*scale);
+        rotateIn();
         sleep(470);
         fL.setPower(0.7*scale);
         fR.setPower(-0.7*scale);
         bL.setPower(0.7*scale);
         bR.setPower(-0.7*scale);
-
         while(opModeIsActive()&&getHeading()>90){
+            if(getHeading()<125 && ROTATE.getPosition()>0.6 && LIFT.getCurrentPosition()>5){
+                LIFT.setPower(-0.2*scale);
+            }else if(getHeading()<125){
+                LIFT.setPower(-0.01*scale);
+            }
             updateT();
         }
         motorsOff();
-        openClaw();
         servosUp();
-        sleep(300);
-        rotateIn();
-        sleep(200);
-
+        LIFT.setPower(-0.01*scale);
         power = 0.3*scale;
         fL.setPower(power);
         fR.setPower(power);
@@ -376,11 +383,11 @@ public class rSauto extends LinearOpMode
 
         turn(90, new double[]{0,0,0,0}, getHeading()<=90, 0);
 
+
         if(sRL.getDistance(DistanceUnit.MM)<distanceFromWall-2)
             moveWithLeftSensor(distanceFromWall, 0.3*scale);
         if(sRL.getDistance(DistanceUnit.MM)>distanceFromWall+2)
             moveWithLeftSensor(distanceFromWall, 0.3*scale);
-        LIFT.setPower(-0.02);
 
         turn(90, new double[]{0,0,0,0}, getHeading()<=90, 0);
 
@@ -393,22 +400,24 @@ public class rSauto extends LinearOpMode
 
 
         if(blockPos == 2)
-            moveWithForwardSensor(700, 0.4*scale);
+            moveWithForwardSensor(720, 0.4*scale);
         else if(blockPos == 1)
             moveWithForwardSensor(910, 0.4*scale);
         else
-            moveWithForwardSensor(1090, 0.4*scale);
+            moveWithForwardSensor(1120, 0.4*scale);
 
         if(blockPos==2){
-            strafeRight(540, 0.5, new double[]{0.3,0.3,0.3,0.3});
-        }else
+            strafeRight(600, 0.5, new double[]{0.3,0.3,0.3,0.3});
+        }else if(blockPos == 1)
             strafeRight(600, 0.5 , new double[]{0.3,0.3,0.3,0.3});
+        else
+            strafeRight(630, 0.5 , new double[]{0.3,0.3,0.3,0.3});
         intake();
 
         if(blockPos!=2)
-            sleep(510);
+            sleep(450);
         else {
-            sleep(430);
+            sleep(450);
             power = -0.3*scale;
             fL.setPower(power);
             fR.setPower(power);
@@ -442,11 +451,17 @@ public class rSauto extends LinearOpMode
             if (sRL.getDistance(DistanceUnit.MM) > distanceFromWall + 2) {
                 moveWithLeftSensor(distanceFromWall, 0.3 * scale);
                 if (sRL.getDistance(DistanceUnit.MM) < distanceFromWall-2)
-                    moveWithLeftSensor(distanceFromWall, 0.3 * scale);
+                    moveWithLeftSensor(distanceFromWall, 0.29 * scale);
             }else
                 turn(90, new double[]{0, 0, 0, 0}, 90 > getHeading(), 0);
 
             intakeOff();
+            if(blockPos==2 && distanceFromWall>1100){
+                if(Math.abs(getHeading()-89)>1)
+                    turn(89, new double[]{0,0,0,0}, 89>getHeading(), 0);
+            } else
+                if(Math.abs(getHeading()-90)>1)
+                    turn(90, new double[]{0,0,0,0}, 90>getHeading(), 0);
 
             driveSleep(1150, -0.7);
             driveSleep(720, -0.55);
@@ -645,13 +660,13 @@ public class rSauto extends LinearOpMode
         telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
                         "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
                 bL.getPower(), bR.getPower());
-        telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
-                        "back left (%.1f), back right (%.1f)", (float)fL.getCurrentPosition(), (float)fR.getCurrentPosition(),
-                (float)bL.getCurrentPosition(), (float)bR.getCurrentPosition());
-        telemetry.addData("Status", "Run Time: " + runtime.toString());
+
         telemetry.addData("Status", "Run Time2: " + runtim2.toString());
         telemetry.addData("LeftSensor", sRL.getDistance(DistanceUnit.MM));
         telemetry.addData("distanceFromWall", distanceFromWall);
+        telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
+                        "back left (%.1f), back right (%.1f)", (float)fL.getCurrentPosition(), (float)fR.getCurrentPosition(),
+                (float)bL.getCurrentPosition(), (float)bR.getCurrentPosition());
         telemetry.addData("BlockPos", blockPos);
         telemetry.addData("INTAKE POWER", IN1.getPower());
         telemetry.update();
@@ -838,6 +853,9 @@ public class rSauto extends LinearOpMode
                         bR.setPower(bR.getPower() - 0.02);
                     }else{}
                 }
+                if(LIFT.getPower()<0 && LIFT.getCurrentPosition()<20){
+                    LIFT.setPower(0);
+                }
                 updateT();
             }}else{
             while(opModeIsActive()&&(sRL.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<2.5){
@@ -869,6 +887,9 @@ public class rSauto extends LinearOpMode
                         bL.setPower(bL.getPower() + 0.02);
                         bR.setPower(bR.getPower() - 0.02);
                     }else{}
+                }
+                if(LIFT.getPower()<0 && LIFT.getCurrentPosition()<20){
+                    LIFT.setPower(0);
                 }
                 updateT();
 
@@ -1011,6 +1032,9 @@ public class rSauto extends LinearOpMode
         boolean turned = false;
         runtim2.reset();
         while (!turned && opModeIsActive() && runtim2.seconds() < 3) {
+            if(LIFT.getPower()<0 && LIFT.getCurrentPosition()<20){
+                LIFT.setPower(0);
+            }
             double ang = getHeading();
             telemetry.addData("Angle", ang);
             telemetry.addData("TurnTo", vuAng);
