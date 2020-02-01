@@ -115,7 +115,7 @@ public class rSauto extends LinearOpMode
     Orientation angles;
     Acceleration gravity;
     boolean usingCamera = true;
-    //SkystoneDetectorNew detector = null;
+    SkystoneDetectorNew detector = null;
     private boolean liftgoingup = false;
 
     @Override
@@ -123,7 +123,7 @@ public class rSauto extends LinearOpMode
 
         distanceFromWall = 1112;
 
-        //detector = new SkystoneDetectorNew(hardwareMap, true, true,true);
+        detector = new SkystoneDetectorNew(hardwareMap, true, true,true);
 
         voltage = getBatteryVoltage();
         scale = 12.8 / voltage;
@@ -218,32 +218,32 @@ public class rSauto extends LinearOpMode
         //waitForStart();
         while (!opModeIsActive() && !isStopRequested()) {
 
-            if (usingCamera){}
-                //telemetry.addData("blockPos", detector.getPos());
+            if (usingCamera)
+                telemetry.addData("blockPos", detector.getPos());
             else
                 telemetry.addData("blockPOs", blockPos);
             if (gamepad1.x && gamepad1.right_bumper) {
                 blockPos = 0;
                 usingCamera = false;
-                //detector.stop();
+                detector.stop();
             }
             if (gamepad1.a && gamepad1.right_bumper) {
                 blockPos = 1;
                 usingCamera = false;
-                //detector.stop();
+                detector.stop();
             }
             if (gamepad1.b &&gamepad1.right_bumper) {
                 blockPos = 2;
                 usingCamera = false;
-                //detector.stop();
+                detector.stop();
             }
 
             telemetry.update();
         }
         runtime.reset();
         if (usingCamera) {
-            blockPos = (int) 0;//detector.getPos();
-            //detector.stop();
+            blockPos = (int) detector.getPos();
+            detector.stop();
         }
 
         double[] array1 = {0.7, -0.7, -0.7, 0.7};

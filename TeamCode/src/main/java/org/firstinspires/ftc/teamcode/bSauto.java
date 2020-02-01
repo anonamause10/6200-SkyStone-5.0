@@ -102,7 +102,7 @@ public class bSauto extends LinearOpMode
     Orientation angles;
     Acceleration gravity;
     boolean usingCamera = true;
-    //SkystoneDetectorNew detector = null;
+    SkystoneDetectorNew detector = null;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -110,7 +110,7 @@ public class bSauto extends LinearOpMode
         int distanceFromWall = 683;
 
 
-        //detector = new SkystoneDetectorNew(hardwareMap, true, false, true);
+        detector = new SkystoneDetectorNew(hardwareMap, true, false, true);
 
         voltage = getBatteryVoltage();
         scale = 12.8 / voltage;
@@ -168,7 +168,6 @@ public class bSauto extends LinearOpMode
         servo.setPosition(0);
         servo2.setPosition(.6);
 
-        //SkystoneDetector sky = new SkystoneDetector(hardwareMap, true, false, false);
 
         sR = hardwareMap.get(DistanceSensor.class, "DSB");
         sR2 = hardwareMap.get(DistanceSensor.class, "DS2");
@@ -212,25 +211,25 @@ public class bSauto extends LinearOpMode
             if (gamepad1.x && gamepad1.right_bumper) {
                 blockPos = 0;
                 usingCamera = false;
-                //detector.stop();
+                detector.stop();
             }
             if (gamepad1.a && gamepad1.right_bumper) {
                 blockPos = 1;
                 usingCamera = false;
-                //detector.stop();
+                detector.stop();
             }
             if (gamepad1.b &&gamepad1.right_bumper) {
                 blockPos = 2;
                 usingCamera = false;
-                //detector.stop();
+                detector.stop();
             }
 
             telemetry.update();
         }
         runtime.reset();
         if (usingCamera) {
-            //blockPos = (int) detector.getPos();
-            //detector.stop();
+            blockPos = (int) detector.getPos();
+            detector.stop();
         }
 
         double[] array1 = {0.7, -0.7, -0.7, 0.7};
@@ -245,7 +244,7 @@ public class bSauto extends LinearOpMode
             sleep(300);
         }else{
             goV2(740, 0.5 * scale, array1, false);
-            sleep(150);
+            sleep(125);
         }
 
         if (LIFT.getPower() > 0) {
@@ -269,15 +268,28 @@ public class bSauto extends LinearOpMode
         }
 
         sleep(800);
+        double power = -0.5 * scale;
+        if(!(blockPos==0)) {
+            fL.setPower(power);
+            fR.setPower(power);
+            bL.setPower(power);
+            bR.setPower(power);
+            if (blockPos != 2)
+                sleep(100);
+            sleep(355);
 
-        double power = -0.5*scale;
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
-        if(blockPos!=2)
+        }else{
+            fL.setPower(-power);
+            fR.setPower(power);
+            bL.setPower(-power);
+            bR.setPower(power);
             sleep(100);
-        sleep(355);
+            fL.setPower(power);
+            fR.setPower(power);
+            bL.setPower(power);
+            bR.setPower(power);
+            sleep(365);
+        }
 
         intakeOff();
         closeClaw();
@@ -304,9 +316,9 @@ public class bSauto extends LinearOpMode
         servosUp();
 
         if(blockPos==1)
-            driveSleep(850,-0.7*scale);
+            driveSleep(700,-0.7*scale);
         else if(blockPos == 0)
-            driveSleep(1100, -0.7*scale);
+            driveSleep(1050, -0.7*scale);
         else
             driveSleep(1050,-0.7*scale);
         LIFT.setPower(0.82);
@@ -923,7 +935,7 @@ public class bSauto extends LinearOpMode
         double vuAng = tun;
         boolean turned = false;
         runtim2.reset();
-        while (!turned && opModeIsActive() && runtim2.seconds() < 4) {
+        while (!turned && opModeIsActive() && runtim2.seconds() < 3) {
             double ang = getHeading();
 
             telemetry.addData("Angle", ang);
