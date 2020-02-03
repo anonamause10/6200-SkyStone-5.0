@@ -36,10 +36,9 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.FORWARD;
 import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 
 /**
- * Created by isong on 10/17/18.
+ * Created by isong on teh day afteh lague
  */
 @TeleOp(group = "a", name="TelP LEDS")
-
 
 public class distancetester extends LinearOpMode {
     // Declare OpMode members.
@@ -147,7 +146,6 @@ public class distancetester extends LinearOpMode {
 
         telemetry.addData("Robot", "Initialized");
         telemetry.update();
-
 
         // Wait for the game to start (driver presses PLAY)
         //waitForStart();
