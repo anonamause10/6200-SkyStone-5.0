@@ -20,6 +20,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.ftccommon.SoundPlayer;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.SampleRevBlinkinLedDriver;
+import org.firstinspires.ftc.robotcontroller.external.samples.SensorAdafruitRGB;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -69,7 +70,7 @@ public class distancetester extends LinearOpMode {
     private boolean dPadLPrev = false;
     private boolean dPadRPrev = false;
     private boolean sPrev = false;
-
+    private DistanceSensor intSens = null;
 
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
@@ -94,21 +95,11 @@ public class distancetester extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        // Variables for choosing from the available sounds
-        int     soundIndex      = 8;
         boolean yPrev     = false;
         boolean xPrev   = false;
-        boolean liftRunning = false;
 
+        intSens = hardwareMap.get(DistanceSensor.class, "DS2");
 
-        int[] positions = {0, 111, 391, 599, 879, 1099, 1299, 1499, 1699};
-
-        int currLiftPos = 0;
-
-        Context myApp = hardwareMap.appContext;
-        SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
-        params.loopControl = 0;
-        params.waitForNonLoopingSoundsToFinish = true;
 
         FL = hardwareMap.get(DcMotor.class, "fL");FR = hardwareMap.get(DcMotor.class, "fR");
         BL = hardwareMap.get(DcMotor.class, "bL");BR = hardwareMap.get(DcMotor.class, "bR");
@@ -169,6 +160,23 @@ public class distancetester extends LinearOpMode {
 
             //DRIVE + MAYBE LED
             drive();
+            if(gamepad1.left_bumper){
+                IN1.setPower(-0.4);
+                IN2.setPower(-0.4);
+            }else if(gamepad1.right_bumper && intSens.getDistance(DistanceUnit.MM)>70){
+                IN1.setPower(0.7);
+                IN2.setPower(0.7);
+            }else{
+                IN1.setPower(0);
+                IN2.setPower(0);
+            }
+            if(gamepad1.dpad_up){
+                foundServL.setPosition(0);
+                foundServR.setPosition(0.4);
+            }else if(gamepad1.dpad_down){
+                foundServL.setPosition(0.2);
+                foundServR.setPosition(0.6);
+            }
 
             if(gamepad2.start){
                 blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
@@ -264,22 +272,7 @@ public class distancetester extends LinearOpMode {
         imu.initialize(parameters2);
         imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
     }
-    private void playSound(int soundIndex, Context myApp, SoundPlayer.PlaySoundParams params){
-        // Determine Resource IDs for the sounds you want to play, and make sure it's valid.
-        int soundID = -1;
-        if ((soundID = myApp.getResources().getIdentifier(sounds[soundIndex], "raw", myApp.getPackageName())) != 0){
 
-            // Signal that the sound is now playing.
-            soundPlaying = true;
-
-            // Start playing, and also Create a callback that will clear the playing flag when the sound is complete.
-            SoundPlayer.getInstance().startPlaying(myApp, soundID, params, null,
-                    new Runnable() {
-                        public void run() {
-                            soundPlaying = false;
-                        }} );
-        }
-    }
     public void drive(int ticks, double power){
         if(ticks <0){
             power = -power;
