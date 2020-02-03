@@ -37,10 +37,16 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 /**
  * Created by isong on 10/17/18.
  */
-@TeleOp(group = "a", name="TeleOp")
+@TeleOp(group = "a", name="TelP LEDS")
 
-public class teleop extends LinearOpMode {
+
+public class distancetester extends LinearOpMode {
     // Declare OpMode members.
+    PIDController           pidRotate;
+    Orientation             lastAngles = new Orientation();
+    private ElapsedTime runtim2 = new ElapsedTime();
+    double globalAngle, rotation;
+    private PIDController pidDrive;
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor FL = null;
     private DcMotor FR = null;
@@ -67,15 +73,20 @@ public class teleop extends LinearOpMode {
 
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
-    private DistanceSensor intSens = null;
+    boolean backPrev = false;
     private DigitalChannel touch = null;
     // List of available sound resources
     String  sounds[] =  {"ss_alarm", "ss_bb8_down", "ss_bb8_up", "ss_darth_vader", "ss_fly_by",
             "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
             "ss_light_speed", "ss_mine", "ss_power_up", "ss_r2d2_up", "ss_roger_roger", "ss_siren", "ss_wookie" };
     boolean soundPlaying = false;
+    RevBlinkinLedDriver blink;
+    String pattern = "";
+    String team = "red";
     // The IMU sensor object
     BNO055IMU imu;
+    int ticks = 1000;
+    double power = 0.5;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -92,6 +103,7 @@ public class teleop extends LinearOpMode {
 
         int[] positions = {0, 111, 391, 599, 879, 1099, 1299, 1499, 1699};
 
+        int currLiftPos = 0;
 
         Context myApp = hardwareMap.appContext;
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
@@ -127,18 +139,20 @@ public class teleop extends LinearOpMode {
 
         rotateServo= hardwareMap.get(Servo.class, "ROTATE");
         clawServo= hardwareMap.get(Servo.class, "CLAW");
-         clawServo.setPosition(0.15);
+        rotateServo.setPosition(0.69); clawServo.setPosition(0.15);
 
         foundServL = hardwareMap.get(Servo.class, "left");
         foundServR = hardwareMap.get(Servo.class, "right");
-        foundServL.setPosition(0.2);
-        foundServR.setPosition(.6);
+        foundServL.setPosition(0);
+        foundServR.setPosition(.65);
 
-        intSens = hardwareMap.get(DistanceSensor.class, "DS2");
         touch = hardwareMap.get(DigitalChannel.class, "touch");
         touch.setMode(DigitalChannel.Mode.INPUT);
 
         //initIMU();
+        blink = hardwareMap.get(RevBlinkinLedDriver.class, "blink");
+        blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_END_TO_END_BLEND);
+        pattern = "CP1_2_END_TO_END_BLEND";
 
         telemetry.addData("Robot", "Initialized");
         telemetry.update();
@@ -153,129 +167,57 @@ public class teleop extends LinearOpMode {
         runtime.reset();
         while (opModeIsActive()) {
 
-            //DRIVE + MAYBE LED + PROBABLY NOT SOUND STUFF
+            //DRIVE + MAYBE LED
             drive();
 
-            //CLAW STUFF
-            if (gamepad2.a) {
-                rotateServo.setPosition(0.725);
-            }else if(gamepad2.b){
-                rotateServo.setPosition(0.06);
-                playSound( 0, myApp, params);
+            if(gamepad2.start){
+                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLUE);
+                pattern = "blue";
+                drive(ticks, power);
+                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.RED);
+                pattern = "red";
             }
-
-            if(gamepad2.left_bumper || gamepad2.y) {
-                clawServo.setPosition(0.15);
-            }else if(gamepad2.right_bumper || gamepad2.x){
-                clawServo.setPosition(0.04);
-            }else if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<30 && clawServo.getPosition()!=0){
-                clawServo.setPosition(0.04);
+            if(gamepad2.x&&!xPrev){
+                ticks+=100;
             }
-
-            //ARM STUFF
-
-            if(gamepad2.start && gamepad2.back){
-                LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            if(gamepad2.y&&!yPrev){
+                ticks-=100;
             }
-
-
-
-            if(gamepad2.left_stick_y != 0 || gamepad2.right_stick_y != 0) {
-                if (-gamepad2.left_stick_y>=0){
-                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    LIFT.setPower(-gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25);
-                }else if(touch.getState()) {
-                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                    if (gamepad2.left_stick_y > 0 && gamepad2.left_stick_y < .3){
-                        LIFT.setPower(0);
-                    }
-                    else{
-                    LIFT.setPower(-0.5 * gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25 + 0.2);
-                }
-                }else{
-                    LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                    LIFT.setPower(0);
-                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                }
-            }else if(gamepad2.dpad_down){
-                LIFT.setPower(0);
-                LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            }else{
-
-                if(LIFT.getCurrentPosition()>50){
-                    LIFT.setTargetPosition(LIFT.getCurrentPosition()); //STALL
-                    LIFT.setPower(0.2);
-
-                }else if(LIFT.getCurrentPosition()<=5 && LIFT.getMode()==DcMotor.RunMode.RUN_TO_POSITION){
-                    LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                }else{
-                    LIFT.setPower(0);
-                }
+            if(gamepad2.dpad_left&&!dPadLPrev){
+                ticks-=10;
             }
-            if(gamepad2.right_trigger!=0){
-                YEETER.setPower(-gamepad2.right_trigger);
-                if(!lightsaber) {
-                    playSound(8, myApp, params);
-                    lightsaber = true;
-                }
-            }else if(gamepad2.left_trigger!=0){
-                YEETER.setPower(gamepad2.left_trigger);
-                if(lightsaber) lightsaber = false;
-            }else{
-                YEETER.setPower(0);
+            if(gamepad2.dpad_right&&!dPadRPrev){
+                ticks+=10;
             }
-            dPadDPrev = gamepad2.dpad_down; dPadUPrev = gamepad2.dpad_up;
-            dPadLPrev = gamepad2.dpad_left; dPadRPrev = gamepad2.dpad_right;
-
-            //INTAKE STUFF
-
-            if(gamepad1.left_bumper){
-                IN1.setPower(-0.4);
-                IN2.setPower(-0.4);
-            }else if(gamepad1.right_bumper && intSens.getDistance(DistanceUnit.MM)>70){
-                IN1.setPower(0.7);
-                IN2.setPower(0.7);
-            }else{
-                IN1.setPower(0);
-                IN2.setPower(0);
+            if(gamepad2.dpad_down&&!dPadDPrev){
+                power-=0.05;
             }
-
-            if(gamepad1.left_trigger != 0){
-                IN1.setPower(gamepad1.left_trigger);
-                IN2.setPower(gamepad1.left_trigger);
+            if(gamepad2.dpad_up&&!dPadUPrev){
+                power+=0.05;
             }
-
-            /**}else if(gamepad1.right_trigger != 0){
-                IN1.setPower(gamepad1.right_trigger);
-                IN2.setPower(gamepad1.right_trigger);
-            }*/
-
-            //FOUNDATION
-
-            if(gamepad1.dpad_up){
-                foundServL.setPosition(0);
-                foundServR.setPosition(0.4);
-            }else if(gamepad1.dpad_down){
-                foundServL.setPosition(0.2);
-                foundServR.setPosition(0.6);
+            if(gamepad2.back&&!backPrev){
+                ticks = -ticks;
             }
 
             //VARIABLE CHECKS
 
             xPrev = gamepad2.x;
             yPrev = gamepad2.y;
+            dPadDPrev = gamepad2.dpad_down;
+            dPadUPrev = gamepad2.dpad_up;
+            dPadLPrev = gamepad2.dpad_left;
+            dPadRPrev = gamepad2.dpad_right;
+            backPrev = gamepad2.back;
 
             //TELEMETRY
 
             telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
                             "back left (%.2f), back right (%.2f)", FL.getPower(), FR.getPower(),
                     BL.getPower(), BR.getPower());
-            telemetry.addData("Lift:", LIFT.getPower());
-            telemetry.addData("Lif2:",LIFT.getCurrentPosition());
-            telemetry.addData("DISTANCE", intSens.getDistance(DistanceUnit.MM));
+            telemetry.addData("power", power);
+            telemetry.addData("ticks", ticks);
+            telemetry.addData("LED Pattern", pattern);
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("touch", touch.getState());
             telemetry.update();
 
         }
@@ -294,17 +236,11 @@ public class teleop extends LinearOpMode {
         double v2 = r * Math.sin(robotAngle) - rightX;
         double v3 = r * Math.sin(robotAngle) + rightX;
         double v4 = r * Math.cos(robotAngle) - rightX;
-        if (gamepad1.x) {
-            v1 *= 2.85;
-            v2 *= 2.85;
-            v3 *= 2.85;
-            v4 *= 2.85;
-        }
-        if(gamepad1.left_stick_button || gamepad1.right_stick_button || gamepad1.left_trigger!=0 || gamepad1.right_trigger!=0){
-            v1 *= .5;
-            v2 *= .5;
-            v3 *= .5;
-            v4 *= .5;
+        if(gamepad1.left_stick_button){
+            v1 = v1 * .5;
+            v2 = v2 * .5;
+            v3 = v3 * .5;
+            v4 = v4 * .5;
         }
         FL.setPower(v1);
         FR.setPower(v2);
@@ -344,6 +280,125 @@ public class teleop extends LinearOpMode {
                         }} );
         }
     }
+    public void drive(int ticks, double power){
+        if(ticks <0){
+            power = -power;
+        }
+        // restart imu angle tracking.
+        resetAngle();
+        int degrees = 0;
+
+        FL.setPower(power);
+        FR.setPower(power);
+        BL.setPower(power);
+        BR.setPower(power);
+        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+
+        pidDrive.reset();
+
+
+        pidDrive.setSetpoint(0);
+        pidDrive.setInputRange(0, degrees);
+        pidDrive.setOutputRange(0, power);
+        pidDrive.setTolerance(1);
+        pidDrive.enable();
+
+        // getAngle() returns + when rotating counter clockwise (left) and - when rotating
+        // clockwise (right).
+
+        // rotate until turn is completed.
+        double pow = 0;
+        runtim2.reset();
+        boolean working = true;
+
+        do
+        {
+            pow = pidDrive.performPID(getAngle()); // power will be + on left turn.
+            updateT();
+            FL.setPower(power-pow);
+            FR.setPower(power+pow);
+            BL.setPower(power-pow);
+            BR.setPower(power+pow);
+            if (Math.abs((4*ticks)-FL.getCurrentPosition()-FR.getCurrentPosition()-FL.getCurrentPosition()-BR.getCurrentPosition())<100){
+                working = false;
+            }
+        } while (opModeIsActive() && runtim2.seconds()<1.5 && working );
+
+        // turn the motors off.
+        FL.setPower(0);
+        FR.setPower(0);
+        BL.setPower(0);
+        BR.setPower(0);
+        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        rotation = getAngle();
+
+        // wait for rotation to stop.
+
+        // reset angle tracking on new heading.
+        resetAngle();
+    }
+    private void resetAngle()
+    {
+        lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+        globalAngle = 0;
+    }
+
+    /**
+     * Get current cumulative angle rotation from last reset.
+     * @return Angle in degrees. + = left, - = right from zero point.
+     */
+    private double getAngle()
+    {
+        // We experimentally determined the Z axis is the axis we want to use for heading angle.
+        // We have to process the angle because the imu works in euler angles so the Z axis is
+        // returned as 0 to +180 or 0 to -180 rolling back to -179 or +179 when rotation passes
+        // 180 degrees. We detect this transition and track the total cumulative angle of rotation.
+
+        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+        double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
+
+        if (deltaAngle < -180)
+            deltaAngle += 360;
+        else if (deltaAngle > 180)
+            deltaAngle -= 360;
+
+        globalAngle += deltaAngle;
+
+        lastAngles = angles;
+
+        return globalAngle;
+    }
+    private void updateT(){
+        telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
+                        "back left (%.2f), back right (%.2f)", FL.getPower(), FR.getPower(),
+                BL.getPower(), BR.getPower());
+        telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
+                        "back left (%.1f), back right (%.1f)", (float)FL.getCurrentPosition(), (float)FR.getCurrentPosition(),
+                (float)BL.getCurrentPosition(), (float)BR.getCurrentPosition());
+        telemetry.addData("Status", "Run Time: " + runtime.toString());
+        telemetry.addData("Status", "Run Time2: " + runtim2.toString());
+        telemetry.addData("INTAKE POWER", IN1.getPower());
+        telemetry.update();
+    }
 }
+
 
 

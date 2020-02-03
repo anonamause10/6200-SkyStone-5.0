@@ -35,6 +35,7 @@ public class newencodertester extends LinearOpMode{
     private boolean leftD = false;
     private boolean rightD = false;
     private double ticksperinches = 27.8521150411;
+
     /*
      * Code to run ONCE when the driver hits INIT
      */

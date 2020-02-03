@@ -117,6 +117,7 @@ public class rSauto extends LinearOpMode
     boolean usingCamera = true;
     SkystoneDetectorNew detector = null;
     private boolean liftgoingup = false;
+    boolean imuworking = true;
 
     @Override
     public void runOpMode() throws InterruptedException{
@@ -177,7 +178,7 @@ public class rSauto extends LinearOpMode
         ROTATE.setPosition(.725);
         servo = hardwareMap.get(Servo.class, "left");
         servo2 = hardwareMap.get(Servo.class, "right");
-        servo.setPosition(0);
+        servo.setPosition(0.2);
         servo2.setPosition(.6);
 
         sR = hardwareMap.get(DistanceSensor.class, "DSB");
@@ -258,7 +259,7 @@ public class rSauto extends LinearOpMode
             sleep(240);
         }else{
             goV2(765, 0.5 * scale, array1, false);
-            sleep(200);
+            sleep(170);
         }
 
         if (LIFT.getPower() > 0) {
@@ -275,263 +276,267 @@ public class rSauto extends LinearOpMode
         }else{
             turn(32, array1, true, 2);
         }
-        intake();
+        if(imuworking) {
+            intake();
 
-        if(LIFT.getPower()!=0){
-            LIFT.setPower(0);
-        }
-
-        sleep(800);
-
-        double power = -0.5*scale;
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
-        if(blockPos==0)
-            sleep(100);
-        if(blockPos!=2)
-        sleep(440);
-        else
-        sleep(420);
-
-        intakeOff();
-        closeClaw();
-
-        array1 = new double[] {0.5, 0.5, 0.5, 0.5};
-
-        turn(90, new double[]{0,0,0,0}, true, 2);
-
-        if(sRL.getDistance(DistanceUnit.MM)<8000){
-            int numberOfTimes = 1;
-            distanceFromWall = (int)sRL.getDistance(DistanceUnit.MM);
-            for(int i = 0; i<6; i++){
-                int addition = (int)sRL.getDistance(DistanceUnit.MM);
-                if(addition<7000) {
-                    distanceFromWall = (addition + distanceFromWall);
-                    numberOfTimes++;
-                }
+            if (LIFT.getPower() != 0) {
+                LIFT.setPower(0);
             }
-            distanceFromWall /= numberOfTimes;
-        }else{
-            sensorWorking = false;
-        }
 
-        servosUp();
-        if(blockPos==1)
-            driveSleep(950,-0.7*scale);
-        else if(blockPos == 0)
-            driveSleep(1300, -0.7*scale);
-        else
-            driveSleep(1150,-0.7*scale);
-        LIFT.setPower(0.79);
-        liftgoingup = true;
-        driveSleep(300,-0.7*scale);
-        LIFT.setPower(0.2);
-        driveSleep(270, -0.55*scale);
-        liftgoingup = false;
-        outtake();
+            sleep(800);
 
-        turn(180, new double[] {0,0,0,0}, true, 2);
-        rotateOut();
-        goV2(-350, 0.3, new double[] {-0.25, -0.25, -0.25, -0.25}, true);
-        intakeOff();
-        servosDown();
-        fL.setPower(0.3*scale);
-        fR.setPower(0.3*scale);
-        bL.setPower(0.3*scale);
-        bR.setPower(0.3*scale);
-        if(blockPos!=0){
-            sleep(200);
-        }
-        sleep(200);
-        openClaw();
-        motorsOff();
-        sleep(300);
-        fL.setPower(0.7*scale);
-        fR.setPower(-0.7*scale);
-        bL.setPower(-0.7*scale);
-        bR.setPower(0.7*scale);
-        sleep(300);
-        fL.setPower(0.7*scale);
-        fR.setPower(0.7*scale);
-        bL.setPower(0.7*scale);
-        bR.setPower(0.7*scale);
-        rotateIn();
-        sleep(470);
-        fL.setPower(0.7*scale);
-        fR.setPower(-0.7*scale);
-        bL.setPower(0.7*scale);
-        bR.setPower(-0.7*scale);
-        while(opModeIsActive()&&getHeading()>90){
-            if(getHeading()<125 && ROTATE.getPosition()>0.6 && LIFT.getCurrentPosition()>5){
-                LIFT.setPower(-0.2*scale);
-            }else if(getHeading()<125){
-                LIFT.setPower(-0.01*scale);
-            }
-            updateT();
-        }
-        motorsOff();
-        servosUp();
-        LIFT.setPower(-0.01*scale);
-        power = 0.3*scale;
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
-        sleep(10);
-
-        turn(90, new double[]{0,0,0,0}, getHeading()<=90, 0);
-
-
-        if(sRL.getDistance(DistanceUnit.MM)<distanceFromWall-2)
-            moveWithLeftSensor(distanceFromWall, 0.3*scale);
-        if(sRL.getDistance(DistanceUnit.MM)>distanceFromWall+2)
-            moveWithLeftSensor(distanceFromWall, 0.3*scale);
-
-        turn(90, new double[]{0,0,0,0}, getHeading()<=90, 0);
-
-
-        driveSleep(1400, 0.7);
-
-        if(Math.abs(getHeading()-88)>1)
-            turn(88, new double[]{0,0,0,0}, 88>getHeading(), 0);
-
-
-
-        if(blockPos == 2)
-            moveWithForwardSensor(720, 0.4*scale);
-        else if(blockPos == 1)
-            moveWithForwardSensor(910, 0.4*scale);
-        else
-            moveWithForwardSensor(1120, 0.4*scale);
-
-        if(blockPos==2){
-            strafeRight(600, 0.5, new double[]{0.3,0.3,0.3,0.3});
-        }else if(blockPos == 1)
-            strafeRight(600, 0.5 , new double[]{0.3,0.3,0.3,0.3});
-        else
-            strafeRight(630, 0.5 , new double[]{0.3,0.3,0.3,0.3});
-        intake();
-
-        if(blockPos!=2)
-            sleep(450);
-        else {
-            sleep(450);
-            power = -0.3*scale;
+            double power = -0.5 * scale;
             fL.setPower(power);
             fR.setPower(power);
             bL.setPower(power);
             bR.setPower(power);
-            sleep(120);
-        }
-        if(blockPos==2){
-            strafeLeft(630, 0.5, new double[]{0,0,0,0});
-        }else
-            strafeLeft(660, 0.5, new double[]{0,0,0,0});
+            if (blockPos == 0)
+                sleep(100);
+            if (blockPos != 2)
+                sleep(440);
+            else
+                sleep(420);
 
-        if(sR2.getDistance(DistanceUnit.MM)<70) {
             intakeOff();
             closeClaw();
-        }
 
-        turn(90, new double[]{0,0,0,0}, getHeading()<90, 0);
-        closeClaw();
+            array1 = new double[]{0.5, 0.5, 0.5, 0.5};
 
-        outtake();
+            turn(90, new double[]{0, 0, 0, 0}, true, 2);
 
-        servosDown();
+            if (sRL.getDistance(DistanceUnit.MM) < 8000) {
+                int numberOfTimes = 1;
+                distanceFromWall = (int) sRL.getDistance(DistanceUnit.MM);
+                for (int i = 0; i < 6; i++) {
+                    int addition = (int) sRL.getDistance(DistanceUnit.MM);
+                    if (addition < 7000) {
+                        distanceFromWall = (addition + distanceFromWall);
+                        numberOfTimes++;
+                    }
+                }
+                distanceFromWall /= numberOfTimes;
+            } else {
+                sensorWorking = false;
+            }
 
+            servosUp();
+            if (blockPos == 1)
+                driveSleep(950, -0.7 * scale);
+            else if (blockPos == 0)
+                driveSleep(1330, -0.7 * scale);
+            else
+                driveSleep(1150, -0.7 * scale);
+            LIFT.setPower(0.79);
+            liftgoingup = true;
+            driveSleep(300, -0.7 * scale);
+            LIFT.setPower(0.2);
+            driveSleep(270, -0.55 * scale);
+            liftgoingup = false;
+            outtake();
 
-        if(sRL.getDistance(DistanceUnit.MM)<7000) {
+            turn(180, new double[]{0, 0, 0, 0}, true, 2);
+            rotateOut();
+            goV2(-350, 0.3, new double[]{-0.25, -0.25, -0.25, -0.25}, true);
+            intakeOff();
+            servosDown();
+            fL.setPower(0.3 * scale);
+            fR.setPower(0.3 * scale);
+            bL.setPower(0.3 * scale);
+            bR.setPower(0.3 * scale);
+            if (blockPos != 0) {
+                sleep(200);
+            }
+            sleep(200);
+            openClaw();
+            motorsOff();
+            sleep(300);
+            fL.setPower(0.7 * scale);
+            fR.setPower(-0.7 * scale);
+            bL.setPower(-0.7 * scale);
+            bR.setPower(0.7 * scale);
+            sleep(300);
+            fL.setPower(0.7 * scale);
+            fR.setPower(0.7 * scale);
+            bL.setPower(0.7 * scale);
+            bR.setPower(0.7 * scale);
+            rotateIn();
+            sleep(470);
+            fL.setPower(0.7 * scale);
+            fR.setPower(-0.7 * scale);
+            bL.setPower(0.7 * scale);
+            bR.setPower(-0.7 * scale);
+            while (opModeIsActive() && getHeading() > 90) {
+                if (getHeading() < 125 && ROTATE.getPosition() > 0.6 && LIFT.getCurrentPosition() > 5) {
+                    LIFT.setPower(-0.2 * scale);
+                } else if (getHeading() < 125) {
+                    LIFT.setPower(-0.01 * scale);
+                }
+                updateT();
+            }
+            motorsOff();
+            servosUp();
+
+            driveSleep(300, -0.5);
+            driveSleep(300, 0.5);
+
+            if(Math.abs(getHeading()-90) >=1){
+                turn(90,new double[]{0,0,0,0}, getHeading()<=90, 0);
+            }
+
 
             if (sRL.getDistance(DistanceUnit.MM) < distanceFromWall - 2)
                 moveWithLeftSensor(distanceFromWall, 0.3 * scale);
-
-            if (sRL.getDistance(DistanceUnit.MM) > distanceFromWall + 2) {
+            if (sRL.getDistance(DistanceUnit.MM) > distanceFromWall + 2)
                 moveWithLeftSensor(distanceFromWall, 0.3 * scale);
-                if (sRL.getDistance(DistanceUnit.MM) < distanceFromWall-2)
-                    moveWithLeftSensor(distanceFromWall, 0.29 * scale);
-            }else
-                turn(90, new double[]{0, 0, 0, 0}, 90 > getHeading(), 0);
 
-            intakeOff();
-            if(blockPos==2 && distanceFromWall>1100){
-                if(Math.abs(getHeading()-89)>1)
-                    turn(89, new double[]{0,0,0,0}, 89>getHeading(), 0);
+            turn(90, new double[]{0, 0, 0, 0}, getHeading() <= 90, 0);
+
+
+            driveSleep(1400, 0.7);
+
+            if (Math.abs(getHeading() - 88) > 1)
+                turn(88, new double[]{0, 0, 0, 0}, 88 > getHeading(), 0);
+
+
+            boolean frontsensorgood = true;
+            if (blockPos == 2)
+                frontsensorgood = moveWithForwardSensor(720, 0.4 * scale);
+            else if (blockPos == 1)
+                frontsensorgood = moveWithForwardSensor(890, 0.4 * scale);
+            else
+                frontsensorgood = moveWithForwardSensor(1120, 0.4 * scale);
+
+            if (!frontsensorgood) {
+                driveSleep(800, -0.7);
+            }
+
+            if (blockPos == 2) {
+                strafeRight(600, 0.5, new double[]{0.3, 0.3, 0.3, 0.3});
+            } else if (blockPos == 1)
+                strafeRight(600, 0.5, new double[]{0.3, 0.3, 0.3, 0.3});
+            else
+                strafeRight(630, 0.5, new double[]{0.3, 0.3, 0.3, 0.3});
+            intake();
+
+            if (blockPos != 2)
+                sleep(450);
+            else {
+                sleep(450);
+                power = -0.3 * scale;
+                fL.setPower(power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(power);
+                sleep(120);
+            }
+            if (blockPos == 2) {
+                strafeLeft(630, 0.5, new double[]{0, 0, 0, 0});
             } else
-                if(Math.abs(getHeading()-90)>1)
-                    turn(90, new double[]{0,0,0,0}, 90>getHeading(), 0);
+                strafeLeft(660, 0.5, new double[]{0, 0, 0, 0});
 
-            driveSleep(1150, -0.7);
-            driveSleep(720, -0.55);
-
-            LIFT.setPower(0.9);
-            power = -0.5 * scale;
-            fL.setPower(power);
-            fR.setPower(power);
-            bL.setPower(power);
-            bR.setPower(power);
-            sleep(300);
-
-            rotateOut();
-            LIFT.setPower(0.2);
-            power = -0.3 * scale;
-            fL.setPower(power);
-            fR.setPower(power);
-            bL.setPower(power);
-            bR.setPower(power);
-            sleep(120);
-            sleep(150);
-            sleep(200);
-            motorsOff();
-            sleep(300);
-            openClaw();
-            sleep(200);
-
-            turn(92, new double[]{0,0,0,0}, 93 >getHeading(), 2);
-
-            YEETER.setPower(-1);
-            power = 0.3 * scale;
-            fL.setPower(power);
-            fR.setPower(power + 0.01);
-            bL.setPower(power);
-            bR.setPower(power + 0.01);
-            sleep(300);
-            YEETER.setPower(0);
-
-            rotateIn();
-            motorsOff();
-
-            IN1.setPower(-0.7);
-            IN2.setPower(-0.7);
-            sleep(600);
-            intakeOff();
-
-            LIFT.setPower(-0.3);
-        }else{
-            turn(270, new double[]{0, 0, 0, 0}, 270 > getHeading(), 2);
-            intakeOff();
-            YEETER.setPower(-1);
-            sleep(300);
-            if(blockPos>=1){
-                sleep(100);
+            if (sR2.getDistance(DistanceUnit.MM) < 70) {
+                intakeOff();
+                closeClaw();
             }
-            if(blockPos==2){
-                sleep(100);
+
+            turn(90, new double[]{0, 0, 0, 0}, getHeading() < 90, 0);
+            closeClaw();
+
+            outtake();
+
+            servosDown();
+
+
+            if (sRL.getDistance(DistanceUnit.MM) < 7000) {
+
+                if (sRL.getDistance(DistanceUnit.MM) < distanceFromWall - 2)
+                    moveWithLeftSensor(distanceFromWall, 0.3 * scale);
+
+                if (sRL.getDistance(DistanceUnit.MM) > distanceFromWall + 2) {
+                    moveWithLeftSensor(distanceFromWall, 0.3 * scale);
+                    if (sRL.getDistance(DistanceUnit.MM) < distanceFromWall - 2)
+                        moveWithLeftSensor(distanceFromWall, 0.29 * scale);
+                } else
+                    turn(90, new double[]{0, 0, 0, 0}, 90 > getHeading(), 0);
+
+                intakeOff();
+                if (blockPos == 2 && distanceFromWall > 1100) {
+                    if (Math.abs(getHeading() - 89) > 1)
+                        turn(89, new double[]{0, 0, 0, 0}, 89 > getHeading(), 0);
+                } else if (Math.abs(getHeading() - 90) > 1)
+                    turn(90, new double[]{0, 0, 0, 0}, 90 > getHeading(), 0);
+
+                driveSleep(1150, -0.7);
+                driveSleep(720, -0.55);
+
+                LIFT.setPower(0.9);
+                power = -0.5 * scale;
+                fL.setPower(power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(power);
+                sleep(300);
+
+                rotateOut();
+                LIFT.setPower(0.2);
+                power = -0.3 * scale;
+                fL.setPower(power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(power);
+                sleep(120);
+                sleep(150);
+                sleep(200);
+                motorsOff();
+                sleep(300);
+                openClaw();
+                sleep(200);
+
+                turn(92, new double[]{0, 0, 0, 0}, 93 > getHeading(), 2);
+
+                YEETER.setPower(-1);
+                power = 0.3 * scale;
+                fL.setPower(power);
+                fR.setPower(power + 0.01);
+                bL.setPower(power);
+                bR.setPower(power + 0.01);
+                sleep(300);
+                YEETER.setPower(0);
+
+                rotateIn();
+                motorsOff();
+
+                IN1.setPower(-0.7);
+                IN2.setPower(-0.7);
+                sleep(600);
+                intakeOff();
+
+                LIFT.setPower(-0.3);
+            } else {
+                turn(270, new double[]{0, 0, 0, 0}, 270 > getHeading(), 2);
+                intakeOff();
+                YEETER.setPower(-1);
+                sleep(300);
+                if (blockPos >= 1 || !frontsensorgood) {
+                    sleep(100);
+                }
+                if (blockPos == 2 || !frontsensorgood) {
+                    sleep(100);
+                }
+                YEETER.setPower(0);
             }
-            YEETER.setPower(0);
-        }
 
-        if(LIFT.getCurrentPosition()<10 || !touch.getState()){
-            LIFT.setPower(0);
-        }
-
-        while(opModeIsActive()){
-            if(LIFT.getCurrentPosition()<10 || !touch.getState()){
+            if (LIFT.getCurrentPosition() < 10 || !touch.getState()) {
                 LIFT.setPower(0);
-                break;
-            }}
+            }
+
+            while (opModeIsActive()) {
+                if (LIFT.getCurrentPosition() < 10 || !touch.getState()) {
+                    LIFT.setPower(0);
+                    break;
+                }
+            }
+        }else{}
     }
     private void outtake(){
         IN1.setPower(-0.4);
@@ -634,12 +639,12 @@ public class rSauto extends LinearOpMode
         CLAW.setPosition(0.15);
     }
     private void servosUp(){
-        servo.setPosition(.2);
+        servo.setPosition(0);
         servo2.setPosition(.4);
         sleep(100);
     }
     private void servosDown(){
-        servo.setPosition(0);
+        servo.setPosition(0.2);
         servo2.setPosition(.6);
     }
 
@@ -707,7 +712,7 @@ public class rSauto extends LinearOpMode
         resetEncoders();
     }
 
-    void moveWithForwardSensor(int target, double power){
+    boolean moveWithForwardSensor(int target, double power){
 
         fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -715,14 +720,14 @@ public class rSauto extends LinearOpMode
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         runtim2.reset();
         if(sRF.getDistance(DistanceUnit.MM)>target){
-            while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<3.5){
+            while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<4){
                 fL.setPower(power);
                 fR.setPower(power);
                 bL.setPower(power);
                 bR.setPower(power);
                 updateT();
             }}else{
-            while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<3.5){
+            while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<4){
                 fL.setPower(-power);
                 fR.setPower(-power);
                 bL.setPower(-power);
@@ -731,6 +736,7 @@ public class rSauto extends LinearOpMode
             }
         }
         motorsOff();
+        return sRF.getDistance(DistanceUnit.MM)<7000;
     }
     void moveWithRightSensor(int target, double power){
 
@@ -1024,11 +1030,14 @@ public class rSauto extends LinearOpMode
 
 
     void turn(double tun, double[] endPowers, boolean targGreater, int foundation){
-
+        boolean startedAtZero = getHeading() == 0;
         double vuAng = tun;
         boolean turned = false;
         runtim2.reset();
         while (!turned && opModeIsActive() && runtim2.seconds() < 3) {
+            if(runtim2.seconds()>2 && getHeading() == 0 && startedAtZero){
+                imuworking = false;
+            }
             if(LIFT.getPower()<0 && LIFT.getCurrentPosition()<20){
                 LIFT.setPower(0);
             }
