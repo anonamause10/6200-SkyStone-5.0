@@ -142,7 +142,7 @@ public class distancetester extends LinearOpMode {
         //initIMU();
         blink = hardwareMap.get(RevBlinkinLedDriver.class, "blink");
         blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_END_TO_END_BLEND);
-        pattern = "CP1_2_END_TO_END_BLEND";
+        pattern = "endtoend";
 
         telemetry.addData("Robot", "Initialized");
         telemetry.update();
@@ -162,11 +162,26 @@ public class distancetester extends LinearOpMode {
                 IN1.setPower(-0.4);
                 IN2.setPower(-0.4);
             }else if(gamepad1.right_bumper && intSens.getDistance(DistanceUnit.MM)>70){
+                if(!pattern.equals("fire")){
+                    blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_MEDIUM);
+                    pattern = "fire";
+                }
                 IN1.setPower(0.7);
                 IN2.setPower(0.7);
             }else{
+                if(intSens.getDistance(DistanceUnit.MM)<70 && !pattern.equals("green")){
+                    blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
+                    pattern = "green";
+                }
                 IN1.setPower(0);
                 IN2.setPower(0);
+            }
+            if(gamepad1.a && !pattern.equals("black")){
+                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BLACK);
+                pattern = "black";
+            }else if(gamepad1.b && !pattern.equals("endtoend")){
+                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_END_TO_END_BLEND);
+                pattern = "endtoend";
             }
             if(gamepad1.dpad_up){
                 foundServL.setPosition(0);
