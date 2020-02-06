@@ -67,7 +67,6 @@ public class robot extends LinearOpMode
     private ElapsedTime runtim2 = new ElapsedTime();
     private boolean liftgoingup = false;
     private boolean imuworking = true;
-
     private DcMotor fL = null;
     private DcMotor fR = null;
     private DcMotor bL = null;
@@ -453,7 +452,9 @@ public class robot extends LinearOpMode
         }
         return false;
     }
-
+    private void goV2(int ticks, double power){
+        goV2(ticks, power, new double[]{0,0,0,0});
+    }
     private void goV2(int ticks, double power, double[] endPowers){
         boolean phase2 = false;
         resetEncoders();
@@ -1208,6 +1209,60 @@ public class robot extends LinearOpMode
         }else{
             return true;
         }
+    }
+    private void moveWhileUsingLift(int ticks, double power, int position, double liftpower){
+        moveWhileUsingLift(ticks, power, position, liftpower, new double[]{0,0,0,0});
+    }
+    private void moveWhileUsingLift(int ticks, double power, int position, double liftpower, double[] endPowers){
+        resetEncoders();
+        runtim2.reset();
+        boolean targetGreater = position > LIFT.getCurrentPosition();
+        if(ticks < 0){
+            fL.setPower(-power);
+            fR.setPower(-power);
+            bL.setPower(-power);
+            bR.setPower(-power);
+            while(opModeIsActive()&&runtim2.seconds()<4&&averageTicks()>ticks){
+                if(LIFT.getPower()<0 && (LIFT.getCurrentPosition()<10 || !touch.getState())){
+                    LIFT.setPower(0);
+                }else if(targetGreater && LIFT.getCurrentPosition()<position){
+                    LIFT.setPower(liftpower);
+                }else if(!targetGreater && LIFT.getCurrentPosition()>position){
+                    LIFT.setPower(-liftpower);
+                }else{
+                    if(LIFT.getCurrentPosition()>100)
+                    LIFT.setPower(0.2);
+                    else
+                    LIFT.setPower(0);
+                }
+                updateT();
+            }
+        }else{
+            fL.setPower(power);
+            fR.setPower(power);
+            bL.setPower(power);
+            bR.setPower(power);
+            while(opModeIsActive()&&runtim2.seconds()<4&&averageTicks()<ticks){
+                if(LIFT.getPower()<0 && (LIFT.getCurrentPosition()<10 || !touch.getState())){
+                    LIFT.setPower(0);
+                }else if(targetGreater && LIFT.getCurrentPosition()<position){
+                    LIFT.setPower(liftpower);
+                }else if(!targetGreater && LIFT.getCurrentPosition()>position){
+                    LIFT.setPower(-liftpower);
+                }else{
+                    if(LIFT.getCurrentPosition()>100)
+                        LIFT.setPower(0.2);
+                    else
+                        LIFT.setPower(0);
+                }
+                updateT();
+            }
+        }
+        fL.setPower(endPowers[0]);
+        fR.setPower(endPowers[1]);
+        bL.setPower(endPowers[2]);
+        bR.setPower(endPowers[3]);
+
     }
 
 

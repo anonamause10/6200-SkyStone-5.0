@@ -62,12 +62,14 @@ public class teleop extends LinearOpMode {
     private boolean dPadUPrev = false;
     private boolean dPadLPrev = false;
     private boolean dPadRPrev = false;
+    private boolean aPrev = false;
+    private boolean bPrev = false;
+    private boolean xPrev = false;
     private boolean sPrev = false;
 
 
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
-    private DistanceSensor intSens = null;
     private DigitalChannel touch = null;
     // List of available sound resources
     String  sounds[] =  {"ss_alarm", "ss_bb8_down", "ss_bb8_up", "ss_darth_vader", "ss_fly_by",
@@ -127,14 +129,13 @@ public class teleop extends LinearOpMode {
 
         rotateServo= hardwareMap.get(Servo.class, "ROTATE");
         clawServo= hardwareMap.get(Servo.class, "CLAW");
-         clawServo.setPosition(0.15);
+        clawServo.setPosition(0.7);
 
         foundServL = hardwareMap.get(Servo.class, "left");
         foundServR = hardwareMap.get(Servo.class, "right");
         foundServL.setPosition(0.2);
         foundServR.setPosition(.6);
 
-        intSens = hardwareMap.get(DistanceSensor.class, "DS2");
         touch = hardwareMap.get(DigitalChannel.class, "touch");
         touch.setMode(DigitalChannel.Mode.INPUT);
 
@@ -157,20 +158,33 @@ public class teleop extends LinearOpMode {
             drive();
 
             //CLAW STUFF
-            if (gamepad2.a) {
-                rotateServo.setPosition(0.725);
-            }else if(gamepad2.b){
+            if (gamepad2.a && !aPrev) {
+                if(rotateServo.getPosition()<0.5)
+                    rotateServo.setPosition(0.725);
+                else
+                    rotateServo.setPosition(0.06);
+            }else if(gamepad2.b && !gamepad2.start){
                 rotateServo.setPosition(0.06);
                 playSound( 0, myApp, params);
             }
-
-            if(gamepad2.left_bumper || gamepad2.y) {
-                clawServo.setPosition(0.15);
-            }else if(gamepad2.right_bumper || gamepad2.x){
-                clawServo.setPosition(0.04);
-            }else if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<30 && clawServo.getPosition()!=0){
-                clawServo.setPosition(0.04);
+            if(gamepad2.x && !xPrev){
+                if(rotateServo.getPosition()!=0.3925)
+                    rotateServo.setPosition(0.3925);
+                else
+                    rotateServo.setPosition(0.725);
             }
+
+            if(gamepad2.left_bumper) {
+                clawServo.setPosition(0.7);
+            }else if(gamepad2.right_bumper && !rbumpprev){
+                if(clawServo.getPosition()<0.5)
+                    clawServo.setPosition(0.7);
+                else
+                    clawServo.setPosition(0.35);
+            }
+            rbumpprev = gamepad2.right_bumper;
+            aPrev = gamepad2.a;
+            xPrev = gamepad2.x;
 
             //ARM STUFF
 
@@ -192,7 +206,7 @@ public class teleop extends LinearOpMode {
                     }
                     else{
                     LIFT.setPower(-0.5 * gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25 + 0.2);
-                }
+                    }
                 }else{
                     LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     LIFT.setPower(0);
@@ -233,7 +247,7 @@ public class teleop extends LinearOpMode {
             if(gamepad1.left_bumper){
                 IN1.setPower(-0.4);
                 IN2.setPower(-0.4);
-            }else if(gamepad1.right_bumper && intSens.getDistance(DistanceUnit.MM)>70){
+            }else if(gamepad1.right_bumper){
                 IN1.setPower(0.7);
                 IN2.setPower(0.7);
             }else{
@@ -261,9 +275,6 @@ public class teleop extends LinearOpMode {
                 foundServR.setPosition(0.6);
             }
 
-            //VARIABLE CHECKS
-
-            xPrev = gamepad2.x;
             yPrev = gamepad2.y;
 
             //TELEMETRY
@@ -273,7 +284,6 @@ public class teleop extends LinearOpMode {
                     BL.getPower(), BR.getPower());
             telemetry.addData("Lift:", LIFT.getPower());
             telemetry.addData("Lif2:",LIFT.getCurrentPosition());
-            telemetry.addData("DISTANCE", intSens.getDistance(DistanceUnit.MM));
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("touch", touch.getState());
             telemetry.update();

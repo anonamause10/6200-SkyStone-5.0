@@ -11,9 +11,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -48,10 +50,10 @@ public class distancetester extends LinearOpMode {
     double globalAngle, rotation;
     private PIDController pidDrive;
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor FL = null;
-    private DcMotor FR = null;
-    private DcMotor BL = null;
-    private DcMotor BR = null;
+    private DcMotorEx FL = null;
+    private DcMotorEx FR = null;
+    private DcMotorEx BL = null;
+    private DcMotorEx BR = null;
     private DcMotor IN1 = null;
     private DcMotor IN2 = null;
     private DcMotor LIFT = null;
@@ -99,9 +101,18 @@ public class distancetester extends LinearOpMode {
 
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
 
+        // create a sound parameter that holds the desired player parameters.
+        SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
+        pidRotate = new PIDController(.003, .00003, 0);
+        pidDrive = new PIDController(.05, 0, 0);
+        pidDrive.setSetpoint(0);
+        pidDrive.setOutputRange(0, 1.0);
+        pidDrive.setInputRange(-270, 270);
+        pidDrive.enable();
 
-        FL = hardwareMap.get(DcMotor.class, "fL");FR = hardwareMap.get(DcMotor.class, "fR");
-        BL = hardwareMap.get(DcMotor.class, "bL");BR = hardwareMap.get(DcMotor.class, "bR");
+
+        FL = hardwareMap.get(DcMotorEx.class, "fL");FR = hardwareMap.get(DcMotorEx.class, "fR");
+        BL = hardwareMap.get(DcMotorEx.class, "bL");BR = hardwareMap.get(DcMotorEx.class, "bR");
         FL.setDirection(REVERSE);FR.setDirection(FORWARD);
         BL.setDirection(REVERSE);BR.setDirection(FORWARD);
         FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -112,6 +123,11 @@ public class distancetester extends LinearOpMode {
         BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         FL.setPower(0);FR.setPower(0);
         BL.setPower(0);BR.setPower(0);
+
+        FL.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(30.0, 1.0, 12.0, 12.0));
+        FR.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(30.0, 1.0, 12.0, 12.0));
+        BL.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(30.0, 1.0, 12.0, 12.0));
+        BR.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(30.0, 1.0, 12.0, 12.0));
 
         LIFT = hardwareMap.get(DcMotor.class, "LIFT");
         LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -133,13 +149,13 @@ public class distancetester extends LinearOpMode {
 
         foundServL = hardwareMap.get(Servo.class, "left");
         foundServR = hardwareMap.get(Servo.class, "right");
-        foundServL.setPosition(0);
-        foundServR.setPosition(.65);
+        foundServL.setPosition(0.2);
+        foundServR.setPosition(.6);
 
         touch = hardwareMap.get(DigitalChannel.class, "touch");
         touch.setMode(DigitalChannel.Mode.INPUT);
 
-        //initIMU();
+        initIMU();
         blink = hardwareMap.get(RevBlinkinLedDriver.class, "blink");
         blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_END_TO_END_BLEND);
         pattern = "endtoend";
@@ -365,6 +381,34 @@ public class distancetester extends LinearOpMode {
 
         globalAngle = 0;
     }
+    private void goV2(int ticks, double power){
+        goV2(ticks, power, new double[]{0,0,0,0});
+    }
+    private void goV2(int ticks, double power, double[] endPowers){
+        resetEncoders();
+        runtim2.reset();
+        if(ticks < 0){
+            FL.setPower(-power);
+            FR.setPower(-power);
+            BL.setPower(-power);
+            BR.setPower(-power);
+            while(opModeIsActive()&&averageTicks()>ticks){
+                updateT();
+            }
+        }else{
+            FL.setPower(power);
+            FR.setPower(power);
+            BL.setPower(power);
+            BR.setPower(power);
+            while(opModeIsActive()&&averageTicks()<ticks){
+                updateT();
+            }
+        }
+        FL.setPower(endPowers[0]);
+        FR.setPower(endPowers[1]);
+        BL.setPower(endPowers[2]);
+        BR.setPower(endPowers[3]);
+    }
 
     /**
      * Get current cumulative angle rotation from last reset.
@@ -392,6 +436,19 @@ public class distancetester extends LinearOpMode {
 
         return globalAngle;
     }
+    private void resetEncoders(){
+        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+    private double averageTicks(){
+        return (FL.getCurrentPosition()+FR.getCurrentPosition()+BL.getCurrentPosition()+BR.getCurrentPosition())/4;
+    }
     private void updateT(){
         telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
                         "back left (%.2f), back right (%.2f)", FL.getPower(), FR.getPower(),
@@ -399,7 +456,6 @@ public class distancetester extends LinearOpMode {
         telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
                         "back left (%.1f), back right (%.1f)", (float)FL.getCurrentPosition(), (float)FR.getCurrentPosition(),
                 (float)BL.getCurrentPosition(), (float)BR.getCurrentPosition());
-        telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Status", "Run Time2: " + runtim2.toString());
         telemetry.addData("INTAKE POWER", IN1.getPower());
         telemetry.update();
