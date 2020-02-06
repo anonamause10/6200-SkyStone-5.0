@@ -130,7 +130,7 @@ public class teleop1P extends LinearOpMode {
         IN2.setDirection(REVERSE);
 
         rotateServo= hardwareMap.get(Servo.class, "ROTATE");
-        clawServo= hardwareMap.get(Servo.class, "CLAW");clawServo.setPosition(0.15);
+        clawServo= hardwareMap.get(Servo.class, "CLAW");clawServo.setPosition(0.4);
 
         foundServL = hardwareMap.get(Servo.class, "left");
         foundServR = hardwareMap.get(Servo.class, "right");
@@ -168,11 +168,11 @@ public class teleop1P extends LinearOpMode {
             }
 
             if(gamepad1.x) {
-                clawServo.setPosition(0.15);
+                clawServo.setPosition(0.65);
             }else if(gamepad1.y){
-                clawServo.setPosition(0.04);
+                clawServo.setPosition(0.4);
             }else if (intSens.getDistance(DistanceUnit.MM)<70 && LIFT.getCurrentPosition()<30 && clawServo.getPosition()!=0){
-                clawServo.setPosition(0.04);
+                clawServo.setPosition(0.4);
             }
 
             //aARM STUFF
