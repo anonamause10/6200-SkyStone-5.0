@@ -160,7 +160,7 @@ public class robot extends LinearOpMode
         IN2 = hardwareMap.get(DcMotor.class, "IN2");
         IN2.setDirection(DcMotor.Direction.REVERSE);
         CLAW = hardwareMap.get(Servo.class, "CLAW");
-        CLAW.setPosition(.25);
+        CLAW.setPosition(.2);
         ROTATE = hardwareMap.get(Servo.class, "ROTATE");
         ROTATE.setPosition(.725);
         servo = hardwareMap.get(Servo.class, "left");
@@ -532,10 +532,10 @@ public class robot extends LinearOpMode
         ROTATE.setPosition(0.06);
     }
     private void closeClaw(){
-        CLAW.setPosition(0);
+        CLAW.setPosition(0.05);
     }
     private void openClaw(){
-        CLAW.setPosition(0.15);
+        CLAW.setPosition(0.2);
     }
     private void servosUp(){
         servo.setPosition(0);

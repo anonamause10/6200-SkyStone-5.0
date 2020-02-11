@@ -41,6 +41,7 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
  * Created by isong on teh day afteh lague
  */
 @TeleOp(group = "a", name="TelP LEDS")
+@Disabled
 
 public class distancetester extends LinearOpMode {
     // Declare OpMode members.

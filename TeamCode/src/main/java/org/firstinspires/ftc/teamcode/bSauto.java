@@ -59,6 +59,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Autonomous(name="blu", group="ree")
+@Disabled
 
 public class bSauto extends LinearOpMode
 {

@@ -71,6 +71,7 @@ public class teleop extends LinearOpMode {
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
     private DigitalChannel touch = null;
+    private boolean encodersShown = false;
     // List of available sound resources
     String  sounds[] =  {"ss_alarm", "ss_bb8_down", "ss_bb8_up", "ss_darth_vader", "ss_fly_by",
             "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
@@ -129,7 +130,7 @@ public class teleop extends LinearOpMode {
 
         rotateServo= hardwareMap.get(Servo.class, "ROTATE");
         clawServo= hardwareMap.get(Servo.class, "CLAW");
-        clawServo.setPosition(0.7);
+        clawServo.setPosition(0.2);
 
         foundServL = hardwareMap.get(Servo.class, "left");
         foundServR = hardwareMap.get(Servo.class, "right");
@@ -175,12 +176,24 @@ public class teleop extends LinearOpMode {
             }
 
             if(gamepad2.left_bumper) {
-                clawServo.setPosition(0.7);
+                clawServo.setPosition(0.2);
             }else if(gamepad2.right_bumper && !rbumpprev){
-                if(clawServo.getPosition()<0.5)
-                    clawServo.setPosition(0.7);
+                if(clawServo.getPosition()<0.1)
+                    clawServo.setPosition(0.2);
                 else
-                    clawServo.setPosition(0.35);
+                    clawServo.setPosition(0.03);
+            }
+            if(gamepad2.right_bumper && gamepad2.y)
+                encodersShown = true;
+            if(gamepad2.left_bumper && gamepad2.y){
+                FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             }
             rbumpprev = gamepad2.right_bumper;
             aPrev = gamepad2.a;
@@ -282,6 +295,10 @@ public class teleop extends LinearOpMode {
             telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
                             "back left (%.2f), back right (%.2f)", FL.getPower(), FR.getPower(),
                     BL.getPower(), BR.getPower());
+            if(encodersShown){
+                telemetry.addData("Wheel Encoders", "front left(%.2f), front right (%.2f),"+
+                        "back left (%.2f), back right (%.2f)", (float)FL.getCurrentPosition(),(float)FR.getCurrentPosition(),(float)BL.getCurrentPosition(),(float)BR.getCurrentPosition());
+            }
             telemetry.addData("Lift:", LIFT.getPower());
             telemetry.addData("Lif2:",LIFT.getCurrentPosition());
             telemetry.addData("Status", "Run Time: " + runtime.toString());

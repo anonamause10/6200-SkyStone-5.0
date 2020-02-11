@@ -180,17 +180,7 @@ public class rSautonoIntake extends LinearOpMode
             telemetry.update();
         }
         runtime.reset();
-        LIFT.setPower(0.5);
-        sleep(500);
-        LIFT.setTargetPosition(0);
-        LIFT.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        LIFT.setPower(-0.5);
-        runtim2.reset();
-        while(opModeIsActive()&&LIFT.getCurrentPosition()>5 && runtim2. seconds()<=0.75){
-        }
-        LIFT.setPower(0);
-        LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        go(200, 0.5);
+        go(400, 0.5);
     }
 
     private void go(int ticks, double power){
