@@ -217,7 +217,7 @@ public class autoFeb11 extends LinearOpMode
             telemetry.update();
         }
         runtime.reset();
-        goV3(600, 0.7);
+        goV3(700, 0.7);
         turn(90,true,0);
         goV3(-400, 0.3);
         if(blockPos==0){
@@ -240,7 +240,9 @@ public class autoFeb11 extends LinearOpMode
         }
         runtim2.reset();
         while(opModeIsActive() && runtim2.seconds()<10){
-
+            if(LIFT.getCurrentPosition()>450){
+                LIFT.setPower(0);
+            }
         }
     }
 
@@ -349,8 +351,8 @@ public class autoFeb11 extends LinearOpMode
             bR.setPower(-power);
             while(opModeIsActive()&&averageTicks2()>ticks){
                 if(averageTicks2() < ticks + 1300 ) {
-                    if (LIFT.getCurrentPosition() < 450){
-                        LIFT.setPower(0.7);
+                    if (LIFT.getCurrentPosition() < 450 && rotatedIN()){
+                        LIFT.setPower(1);
                     }else{
                         LIFT.setPower(0);
                         rotateOut();
@@ -411,6 +413,9 @@ public class autoFeb11 extends LinearOpMode
     }
     private void rotateIn(){
         ROTATE.setPosition(0.725);
+    }
+    private boolean rotatedIN(){
+        return ROTATE.getPosition()>0.5;
     }
     private void rotateOut(){
         ROTATE.setPosition(0.06);
