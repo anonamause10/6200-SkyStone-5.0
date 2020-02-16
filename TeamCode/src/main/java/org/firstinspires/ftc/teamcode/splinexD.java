@@ -38,7 +38,6 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
  * Created by isong on 10/17/18.
  */
 @TeleOp(group = "z", name="spline tester")
-@Disabled
 
 public class splinexD extends LinearOpMode {
     // Declare OpMode members.
@@ -53,11 +52,12 @@ public class splinexD extends LinearOpMode {
     private DcMotor LIFT = null;
     private Servo rotateServo = null;
     private Servo clawServo = null;
-    private Servo foundServL = null;
-    private Servo foundServR = null;
     private DcMotor YEETER = null;
-    private DistanceSensor DSF = null;
     private double[] powers = {0.8, 0.05, 0.8, 0.05};
+    boolean blockPushed = false;
+    double starttime = 0;
+
+    private Servo blockPusher = null;
 
     private int indx = 0;
 
@@ -69,8 +69,6 @@ public class splinexD extends LinearOpMode {
     private boolean sPrev = false;
     private boolean aPrev = false;
     private double secondsToDisplay = 0;
-
-
 
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
@@ -133,20 +131,15 @@ public class splinexD extends LinearOpMode {
         IN2 = hardwareMap.get(DcMotor.class, "IN2");
         IN2.setDirection(REVERSE);
 
-        DSF = hardwareMap.get(DistanceSensor.class, "DSF");
-
         rotateServo= hardwareMap.get(Servo.class, "ROTATE");
         clawServo= hardwareMap.get(Servo.class, "CLAW");
-        rotateServo.setPosition(0.69); clawServo.setPosition(0.15);
-
-        foundServL = hardwareMap.get(Servo.class, "left");
-        foundServR = hardwareMap.get(Servo.class, "right");
-        foundServL.setPosition(0);
-        foundServR.setPosition(.4);
+        rotateServo.setPosition(0.84); clawServo.setPosition(0.2);
 
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
         touch = hardwareMap.get(DigitalChannel.class, "touch");
         touch.setMode(DigitalChannel.Mode.INPUT);
+        blockPusher = hardwareMap.get(Servo.class, "push");
+        blockPusher.setPosition(0);
 
         //initIMU();
 
@@ -165,10 +158,10 @@ public class splinexD extends LinearOpMode {
 
             if(drive)
                 drive();
-            if(gamepad2.start && !sPrev){
+            if(gamepad2.back && !sPrev){
                 drive = !drive;
             }
-            sPrev = gamepad2.start;
+            sPrev = gamepad2.back;
 
             if(gamepad2.dpad_up&&!dPadUPrev){
                 indx++;
@@ -185,16 +178,12 @@ public class splinexD extends LinearOpMode {
             }else if(gamepad2.dpad_right&&!dPadRPrev){
                 powers[indx] = powers[indx]+0.05;
             }
+            if(gamepad2.left_bumper) {
+                clawServo.setPosition(0.2);
+            }
             dPadLPrev = gamepad2.dpad_left;
             dPadRPrev = gamepad2.dpad_right;
 
-            if(gamepad1.dpad_up||gamepad2.left_bumper){
-                foundServL.setPosition(0.4);
-                foundServR.setPosition(0.65);
-            }else if(gamepad1.dpad_down || gamepad2.right_bumper){
-                foundServL.setPosition(0);
-                foundServR.setPosition(0.4);
-            }
 
             if(gamepad2.a){
                 FL.setPower(powers[0]);
@@ -203,10 +192,8 @@ public class splinexD extends LinearOpMode {
                 BR.setPower(powers[3]);
                 IN1.setPower(0.7);
                 IN2.setPower(0.7);
-
                 if(!aPrev)
                     runtime2.reset();
-
             }else if(!drive){
                 FL.setPower(0);
                 FR.setPower(0);
@@ -231,7 +218,6 @@ public class splinexD extends LinearOpMode {
             telemetry.addData("indx", indx);
             telemetry.addData("drive", drive);
             telemetry.addData("seconds2", secondsToDisplay);
-            telemetry.addData("Distance", "millimeters " + DSF.getDistance(DistanceUnit.MM));
             telemetry.update();
 
         }

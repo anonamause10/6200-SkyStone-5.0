@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import android.content.Context;
+import android.hardware.Sensor;
 import android.text.method.Touch;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -49,10 +50,13 @@ public class teleop extends LinearOpMode {
     private DcMotor IN1 = null;
     private DcMotor IN2 = null;
     private DcMotor LIFT = null;
+    private DistanceSensor DS2 = null;
     private Servo rotateServo = null;
     private Servo clawServo = null;
     private Servo foundServL = null;
     private Servo foundServR = null;
+    private Servo blockPusher = null;
+
     private DcMotor YEETER = null;
     boolean lightsaber = false;
 
@@ -66,6 +70,8 @@ public class teleop extends LinearOpMode {
     private boolean bPrev = false;
     private boolean xPrev = false;
     private boolean sPrev = false;
+    boolean blockPushed = false;
+    double starttime = 0;
 
 
     private boolean lbumpprev = false;
@@ -137,6 +143,11 @@ public class teleop extends LinearOpMode {
         foundServL.setPosition(0.2);
         foundServR.setPosition(.6);
 
+        blockPusher = hardwareMap.get(Servo.class, "push");
+        blockPusher.setPosition(0);
+
+        DS2 = hardwareMap.get(DistanceSensor.class, "DS2");
+
         touch = hardwareMap.get(DigitalChannel.class, "touch");
         touch.setMode(DigitalChannel.Mode.INPUT);
 
@@ -159,29 +170,37 @@ public class teleop extends LinearOpMode {
             drive();
 
             //CLAW STUFF
-            if (gamepad2.a && !aPrev) {
-                if(rotateServo.getPosition()<0.5)
-                    rotateServo.setPosition(0.725);
-                else
-                    rotateServo.setPosition(0.06);
+            if (gamepad2.a) {
+                rotateServo.setPosition(0.84);
+                blockPusher.setPosition(0);
             }else if(gamepad2.b && !gamepad2.start){
-                rotateServo.setPosition(0.06);
+                rotateServo.setPosition(0.16);
                 playSound( 0, myApp, params);
             }
             if(gamepad2.x && !xPrev){
-                if(rotateServo.getPosition()!=0.3925)
-                    rotateServo.setPosition(0.3925);
+                if(rotateServo.getPosition()!=0.5)
+                    rotateServo.setPosition(0.5);
                 else
-                    rotateServo.setPosition(0.725);
+                    rotateServo.setPosition(0.84);
             }
 
             if(gamepad2.left_bumper) {
                 clawServo.setPosition(0.2);
-            }else if(gamepad2.right_bumper && !rbumpprev){
-                if(clawServo.getPosition()<0.1)
-                    clawServo.setPosition(0.2);
-                else
-                    clawServo.setPosition(0.03);
+            }else if(gamepad2.y){
+                clawServo.setPosition(0.03);
+            }else if(blockPusher.getPosition()==0&&LIFT.getCurrentPosition()<=20&&DS2.getDistance(DistanceUnit.MM)<100){
+                blockPusher.setPosition(0.6);
+                starttime = runtime.milliseconds();
+                blockPushed = true;
+            }
+            if(blockPushed && runtime.milliseconds()>=starttime + 300){
+                clawServo.setPosition(0.03);
+                blockPushed = false;
+            }
+            if(gamepad2.right_bumper){
+                blockPusher.setPosition(0.6);
+                starttime = runtime.milliseconds();
+                blockPushed = true;
             }
             if(gamepad2.right_bumper && gamepad2.y)
                 encodersShown = true;
@@ -212,6 +231,9 @@ public class teleop extends LinearOpMode {
                 if (-gamepad2.left_stick_y>=0){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     LIFT.setPower(-gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25);
+                    if(blockPusher.getPosition()!=0.9 && blockPusher.getPosition()!=0&&clawServo.getPosition()==0.03){
+                        blockPusher.setPosition(0.9);
+                    }
                 }else if(touch.getState()) {
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     if (gamepad2.left_stick_y > 0 && gamepad2.left_stick_y < .3){

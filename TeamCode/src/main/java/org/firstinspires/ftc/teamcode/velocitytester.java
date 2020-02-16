@@ -59,9 +59,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-@Autonomous(name="test block", group="ree")
+@Autonomous(name="test velocity", group="ree")
 
-public class autoFeb11 extends LinearOpMode
+public class velocitytester extends LinearOpMode
 {
     private Servo blockPusher = null;
 
@@ -199,86 +199,23 @@ public class autoFeb11 extends LinearOpMode
         int blockPos = 0;
 
         //waitForStart();
+        int smallPower = 200;
         while (!opModeIsActive() && !isStopRequested()) {
-
-            if (usingCamera)
-                telemetry.addData("camera", blockPos);
-            else
-                telemetry.addData("blockPOs", blockPos);
-            if (gamepad1.x && gamepad1.right_bumper) {
-                blockPos = 0;
-                usingCamera = false;
-                //detector.stop();
-            }
+                telemetry.addData("smallPower", smallPower);
             if (gamepad1.a && gamepad1.right_bumper) {
-                blockPos = 1;
-                usingCamera = false;
-                //detector.stop();
+                smallPower++;
             }
             if (gamepad1.b &&gamepad1.right_bumper) {
-                blockPos = 2;
-                usingCamera = false;
+                smallPower--;
             }
-            if(gamepad2.start)
-                intFirst = true;
-            if(intFirst)
-                telemetry.addData("first block", intFirst);
             telemetry.update();
         }
         runtime.reset();
-        if(intFirst){
-            goV3(720, 0.5);
-            if(blockPos==0){
-                strafeLeft(250, 0.5, new double[]{0,0,0,0});
-                if(Math.abs(getHeading0())>=0.1) {
-                    turnToZero();
-                }
-            }else if(blockPos==2){
-                strafeRight(610, 0.5, new double[]{0,0,0,0});
-                if(Math.abs(getHeading0())>=0.1) {
-                    turnToZero();
-                }
-            }else{
-                strafeRight(200, 0.5, new double[]{0,0,0,0});
-                if(Math.abs(getHeading0())>=0.1) {
-                    turnToZero();
-                }
-            }
-            intake();
-            goV3(800, 0.5);
-            if(Math.abs(getHeading0())>=0.1){
-                turnToZero();
-            }
-            goV3(-770, 0.5);
-            turn(90, new double[]{0, 0, 0, 0}, true, 0);
-        }else {
-            goV3(750, 0.7);
-            turn(90, true, 0);
-            goV3(-400, 0.3);
-            if (blockPos == 0) {
-                goV3(3200, 0.7);
-            } else if (blockPos == 1) {
-                goV3(3500, 0.7);
-            } else {
-                goV3(3800, 0.7);
-            }
-            strafeRight(700, 0.5, new double[]{0, 0, 0, 0});
-            goV3(300, 0.5);
-            strafeLeft(700, 0.5, new double[]{0, 0, 0, 0});
-            turn(90, 0);
-            if (blockPos == 0) {
-                goV3SecondBlock(-3500, 0.7);
-            } else if (blockPos == 1) {
-                goV3SecondBlock(-3800, 0.7);
-            } else {
-                goV3SecondBlock(-4100, 0.7);
-            }
-            runtim2.reset();
-            while (opModeIsActive() && runtim2.seconds() < 10) {
-                if (LIFT.getCurrentPosition() > 450) {
-                    LIFT.setPower(0);
-                }
-            }
+        while(opModeIsActive()){
+            fL.setVelocity(-smallPower);
+            fR.setVelocity(smallPower);
+            bL.setVelocity(-smallPower);
+            bR.setVelocity(smallPower);
         }
     }
 
@@ -286,8 +223,8 @@ public class autoFeb11 extends LinearOpMode
 
 
         /**if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall - 50) {
-            moveWithRightSensor(distanceFromWall, 0.5);
-        }*/
+         moveWithRightSensor(distanceFromWall, 0.5);
+         }*/
         strafeLeft(630, 0.5 * scale, new double[]{0, 0, 0, 0});
         intake();
         double power = 0.3 * scale;
@@ -308,9 +245,9 @@ public class autoFeb11 extends LinearOpMode
         }
         strafeRight(770, 0.5 * scale, new double[]{0, 0, 0, 0});
         /**if (sR2.getDistance(DistanceUnit.MM) < 70) {
-            intakeOff();
-            closeClaw();*/
-            return true;
+         intakeOff();
+         closeClaw();*/
+        return true;
     }
     private void goV2(int ticks, double power){
         goV2(ticks, power, new double[]{0,0,0,0});
@@ -369,7 +306,6 @@ public class autoFeb11 extends LinearOpMode
                     blockPusher.setPosition(0.6);
                     starttime = runtime.milliseconds();
                     blockPushed = true;
-                    intakeOff();
                 }
                 if(blockPushed && runtime.milliseconds()>=starttime + 300){
                     CLAW.setPosition(0.03);
@@ -710,9 +646,9 @@ public class autoFeb11 extends LinearOpMode
                             "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
                     bL.getPower(), bR.getPower());
             telemetry.update();
-            double smallPower = 280;
-            double bigPower = 700;
-            double mediumPower = 500;
+            double smallPower = 200;
+            double bigPower = 600;
+            double mediumPower = 400;
             if(Math.abs(ang - vuAng) <= 0.5){
                 fL.setPower(0);
                 fR.setPower(0);
@@ -804,28 +740,6 @@ public class autoFeb11 extends LinearOpMode
         fR.setPower(endPowers[1]);
         bL.setPower(endPowers[2]);
         bR.setPower(endPowers[3]);
-    }
-    private void turnToZero(){
-        boolean turned = false;
-        double smallPower = 200;
-        runtim2.reset();
-        while (!turned && opModeIsActive() && runtim2.seconds() < 3) {
-
-            if (Math.abs(getHeading0()) <= 0.1) {
-                motorsOff();
-                turned = true;
-            } else if (getHeading0() > 0) {
-                fL.setVelocity(smallPower);
-                fR.setVelocity(-smallPower);
-                bL.setVelocity(smallPower);
-                bR.setVelocity(-smallPower);
-            } else {
-                fL.setVelocity(-smallPower);
-                fR.setVelocity(smallPower);
-                bL.setVelocity(-smallPower);
-                bR.setVelocity(smallPower);
-            }
-        }
     }
 
     private void resetEncoders(){
@@ -1017,24 +931,24 @@ public class autoFeb11 extends LinearOpMode
         }
     }
     /**private boolean correctDistanceFromWall(){
-        return correctDistanceFromWall(0);
-    }
+     return correctDistanceFromWall(0);
+     }
      private boolean correctDistanceFromWall(int x){
-        if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall-2)
-            moveWithRightSensor(distanceFromWall, 0.3 * scale);
-        if (sRR.getDistance(DistanceUnit.MM) > distanceFromWall+2) {
-            moveWithRightSensor(distanceFromWall, 0.3 * scale);
-            if (x > 0) {
-                if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall - 2)
-                    moveWithRightSensor(distanceFromWall, 0.3 * scale);
-            }
-        }
-        if(sRR.getDistance(DistanceUnit.MM)>8000){
-            return false;
-        }else{
-            return true;
-        }
-    }*/
+     if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall-2)
+     moveWithRightSensor(distanceFromWall, 0.3 * scale);
+     if (sRR.getDistance(DistanceUnit.MM) > distanceFromWall+2) {
+     moveWithRightSensor(distanceFromWall, 0.3 * scale);
+     if (x > 0) {
+     if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall - 2)
+     moveWithRightSensor(distanceFromWall, 0.3 * scale);
+     }
+     }
+     if(sRR.getDistance(DistanceUnit.MM)>8000){
+     return false;
+     }else{
+     return true;
+     }
+     }*/
     private void moveWhileUsingLift(int ticks, double power, int position, double liftpower){
         moveWhileUsingLift(ticks, power, position, liftpower, new double[]{0,0,0,0});
     }
