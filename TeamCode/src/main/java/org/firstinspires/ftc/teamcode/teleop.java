@@ -54,7 +54,6 @@ public class teleop extends LinearOpMode {
     private Servo rotateServo = null;
     private Servo clawServo = null;
     private Servo foundServL = null;
-    private Servo foundServR = null;
     private Servo blockPusher = null;
 
     private DcMotor YEETER = null;
@@ -139,9 +138,6 @@ public class teleop extends LinearOpMode {
         clawServo.setPosition(0.2);
 
         foundServL = hardwareMap.get(Servo.class, "left");
-        foundServR = hardwareMap.get(Servo.class, "right");
-        foundServL.setPosition(0.2);
-        foundServR.setPosition(.6);
 
         blockPusher = hardwareMap.get(Servo.class, "push");
         blockPusher.setPosition(0);
@@ -187,13 +183,13 @@ public class teleop extends LinearOpMode {
             if(gamepad2.left_bumper) {
                 clawServo.setPosition(0.2);
             }else if(gamepad2.y){
-                clawServo.setPosition(0.03);
+                clawServo.setPosition(0.04);
             }else if(blockPusher.getPosition()==0&&LIFT.getCurrentPosition()<=20&&DS2.getDistance(DistanceUnit.MM)<100){
                 blockPusher.setPosition(0.6);
                 starttime = runtime.milliseconds();
                 blockPushed = true;
             }
-            if(blockPushed && runtime.milliseconds()>=starttime + 300){
+            if(blockPushed && runtime.milliseconds()>=starttime + 400){
                 clawServo.setPosition(0.03);
                 blockPushed = false;
             }
@@ -231,7 +227,7 @@ public class teleop extends LinearOpMode {
                 if (-gamepad2.left_stick_y>=0){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     LIFT.setPower(-gamepad2.left_stick_y + -gamepad2.right_stick_y * 0.25);
-                    if(blockPusher.getPosition()!=0.9 && blockPusher.getPosition()!=0&&clawServo.getPosition()==0.03){
+                    if(blockPusher.getPosition()!=0.9 && blockPusher.getPosition()!=0&&clawServo.getPosition()<=0.1&&rotateServo.getPosition()>0.7){
                         blockPusher.setPosition(0.9);
                     }
                 }else if(touch.getState()) {
@@ -283,8 +279,8 @@ public class teleop extends LinearOpMode {
                 IN1.setPower(-0.4);
                 IN2.setPower(-0.4);
             }else if(gamepad1.right_bumper){
-                IN1.setPower(0.7);
-                IN2.setPower(0.7);
+                IN1.setPower(0.6);
+                IN2.setPower(0.6);
             }else{
                 IN1.setPower(0);
                 IN2.setPower(0);
@@ -303,12 +299,11 @@ public class teleop extends LinearOpMode {
             //FOUNDATION
 
             if(gamepad1.dpad_up){
-                foundServL.setPosition(0);
-                foundServR.setPosition(0.4);
+                foundServL.setPosition(0.89);
             }else if(gamepad1.dpad_down){
-                foundServL.setPosition(0.2);
-                foundServR.setPosition(0.6);
-            }
+                foundServL.setPosition(0.4);
+            }else if(gamepad1.dpad_right)
+                foundServL.setPosition(0.55);
 
             yPrev = gamepad2.y;
 

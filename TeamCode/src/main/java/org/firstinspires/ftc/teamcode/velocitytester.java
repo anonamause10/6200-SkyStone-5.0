@@ -59,7 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-@Autonomous(name="test velocity", group="ree")
+@Autonomous(name="test 2ish", group="ree")
 
 public class velocitytester extends LinearOpMode
 {
@@ -82,7 +82,6 @@ public class velocitytester extends LinearOpMode
     private Servo CLAW =null;
     private Servo ROTATE = null;
     private Servo servo = null;
-    private Servo servo2 = null;
     private DigitalChannel touch;
     private PIDController pidDrive;
     private DcMotor YEETER;
@@ -108,7 +107,6 @@ public class velocitytester extends LinearOpMode
     //SkystoneDetectorNew detector = null;
     int distanceFromWall = 683;
     boolean failedOnBlockSide = false;
-    DistanceSensor DS2 = null;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -121,7 +119,7 @@ public class velocitytester extends LinearOpMode
         // create a sound parameter that holds the desired player parameters.
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
         pidRotate = new PIDController(.003, .00003, 0);
-        pidDrive = new PIDController(.05, 0, 0);
+        pidDrive = new PIDController(.03, 0.005, 0);
         pidDrive.setSetpoint(0);
         pidDrive.setOutputRange(0, 1.0);
         pidDrive.setInputRange(-270, 270);
@@ -151,8 +149,6 @@ public class velocitytester extends LinearOpMode
         bR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         YEETER = hardwareMap.get(DcMotor.class, "YEET");
 
-        DS2 = hardwareMap.get(DistanceSensor.class, "DS2");
-
         LIFT = hardwareMap.get(DcMotor.class, "LIFT");
         LIFT.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         IN1 = hardwareMap.get(DcMotor.class, "IN1");
@@ -164,9 +160,6 @@ public class velocitytester extends LinearOpMode
         ROTATE = hardwareMap.get(Servo.class, "ROTATE");
         ROTATE.setPosition(.84);
         servo = hardwareMap.get(Servo.class, "left");
-        servo2 = hardwareMap.get(Servo.class, "right");
-        servo.setPosition(0.2);
-        servo2.setPosition(.6);
 
         touch = hardwareMap.get(DigitalChannel.class, "touch");
         touch.setMode(DigitalChannel.Mode.INPUT);
@@ -199,91 +192,156 @@ public class velocitytester extends LinearOpMode
         int blockPos = 0;
 
         //waitForStart();
-        int smallPower = 200;
         while (!opModeIsActive() && !isStopRequested()) {
-                telemetry.addData("smallPower", smallPower);
+
+            if (usingCamera)
+                telemetry.addData("camera", blockPos);
+            else
+                telemetry.addData("blockPOs", blockPos);
+            if (gamepad1.x && gamepad1.right_bumper) {
+                blockPos = 0;
+                usingCamera = false;
+                //detector.stop();
+            }
             if (gamepad1.a && gamepad1.right_bumper) {
-                smallPower++;
+                blockPos = 1;
+                usingCamera = false;
+                //detector.stop();
             }
             if (gamepad1.b &&gamepad1.right_bumper) {
-                smallPower--;
+                blockPos = 2;
+                usingCamera = false;
             }
+            if(gamepad2.start)
+                intFirst = true;
+            if(intFirst)
+                telemetry.addData("first block", intFirst);
             telemetry.update();
         }
         runtime.reset();
-        while(opModeIsActive()){
-            fL.setVelocity(-smallPower);
-            fR.setVelocity(smallPower);
-            bL.setVelocity(-smallPower);
-            bR.setVelocity(smallPower);
-        }
-    }
-
-    private boolean pickUpSecondSkystone(){
-
-
-        /**if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall - 50) {
-         moveWithRightSensor(distanceFromWall, 0.5);
-         }*/
-        strafeLeft(630, 0.5 * scale, new double[]{0, 0, 0, 0});
-        intake();
-        double power = 0.3 * scale;
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
-        if (blockPos != 2)
-            sleep(530);
-        else {
-            sleep(530);
-            power = -0.3 * scale;
-            fL.setPower(power);
-            fR.setPower(power);
-            bL.setPower(power);
-            bR.setPower(power);
-            sleep(120);
-        }
-        strafeRight(770, 0.5 * scale, new double[]{0, 0, 0, 0});
-        /**if (sR2.getDistance(DistanceUnit.MM) < 70) {
-         intakeOff();
-         closeClaw();*/
-        return true;
-    }
-    private void goV2(int ticks, double power){
-        goV2(ticks, power, new double[]{0,0,0,0});
-    }
-    private void goV2(int ticks, double power, double[] endPowers){
-        boolean phase2 = false;
-        resetEncoders();
-        runtim2.reset();
-        if(ticks < 0){
-            fL.setPower(-power);
-            fR.setPower(-power);
-            bL.setPower(-power);
-            bR.setPower(-power);
-            while(opModeIsActive()&&averageTicks()>ticks){
-                updateT();
-            }
-        }else{
-            fL.setPower(power);
-            fR.setPower(power);
-            bL.setPower(power);
-            bR.setPower(power);
-            while(opModeIsActive()&&averageTicks()<ticks){
-
-                if(LIFT.getCurrentPosition()>=50 ){
-                    LIFT.setPower(-0.4*scale);
-                }else{
-                    LIFT.setPower(0);
+            goV3(720, 0.7);
+            servosUp();
+            if(blockPos==0){
+                strafeRight(370, 0.7, new double[]{0,0,0,0});
+                if(Math.abs(getHeading0())>=0.1) {
+                    turnToZero();
                 }
-                updateT();
+            }else if(blockPos==2){
+                strafeLeft(510, 0.7, new double[]{0,0,0,0});
+                if(Math.abs(getHeading0())>=0.1) {
+                    turnToZero();
+                }
+            }else{
+                strafeLeft(200, 0.7, new double[]{0,0,0,0});
+                if(Math.abs(getHeading0())>=0.1) {
+                    turnToZero();
+                }
             }
+            intake();
+            goV3(800, 0.5);
+            if(Math.abs(getHeading0())>=0.1){
+                turnToZero();
+            }
+            if(blockPos!=2)
+                goV3(-680, 0.7);
+            else
+            goV3(-770, 0.7);
+            turn(270.5, false, 0);
+            blockPusher.setPosition(0.6);
+            starttime = runtime.milliseconds();
+            blockPushed = true;
+            intakeOff();
+            if(blockPos==2)
+            drive(3410, 0.7);
+            else if(blockPos==1)
+            drive(3800,0.7);
+            else
+            drive(3400, 0.7);
+            blockPusher.setPosition(0.9);
+            LIFT.setPower(1);
+            turn(180, new double[]{0,0,0,0}, false, 0);
+            LIFT.setPower(0.2);
+            moveWhileUsingLift(-360, 0.4, 500, 0.4, new double[] {0,0,0,0});
+            LIFT.setPower(0.2);
+            rotateOut();
+            sleep(800);
+            openClaw();
+            sleep(200);
+            blockPusher.setPosition(0);
+            rotateIn();
+            servosDown();
+            sleep(500);
+            /**fL.setVelocity(200);
+            fR.setVelocity(-200);
+            bL.setVelocity(200);
+            bR.setVelocity(-200);
+            sleep(200);
+            while(getHeading()>90){
+                fL.setVelocity(4500);
+                fR.setVelocity(50);
+                bL.setVelocity(4500);
+                bR.setVelocity(50);
+            }*/
+        fL.setPower(0.7 * scale);
+        fR.setPower(-0.7 * scale);
+        bL.setPower(-0.7 * scale);
+        bR.setPower(0.7 * scale);
+        sleep(300);
+        fL.setPower(0.7 * scale);
+        fR.setPower(0.7 * scale);
+        bL.setPower(0.7 * scale);
+        bR.setPower(0.7 * scale);
+        sleep(470);
+        fL.setPower(0.7 * scale);
+        fR.setPower(-0.7 * scale);
+        bL.setPower(0.7 * scale);
+        bR.setPower(-0.7 * scale);
+        while (opModeIsActive() && getHeading() > 90) {
+            updateT();
         }
-        fL.setPower(endPowers[0]);
-        fR.setPower(endPowers[1]);
-        bL.setPower(endPowers[2]);
-        bR.setPower(endPowers[3]);
+            motorsOff();
+            servosUp();
+            LIFT.setPower(-0.4);
+            goV3(-430, 0.4);
+            if(blockPos==0){
+                strafeRight(220, 0.5, new double[]{0,0,0,0});
+            }else
+            strafeRight(120, 0.5, new double[] {0,0,0,0});
+            turn(90, 0);
+            if(blockPos==2)
+            drive(4000, 0.7);
+            else if(blockPos==1)
+            drive(3700, 0.7);
+            else
+            drive(3100, 0.7);
+
+            turn(90, 90 >= getHeading(), 0);
+            strafeRight(800, 0.7, new double[]{0,0,0,0});
+            intake();
+            goV3(250, 0.4);
+            strafeLeft(920, 0.7, new double[]{0,0,0,0});
+            blockPusher.setPosition(0.6);
+            starttime = runtime.milliseconds();
+            blockPushed = true;
+            intakeOff();
+            turn(90, 90 >= getHeading(), 0);
+        if(blockPos==2)
+            goV3(-4300, 0.7);
+        else if(blockPos==1)
+            goV3(-4000, 0.7);
+        else
+            goV3(-3600, 0.7);
+        blockPusher.setPosition(0.9);
+        moveWhileUsingLift(-350, 0.5, 500, 0.9, new double[] {0,0,0,0});
+        LIFT.setPower(0.2);
+        rotateOut();
+        sleep(900);
+        openClaw();
+        sleep(200);
+        rotateIn();
+        goV3(200, 0.5);
     }
+
     private void goV3(int ticks, double power, double[] x){
         boolean phase2 = false;
         resetEncoders();
@@ -302,14 +360,12 @@ public class velocitytester extends LinearOpMode
             }
             while(opModeIsActive()&&averageTicks2()>ticks){
                 updateT();
-                if(blockPusher.getPosition()==0&&LIFT.getCurrentPosition()<=20&&DS2.getDistance(DistanceUnit.MM)<100){
-                    blockPusher.setPosition(0.6);
-                    starttime = runtime.milliseconds();
-                    blockPushed = true;
-                }
-                if(blockPushed && runtime.milliseconds()>=starttime + 300){
+                if(blockPushed && runtime.milliseconds()>=starttime + 400){
                     CLAW.setPosition(0.03);
                     blockPushed = false;
+                }
+                if((!touch.getState()||LIFT.getCurrentPosition()<5) && LIFT.getPower()<0 ) {
+                    LIFT.setPower(0);
                 }
             }
         }else{
@@ -326,15 +382,12 @@ public class velocitytester extends LinearOpMode
             }
             while(opModeIsActive()&&averageTicks2()<ticks){
                 updateT();
-                if(blockPusher.getPosition()==0&&LIFT.getCurrentPosition()<=20&&DS2.getDistance(DistanceUnit.MM)<100){
-                    blockPusher.setPosition(0.6);
-                    starttime = runtime.milliseconds();
-                    blockPushed = true;
-                    intakeOff();
-                }
-                if(blockPushed && runtime.milliseconds()>=starttime + 300){
+                if(blockPushed && runtime.milliseconds()>=starttime + 400){
                     CLAW.setPosition(0.03);
                     blockPushed = false;
+                }
+                if((!touch.getState()||LIFT.getCurrentPosition()<5) && LIFT.getPower()<0 ){
+                    LIFT.setPower(0);
                 }
             }
         }
@@ -435,7 +488,7 @@ public class velocitytester extends LinearOpMode
         return (angles.firstAngle);
     }
     private void rotateIn(){
-        ROTATE.setPosition(0.84);
+        ROTATE.setPosition(0.89);
     }
     private boolean rotatedIN(){
         return ROTATE.getPosition()>0.5;
@@ -450,17 +503,15 @@ public class velocitytester extends LinearOpMode
         CLAW.setPosition(0.2);
     }
     private void servosUp(){
-        servo.setPosition(0);
-        servo2.setPosition(.4);
+        servo.setPosition(0.85);
     }
     private void servosDown(){
-        servo.setPosition(0.2);
-        servo2.setPosition(.6);
+        servo.setPosition(0.4);
     }
 
     private void intake(){
-        IN1.setPower(0.7);
-        IN2.setPower(0.7);
+        IN1.setPower(0.6);
+        IN2.setPower(0.6);
     }
     private void outtake(){
         IN1.setPower(-0.4);
@@ -638,6 +689,13 @@ public class velocitytester extends LinearOpMode
             if(runtim2.seconds()>2 && getHeading() == 0 && startedAtZero){
                 imuworking = false;
             }
+            if(LIFT.getCurrentPosition()>400&&LIFT.getPower()==1){
+                LIFT.setPower(0.2);
+            }
+            if(blockPushed && runtime.milliseconds()>=starttime + 400){
+                CLAW.setPosition(0.03);
+                blockPushed = false;
+            }
             double ang = getHeading();
 
             telemetry.addData("Angle", ang);
@@ -646,9 +704,9 @@ public class velocitytester extends LinearOpMode
                             "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
                     bL.getPower(), bR.getPower());
             telemetry.update();
-            double smallPower = 200;
-            double bigPower = 600;
-            double mediumPower = 400;
+            double smallPower = 380;
+            double bigPower = 1500;
+            double mediumPower = 1000;
             if(Math.abs(ang - vuAng) <= 0.5){
                 fL.setPower(0);
                 fR.setPower(0);
@@ -688,7 +746,7 @@ public class velocitytester extends LinearOpMode
                     bL.setVelocity(-mediumPower);
                     bR.setVelocity(mediumPower);
                 }
-            }else if (ang < vuAng) {
+            }else if (ang < vuAng+1.8) {
                 if(!targGreater){
                     turned = true;
                     motorsOff();
@@ -710,7 +768,7 @@ public class velocitytester extends LinearOpMode
                         bR.setVelocity(smallPower);
                     }
                 }
-            }else if (ang > vuAng) {
+            }else if (ang > vuAng-1.8) {
                 if(targGreater){
                     turned = true;
                     motorsOff();
@@ -741,6 +799,28 @@ public class velocitytester extends LinearOpMode
         bL.setPower(endPowers[2]);
         bR.setPower(endPowers[3]);
     }
+    private void turnToZero(){
+        boolean turned = false;
+        double smallPower = 240;
+        runtim2.reset();
+        while (!turned && opModeIsActive() && runtim2.seconds() < 0.7) {
+
+            if (Math.abs(getHeading0()) <= 0.1) {
+                motorsOff();
+                turned = true;
+            } else if (getHeading0() > 0) {
+                fL.setVelocity(smallPower);
+                fR.setVelocity(-smallPower);
+                bL.setVelocity(smallPower);
+                bR.setVelocity(-smallPower);
+            } else {
+                fL.setVelocity(-smallPower);
+                fR.setVelocity(smallPower);
+                bL.setVelocity(-smallPower);
+                bR.setVelocity(smallPower);
+            }
+        }
+    }
 
     private void resetEncoders(){
         fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -766,11 +846,6 @@ public class velocitytester extends LinearOpMode
         // restart imu angle tracking.
         resetAngle();
         int degrees = 0;
-
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
         fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -779,6 +854,11 @@ public class velocitytester extends LinearOpMode
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
 
 
         pidDrive.reset();
@@ -797,26 +877,63 @@ public class velocitytester extends LinearOpMode
         double pow = 0;
         runtim2.reset();
         boolean working = true;
-
-
-
-        do
+        if (degrees < 0)
         {
-            if(LIFT.getCurrentPosition()>=50){
-                LIFT.setPower(-0.4*scale);
-            }else{
-                LIFT.setPower(0);
+            // On right turn we have to get off zero first.
+            while (opModeIsActive() && getAngle() == 0)
+            {
+                fL.setPower(power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(power);
+                //sleep(100);
+                if(blockPushed && runtime.milliseconds()>=starttime + 400){
+                    CLAW.setPosition(0.03);
+                    blockPushed = false;
+                }
+                if((!touch.getState()||LIFT.getCurrentPosition()<5) && LIFT.getPower()<0 ){
+                    LIFT.setPower(0);
+                }
             }
-            pow = pidDrive.performPID(getAngle()); // power will be + on left turn.
-            updateT();
-            fL.setPower(power-pow);
-            fR.setPower(power+pow);
-            bL.setPower(power-pow);
-            bR.setPower(power+pow);
-            if (Math.abs((4*ticks)-fL.getCurrentPosition()-fR.getCurrentPosition()-fL.getCurrentPosition()-bR.getCurrentPosition())<100){
-                working = false;
-            }
-        } while (opModeIsActive() && runtim2.seconds()<1.5 && working );
+
+            do
+            {
+                power = pidDrive.performPID(getAngle()); // power will be - on right turn.
+                fL.setPower(power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(power);
+                if(blockPushed && runtime.milliseconds()>=starttime + 400){
+                    CLAW.setPosition(0.03);
+                    blockPushed = false;
+                }
+                if((!touch.getState()||LIFT.getCurrentPosition()<5) && LIFT.getPower()<0 ){
+                    LIFT.setPower(0);
+                }
+            } while (opModeIsActive() && !pidDrive.onTarget());
+        }
+        else    // left turn.
+
+
+            do
+            {
+                pow = pidDrive.performPID(getAngle()); // power will be + on left turn.
+                updateT();
+                fL.setPower(power-pow);
+                fR.setPower(power+pow);
+                bL.setPower(power-pow);
+                bR.setPower(power+pow);
+                if (((2*ticks)-bL.getCurrentPosition()-bR.getCurrentPosition())<100){
+                    working = false;
+                }
+                if(blockPushed && runtime.milliseconds()>=starttime + 400){
+                    CLAW.setPosition(0.03);
+                    blockPushed = false;
+                }
+                if((!touch.getState()||LIFT.getCurrentPosition()<5) && LIFT.getPower()<0 ){
+                    LIFT.setPower(0);
+                }
+            } while (opModeIsActive() && runtim2.seconds()<5 && working );
 
         // turn the motors off.
         fL.setPower(0);
@@ -835,6 +952,7 @@ public class velocitytester extends LinearOpMode
         rotation = getAngle();
 
         // wait for rotation to stop.
+        sleep(500);
 
         // reset angle tracking on new heading.
         resetAngle();
@@ -930,25 +1048,6 @@ public class velocitytester extends LinearOpMode
         while(opModeIsActive() && runtim2.milliseconds()<millis){
         }
     }
-    /**private boolean correctDistanceFromWall(){
-     return correctDistanceFromWall(0);
-     }
-     private boolean correctDistanceFromWall(int x){
-     if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall-2)
-     moveWithRightSensor(distanceFromWall, 0.3 * scale);
-     if (sRR.getDistance(DistanceUnit.MM) > distanceFromWall+2) {
-     moveWithRightSensor(distanceFromWall, 0.3 * scale);
-     if (x > 0) {
-     if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall - 2)
-     moveWithRightSensor(distanceFromWall, 0.3 * scale);
-     }
-     }
-     if(sRR.getDistance(DistanceUnit.MM)>8000){
-     return false;
-     }else{
-     return true;
-     }
-     }*/
     private void moveWhileUsingLift(int ticks, double power, int position, double liftpower){
         moveWhileUsingLift(ticks, power, position, liftpower, new double[]{0,0,0,0});
     }

@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import android.content.Context;
+import android.hardware.Sensor;
 import android.text.method.Touch;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -37,8 +38,7 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 /**
  * Created by isong on 10/17/18.
  */
-@TeleOp(group = "a", name="TeleOp 1P LEDS")
-@Disabled
+@TeleOp(group = "a", name="teleop 1p 2")
 
 public class teleop1PLEDS extends LinearOpMode {
     // Declare OpMode members.
@@ -50,10 +50,12 @@ public class teleop1PLEDS extends LinearOpMode {
     private DcMotor IN1 = null;
     private DcMotor IN2 = null;
     private DcMotor LIFT = null;
+    private DistanceSensor DS2 = null;
     private Servo rotateServo = null;
     private Servo clawServo = null;
     private Servo foundServL = null;
-    private Servo foundServR = null;
+    private Servo blockPusher = null;
+
     private DcMotor YEETER = null;
     boolean lightsaber = false;
 
@@ -63,21 +65,23 @@ public class teleop1PLEDS extends LinearOpMode {
     private boolean dPadUPrev = false;
     private boolean dPadLPrev = false;
     private boolean dPadRPrev = false;
+    private boolean aPrev = false;
+    private boolean bPrev = false;
+    private boolean xPrev = false;
     private boolean sPrev = false;
+    boolean blockPushed = false;
+    double starttime = 0;
 
 
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
-    boolean backPrev = false;
     private DigitalChannel touch = null;
+    private boolean encodersShown = false;
     // List of available sound resources
     String  sounds[] =  {"ss_alarm", "ss_bb8_down", "ss_bb8_up", "ss_darth_vader", "ss_fly_by",
             "ss_mf_fail", "ss_laser", "ss_laser_burst", "ss_light_saber", "ss_light_saber_long", "ss_light_saber_short",
             "ss_light_speed", "ss_mine", "ss_power_up", "ss_r2d2_up", "ss_roger_roger", "ss_siren", "ss_wookie" };
     boolean soundPlaying = false;
-    RevBlinkinLedDriver blink;
-    String pattern = "";
-    String team = "red";
     // The IMU sensor object
     BNO055IMU imu;
 
@@ -96,7 +100,6 @@ public class teleop1PLEDS extends LinearOpMode {
 
         int[] positions = {0, 111, 391, 599, 879, 1099, 1299, 1499, 1699};
 
-        int currLiftPos = 0;
 
         Context myApp = hardwareMap.appContext;
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
@@ -132,20 +135,19 @@ public class teleop1PLEDS extends LinearOpMode {
 
         rotateServo= hardwareMap.get(Servo.class, "ROTATE");
         clawServo= hardwareMap.get(Servo.class, "CLAW");
-        rotateServo.setPosition(0.69); clawServo.setPosition(0.15);
+        clawServo.setPosition(0.2);
 
         foundServL = hardwareMap.get(Servo.class, "left");
-        foundServR = hardwareMap.get(Servo.class, "right");
-        foundServL.setPosition(0);
-        foundServR.setPosition(.65);
+
+        blockPusher = hardwareMap.get(Servo.class, "push");
+        blockPusher.setPosition(0);
+
+        DS2 = hardwareMap.get(DistanceSensor.class, "DS2");
 
         touch = hardwareMap.get(DigitalChannel.class, "touch");
         touch.setMode(DigitalChannel.Mode.INPUT);
 
         //initIMU();
-        blink = hardwareMap.get(RevBlinkinLedDriver.class, "blink");
-        blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_END_TO_END_BLEND);
-        pattern = "CP1_2_END_TO_END_BLEND";
 
         telemetry.addData("Robot", "Initialized");
         telemetry.update();
@@ -165,79 +167,77 @@ public class teleop1PLEDS extends LinearOpMode {
 
             //CLAW STUFF
             if (gamepad1.a) {
-                rotateServo.setPosition(0.69);
+                rotateServo.setPosition(0.84);
+                blockPusher.setPosition(0);
             }else if(gamepad1.b){
-                rotateServo.setPosition(0.025);
+                rotateServo.setPosition(0.16);
                 playSound( 0, myApp, params);
-                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.CP1_2_SINELON);
-                pattern = "CP1_2_SINELON";
             }
 
             if(gamepad1.x) {
-                clawServo.setPosition(0.15);
-            }else if(gamepad1.y){
-                clawServo.setPosition(0.04);
-                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.GREEN);
-                pattern = "GREEN";
+                clawServo.setPosition(0.2);
+            }else if(gamepad1.back){
+                clawServo.setPosition(0.03);
+            }else if(blockPusher.getPosition()==0&&LIFT.getCurrentPosition()<=20&&DS2.getDistance(DistanceUnit.MM)<100){
+                blockPusher.setPosition(0.6);
+                starttime = runtime.milliseconds();
+                blockPushed = true;
+            }
+            if(blockPushed && runtime.milliseconds()>=starttime + 400){
+                clawServo.setPosition(0.03);
+                blockPushed = false;
+            }
+            if(gamepad1.y){
+                blockPusher.setPosition(0.6);
+                starttime = runtime.milliseconds();
+                blockPushed = true;
             }
 
-            //aARM STUFF
+            if(gamepad2.right_bumper && gamepad2.y)
+                encodersShown = true;
+            if(gamepad2.left_bumper && gamepad2.y){
+                FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            }
+            rbumpprev = gamepad2.right_bumper;
+            aPrev = gamepad2.a;
+            xPrev = gamepad2.x;
 
-            if(gamepad1.start && gamepad1.back){
+            //ARM STUFF
+
+            if(gamepad2.start && gamepad2.back){
                 LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             }
-            if(gamepad1.back&& !backPrev){
-                if(team.equals("blue")){
-                    team = "red";
-                    blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
-                    pattern = "H_RED";
-                }else{
-                    team = "blue";
-                    blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
-                    pattern = "H_BLUE";
-                }
-            }
-            backPrev = gamepad1.back;
+
+
 
             if(gamepad1.right_trigger != 0 || gamepad1.left_trigger != 0){
                 if(gamepad1.right_trigger > 0){
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     LIFT.setPower(gamepad1.right_trigger);
-                    if(!(pattern.equals("e"))) {
-                        if (team.equals("blue")) {
-                            blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.SHOT_BLUE);
-                            pattern = "e";
-                        } else {
-                            blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.SHOT_RED);
-                            pattern = "e";
-                        }
-                    }
-
-                }
-                else if(touch.getState()){
+                    //if(blockPusher.getPosition()!=0.9 && blockPusher.getPosition()!=0&&clawServo.getPosition()==0.03){
+                        blockPusher.setPosition(0.9);
+                    //}
+                }else if(touch.getState()) {
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        if(team.equals("blue")) {
-                            blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
-                            pattern = "H_BLUE";
-                        }else{
-                            blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
-                            pattern = "H_RED";
-                        }
                     if(gamepad1.left_trigger < .3){
                         LIFT.setPower(0);
-                    }
-                    else {
+                    }else {
                         LIFT.setPower(-gamepad1.left_trigger * .5);
                     }
-                }
-                else {
+                }else{
                     LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                     LIFT.setPower(0);
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }
-            }
-            else{
+            }else{
 
                 if(LIFT.getCurrentPosition()>50){
                     LIFT.setTargetPosition(LIFT.getCurrentPosition()); //STALL
@@ -249,33 +249,18 @@ public class teleop1PLEDS extends LinearOpMode {
                     LIFT.setPower(0);
                 }
             }
-
-            //Yeeter
             if(gamepad1.dpad_right){
                 YEETER.setPower(-1);
-                blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.COLOR_WAVES_RAINBOW_PALETTE);
-                pattern = "WAVES_RAINBOW";
                 if(!lightsaber) {
                     playSound(8, myApp, params);
                     lightsaber = true;
                 }
-            }
-            else if(gamepad1.dpad_left){
+            }else if(gamepad1.dpad_left){
                 YEETER.setPower(1);
-
                 if(lightsaber) lightsaber = false;
-                if(team.equals("blue")) {
-                    blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
-                    pattern = "H_BLUE";
-                }else{
-                    blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
-                    pattern = "H_RED";
-                }
-            }
-            else {
+            }else{
                 YEETER.setPower(0);
             }
-
             dPadDPrev = gamepad2.dpad_down; dPadUPrev = gamepad2.dpad_up;
             dPadLPrev = gamepad2.dpad_left; dPadRPrev = gamepad2.dpad_right;
 
@@ -285,22 +270,9 @@ public class teleop1PLEDS extends LinearOpMode {
                 IN1.setPower(-0.4);
                 IN2.setPower(-0.4);
             }else if(gamepad1.right_bumper){
-                IN1.setPower(0.7);
-                IN2.setPower(0.7);
-                if(!pattern.equals("FIRE_L")) {
-                    blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.FIRE_MEDIUM);
-                    pattern = "FIRE_L";
-                }
+                IN1.setPower(0.6);
+                IN2.setPower(0.6);
             }else{
-                if(pattern.equals("FIRE_L")){
-                    if(team.equals("blue")) {
-                        blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_BLUE);
-                        pattern = "H_BLUE";
-                    }else{
-                        blink.setPattern(RevBlinkinLedDriver.BlinkinPattern.BREATH_RED);
-                        pattern = "H_RED";
-                    }
-                }
                 IN1.setPower(0);
                 IN2.setPower(0);
             }
@@ -313,16 +285,11 @@ public class teleop1PLEDS extends LinearOpMode {
             //FOUNDATION
 
             if(gamepad1.dpad_up){
-                foundServL.setPosition(0.4);
-                foundServR.setPosition(0.4);
+                foundServL.setPosition(0.89);
             }else if(gamepad1.dpad_down){
-                foundServL.setPosition(0);
-                foundServR.setPosition(0.65);
+                foundServL.setPosition(0.4);
             }
 
-            //VARIABLE CHECKS
-
-            xPrev = gamepad2.x;
             yPrev = gamepad2.y;
 
             //TELEMETRY
@@ -330,9 +297,12 @@ public class teleop1PLEDS extends LinearOpMode {
             telemetry.addData("Wheel Power", "front left (%.2f), front right (%.2f), " +
                             "back left (%.2f), back right (%.2f)", FL.getPower(), FR.getPower(),
                     BL.getPower(), BR.getPower());
+            if(encodersShown){
+                telemetry.addData("Wheel Encoders", "front left(%.2f), front right (%.2f),"+
+                        "back left (%.2f), back right (%.2f)", (float)FL.getCurrentPosition(),(float)FR.getCurrentPosition(),(float)BL.getCurrentPosition(),(float)BR.getCurrentPosition());
+            }
             telemetry.addData("Lift:", LIFT.getPower());
             telemetry.addData("Lif2:",LIFT.getCurrentPosition());
-            telemetry.addData("LED Pattern", pattern);
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("touch", touch.getState());
             telemetry.update();
@@ -353,11 +323,17 @@ public class teleop1PLEDS extends LinearOpMode {
         double v2 = r * Math.sin(robotAngle) - rightX;
         double v3 = r * Math.sin(robotAngle) + rightX;
         double v4 = r * Math.cos(robotAngle) - rightX;
-        if(gamepad1.left_stick_button){
-            v1 = v1 * .5;
-            v2 = v2 * .5;
-            v3 = v3 * .5;
-            v4 = v4 * .5;
+        if (gamepad1.x) {
+            v1 *= 2.85;
+            v2 *= 2.85;
+            v3 *= 2.85;
+            v4 *= 2.85;
+        }
+        if(gamepad1.left_stick_button || gamepad1.right_stick_button || gamepad1.left_trigger!=0 || gamepad1.right_trigger!=0){
+            v1 *= .5;
+            v2 *= .5;
+            v3 *= .5;
+            v4 *= .5;
         }
         FL.setPower(v1);
         FR.setPower(v2);

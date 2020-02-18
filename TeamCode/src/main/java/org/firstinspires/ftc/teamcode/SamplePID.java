@@ -31,7 +31,6 @@ import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.FORWARD;
 import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
 
 @TeleOp(name="PID test", group="Exercises")
-@Disabled
 public class SamplePID extends LinearOpMode
 {
     private DcMotor FL = null;
@@ -44,6 +43,7 @@ public class SamplePID extends LinearOpMode
     double                  globalAngle, power = .450, correction, rotation;
     boolean                 aButton, bButton;
     PIDController           pidRotate, pidDrive;
+    double p = 0.05, i=0.005;
 
     // called when init button is  pressed.
     @Override
@@ -85,7 +85,7 @@ public class SamplePID extends LinearOpMode
 
         // Set PID proportional value to produce non-zero correction value when robot veers off
         // straight line. P value controls how sensitive the correction is.
-        pidDrive = new PIDController(.05, 0, 0);
+        pidDrive = new PIDController(.05, 0.005, 0);
 
         telemetry.addData("Mode", "calibrating...");
         telemetry.update();
@@ -127,6 +127,8 @@ public class SamplePID extends LinearOpMode
             telemetry.addData("2 global heading", globalAngle);
             telemetry.addData("3 correction", correction);
             telemetry.addData("4 turn rotation", rotation);
+            telemetry.addData("Proportional: ", p);
+            telemetry.addData("Integral: ", i);
             telemetry.update();
 
             // set power levels.
@@ -146,6 +148,18 @@ public class SamplePID extends LinearOpMode
 
                 // YYET.
                 if (bButton) drive(2500, 0.8);
+            }
+            if(gamepad1.dpad_up){
+                p+=0.01;
+            }
+            if (gamepad1.dpad_down) {
+                p-=0.01;
+            }
+            if(gamepad1.dpad_left){
+                i+=0.001;
+            }
+            if(gamepad1.dpad_right){
+                i-=0.001;
             }
         }
 
@@ -294,6 +308,7 @@ public class SamplePID extends LinearOpMode
 
 
         pidDrive.reset();
+        pidDrive.setPID(p,i,0);
 
 
         pidDrive.setSetpoint(0);
@@ -341,7 +356,10 @@ public class SamplePID extends LinearOpMode
                 FR.setPower(power+pow);
                 BL.setPower(power-pow);
                 BR.setPower(power+pow);
-                if (((4*ticks)-FL.getCurrentPosition()-FR.getCurrentPosition()-BL.getCurrentPosition()-BR.getCurrentPosition())<100){
+                if (((2*ticks)-BL.getCurrentPosition()-BR.getCurrentPosition())<ticks/2){
+                    power/=2;
+                }
+                if (((2*ticks)-BL.getCurrentPosition()-BR.getCurrentPosition())<100){
                     working = false;
                 }
             } while (opModeIsActive() && runtim2.seconds()<5 && working );
@@ -376,6 +394,8 @@ public class SamplePID extends LinearOpMode
         telemetry.addData("Wheel Position", "front left (%.1f), front right (%.1f), " +
                         "back left (%.1f), back right (%.1f)", (float)FL.getCurrentPosition(), (float)FR.getCurrentPosition(),
                 (float)BL.getCurrentPosition(), (float)BR.getCurrentPosition());
+        telemetry.addData("Proportional: ", p);
+        telemetry.addData("Integral: ", i);
         telemetry.update();
     }
 }

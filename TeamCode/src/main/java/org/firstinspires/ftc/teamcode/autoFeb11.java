@@ -82,7 +82,6 @@ public class autoFeb11 extends LinearOpMode
     private Servo CLAW =null;
     private Servo ROTATE = null;
     private Servo servo = null;
-    private Servo servo2 = null;
     private DigitalChannel touch;
     private PIDController pidDrive;
     private DcMotor YEETER;
@@ -164,9 +163,6 @@ public class autoFeb11 extends LinearOpMode
         ROTATE = hardwareMap.get(Servo.class, "ROTATE");
         ROTATE.setPosition(.84);
         servo = hardwareMap.get(Servo.class, "left");
-        servo2 = hardwareMap.get(Servo.class, "right");
-        servo.setPosition(0.2);
-        servo2.setPosition(.6);
 
         touch = hardwareMap.get(DigitalChannel.class, "touch");
         touch.setMode(DigitalChannel.Mode.INPUT);
@@ -228,6 +224,7 @@ public class autoFeb11 extends LinearOpMode
         runtime.reset();
         if(intFirst){
             goV3(720, 0.5);
+            servosUp();
             if(blockPos==0){
                 strafeLeft(250, 0.5, new double[]{0,0,0,0});
                 if(Math.abs(getHeading0())>=0.1) {
@@ -371,7 +368,7 @@ public class autoFeb11 extends LinearOpMode
                     blockPushed = true;
                     intakeOff();
                 }
-                if(blockPushed && runtime.milliseconds()>=starttime + 300){
+                if(blockPushed && runtime.milliseconds()>=starttime + 400){
                     CLAW.setPosition(0.03);
                     blockPushed = false;
                 }
@@ -396,7 +393,7 @@ public class autoFeb11 extends LinearOpMode
                     blockPushed = true;
                     intakeOff();
                 }
-                if(blockPushed && runtime.milliseconds()>=starttime + 300){
+                if(blockPushed && runtime.milliseconds()>=starttime + 400){
                     CLAW.setPosition(0.03);
                     blockPushed = false;
                 }
@@ -514,17 +511,15 @@ public class autoFeb11 extends LinearOpMode
         CLAW.setPosition(0.2);
     }
     private void servosUp(){
-        servo.setPosition(0);
-        servo2.setPosition(.4);
+        servo.setPosition(0.87);
     }
     private void servosDown(){
-        servo.setPosition(0.2);
-        servo2.setPosition(.6);
+        servo.setPosition(0.4);
     }
 
     private void intake(){
-        IN1.setPower(0.7);
-        IN2.setPower(0.7);
+        IN1.setPower(0.6);
+        IN2.setPower(0.6);
     }
     private void outtake(){
         IN1.setPower(-0.4);

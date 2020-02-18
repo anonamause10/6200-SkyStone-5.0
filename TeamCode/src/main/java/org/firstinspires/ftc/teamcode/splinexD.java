@@ -11,7 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -31,9 +31,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.Position;
 import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 
-import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.FORWARD;
-import static com.qualcomm.robotcore.hardware.DcMotorSimple.Direction.REVERSE;
-
 /**
  * Created by isong on 10/17/18.
  */
@@ -43,17 +40,18 @@ public class splinexD extends LinearOpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime runtime2 = new ElapsedTime();
-    private DcMotor FL = null;
-    private DcMotor FR = null;
-    private DcMotor BL = null;
-    private DcMotor BR = null;
-    private DcMotor IN1 = null;
-    private DcMotor IN2 = null;
-    private DcMotor LIFT = null;
+    private DcMotorEx FL = null;
+    private DcMotorEx FR = null;
+    private DcMotorEx BL = null;
+    private DcMotorEx BR = null;
+    private DcMotorEx IN1 = null;
+    private DcMotorEx IN2 = null;
+    private DcMotorEx LIFT = null;
     private Servo rotateServo = null;
     private Servo clawServo = null;
-    private DcMotor YEETER = null;
-    private double[] powers = {0.8, 0.05, 0.8, 0.05};
+    private Servo foundationServo = null;
+    private DcMotorEx YEETER = null;
+    private double[] powers = {800, 200, 800, 200};
     boolean blockPushed = false;
     double starttime = 0;
 
@@ -69,6 +67,7 @@ public class splinexD extends LinearOpMode {
     private boolean sPrev = false;
     private boolean aPrev = false;
     private double secondsToDisplay = 0;
+    private boolean intakeDuringGo = true;
 
     private boolean lbumpprev = false;
     private boolean rbumpprev = false;
@@ -104,36 +103,38 @@ public class splinexD extends LinearOpMode {
         params.loopControl = 0;
         params.waitForNonLoopingSoundsToFinish = true;
 
-        FL = hardwareMap.get(DcMotor.class, "fL");FR = hardwareMap.get(DcMotor.class, "fR");
-        BL = hardwareMap.get(DcMotor.class, "bL");BR = hardwareMap.get(DcMotor.class, "bR");
-        FL.setDirection(REVERSE);FR.setDirection(FORWARD);
-        BL.setDirection(REVERSE);BR.setDirection(FORWARD);
-        FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);FR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        BL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);BR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        FL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);FR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        FL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);FR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        BL.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);BR.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        FL = hardwareMap.get(DcMotorEx.class, "fL");FR = hardwareMap.get(DcMotorEx.class, "fR");
+        BL = hardwareMap.get(DcMotorEx.class, "bL");BR = hardwareMap.get(DcMotorEx.class, "bR");
+        FL.setDirection(DcMotorEx.Direction.REVERSE);FR.setDirection(DcMotorEx.Direction.FORWARD);
+        BL.setDirection(DcMotorEx.Direction.REVERSE);BR.setDirection(DcMotorEx.Direction.FORWARD);
+        FL.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);FR.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        BL.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);BR.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        FL.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);FR.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        BL.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);BR.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        FL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);FR.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        BL.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);BR.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         FL.setPower(0);FR.setPower(0);
         BL.setPower(0);BR.setPower(0);
 
-        LIFT = hardwareMap.get(DcMotor.class, "LIFT");
-        LIFT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        LIFT.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LIFT = hardwareMap.get(DcMotorEx.class, "LIFT");
+        LIFT.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        LIFT.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+        LIFT.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         LIFT.setPower(0);
         LIFT.setTargetPosition(LIFT.getCurrentPosition());
 
-        YEETER = hardwareMap.get(DcMotor.class, "YEET");
+        YEETER = hardwareMap.get(DcMotorEx.class, "YEET");
 
-        IN1 = hardwareMap.get(DcMotor.class, "IN1");
-        IN1.setDirection(FORWARD);
-        IN2 = hardwareMap.get(DcMotor.class, "IN2");
-        IN2.setDirection(REVERSE);
+        IN1 = hardwareMap.get(DcMotorEx.class, "IN1");
+        IN1.setDirection(DcMotor.Direction.FORWARD);
+        IN2 = hardwareMap.get(DcMotorEx.class, "IN2");
+        IN2.setDirection(DcMotor.Direction.REVERSE);
 
         rotateServo= hardwareMap.get(Servo.class, "ROTATE");
         clawServo= hardwareMap.get(Servo.class, "CLAW");
         rotateServo.setPosition(0.84); clawServo.setPosition(0.2);
+
+        foundationServo = hardwareMap.get(Servo.class, "left");
 
         intSens = hardwareMap.get(DistanceSensor.class, "DS2");
         touch = hardwareMap.get(DigitalChannel.class, "touch");
@@ -161,6 +162,9 @@ public class splinexD extends LinearOpMode {
             if(gamepad2.back && !sPrev){
                 drive = !drive;
             }
+            if(gamepad2.back && !sPrev && gamepad2.start){
+                intakeDuringGo = !intakeDuringGo;
+            }
             sPrev = gamepad2.back;
 
             if(gamepad2.dpad_up&&!dPadUPrev){
@@ -174,9 +178,9 @@ public class splinexD extends LinearOpMode {
             dPadUPrev = gamepad2.dpad_up;
 
             if(gamepad2.dpad_left&&!dPadLPrev){
-                powers[indx] = powers[indx]-0.05;
+                powers[indx] = powers[indx]-10;
             }else if(gamepad2.dpad_right&&!dPadRPrev){
-                powers[indx] = powers[indx]+0.05;
+                powers[indx] = powers[indx]+10;
             }
             if(gamepad2.left_bumper) {
                 clawServo.setPosition(0.2);
@@ -184,14 +188,21 @@ public class splinexD extends LinearOpMode {
             dPadLPrev = gamepad2.dpad_left;
             dPadRPrev = gamepad2.dpad_right;
 
-
+            if(gamepad1.dpad_up){
+                foundationServo.setPosition(0.87);
+            }else if(gamepad1.dpad_down){
+                foundationServo.setPosition(0.4);
+            }else if(gamepad1.dpad_right)
+                foundationServo.setPosition(0.55);
             if(gamepad2.a){
-                FL.setPower(powers[0]);
-                FR.setPower(powers[1]);
-                BL.setPower(powers[2]);
-                BR.setPower(powers[3]);
-                IN1.setPower(0.7);
-                IN2.setPower(0.7);
+                FL.setVelocity(powers[0]);
+                FR.setVelocity(powers[1]);
+                BL.setVelocity(powers[2]);
+                BR.setVelocity(powers[3]);
+                if(intakeDuringGo) {
+                    IN1.setPower(0.7);
+                    IN2.setPower(0.7);
+                }
                 if(!aPrev)
                     runtime2.reset();
             }else if(!drive){
