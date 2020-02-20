@@ -59,9 +59,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-@Autonomous(name="test 2ish", group="ree")
+@Autonomous(name="red43", group="ree")
 
-public class velocitytester extends LinearOpMode
+public class red43 extends LinearOpMode
 {
     private Servo blockPusher = null;
 
@@ -119,7 +119,7 @@ public class velocitytester extends LinearOpMode
         // create a sound parameter that holds the desired player parameters.
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
         pidRotate = new PIDController(.003, .00003, 0);
-        pidDrive = new PIDController(.03, 0.005, 0);
+        pidDrive = new PIDController(.02, 0.005, 0);
         pidDrive.setSetpoint(0);
         pidDrive.setOutputRange(0, 1.0);
         pidDrive.setInputRange(-270, 270);
@@ -227,7 +227,7 @@ public class velocitytester extends LinearOpMode
                     turnToZero();
                 }
             }else if(blockPos==2){
-                strafeLeft(510, 0.7, new double[]{0,0,0,0});
+                strafeLeft(520, 0.7, new double[]{0,0,0,0});
                 if(Math.abs(getHeading0())>=0.1) {
                     turnToZero();
                 }
@@ -242,17 +242,20 @@ public class velocitytester extends LinearOpMode
             if(Math.abs(getHeading0())>=0.1){
                 turnToZero();
             }
-            if(blockPos!=2)
+            if(blockPos==0)
                 goV3(-680, 0.7);
+            else if(blockPos==1)
+                goV3(-750, 0.7);
             else
-            goV3(-770, 0.7);
-            turn(270.5, false, 0);
+                goV3(-810, 0.7);
             blockPusher.setPosition(0.6);
             starttime = runtime.milliseconds();
             blockPushed = true;
             intakeOff();
+            turn(270.5, false, 0);
+
             if(blockPos==2)
-            drive(3410, 0.7);
+            drive(4100, 0.7);
             else if(blockPos==1)
             drive(3800,0.7);
             else
@@ -261,7 +264,7 @@ public class velocitytester extends LinearOpMode
             LIFT.setPower(1);
             turn(180, new double[]{0,0,0,0}, false, 0);
             LIFT.setPower(0.2);
-            moveWhileUsingLift(-360, 0.4, 500, 0.4, new double[] {0,0,0,0});
+            moveWhileUsingLift(-360, 0.35, 500, 0.4, new double[] {0,0,0,0});
             LIFT.setPower(0.2);
             rotateOut();
             sleep(800);
@@ -271,60 +274,52 @@ public class velocitytester extends LinearOpMode
             rotateIn();
             servosDown();
             sleep(500);
-            /**fL.setVelocity(200);
-            fR.setVelocity(-200);
-            bL.setVelocity(200);
-            bR.setVelocity(-200);
-            sleep(200);
-            while(getHeading()>90){
-                fL.setVelocity(4500);
-                fR.setVelocity(50);
-                bL.setVelocity(4500);
-                bR.setVelocity(50);
-            }*/
-        fL.setPower(0.7 * scale);
-        fR.setPower(-0.7 * scale);
-        bL.setPower(-0.7 * scale);
-        bR.setPower(0.7 * scale);
-        sleep(300);
-        fL.setPower(0.7 * scale);
-        fR.setPower(0.7 * scale);
-        bL.setPower(0.7 * scale);
-        bR.setPower(0.7 * scale);
-        sleep(470);
-        fL.setPower(0.7 * scale);
-        fR.setPower(-0.7 * scale);
-        bL.setPower(0.7 * scale);
-        bR.setPower(-0.7 * scale);
-        while (opModeIsActive() && getHeading() > 90) {
+            fL.setPower(0.7 * scale);
+            fR.setPower(-0.7 * scale);
+            bL.setPower(-0.7 * scale);
+            bR.setPower(0.7 * scale);
+            sleep(300);
+            fL.setPower(0.7 * scale);
+            fR.setPower(0.7 * scale);
+            bL.setPower(0.7 * scale);
+            bR.setPower(0.7 * scale);
+            sleep(470);
+            fL.setPower(0.7 * scale);
+            fR.setPower(-0.7 * scale);
+            bL.setPower(0.7 * scale);
+            bR.setPower(-0.7 * scale);
+            while (opModeIsActive() && getHeading() > 90) {
             updateT();
-        }
+            }
             motorsOff();
             servosUp();
             LIFT.setPower(-0.4);
             goV3(-430, 0.4);
             if(blockPos==0){
-                strafeRight(220, 0.5, new double[]{0,0,0,0});
+                strafeRight(180, 0.5, new double[]{0,0,0,0});
             }else
             strafeRight(120, 0.5, new double[] {0,0,0,0});
-            turn(90, 0);
+            adjust90();
             if(blockPos==2)
-            drive(4000, 0.7);
+            drive(3900, 0.7);
             else if(blockPos==1)
-            drive(3700, 0.7);
+            drive(3650, 0.7);
             else
-            drive(3100, 0.7);
+            drive(3250, 0.7);
 
-            turn(90, 90 >= getHeading(), 0);
-            strafeRight(800, 0.7, new double[]{0,0,0,0});
+            adjust90();
+            if(blockPos==1)
+                strafeRight(800, 0.7, new double[]{0,0,0,0});
+            else
+                strafeRight(720, 0.7, new double[]{0,0,0,0});
             intake();
-            goV3(250, 0.4);
+            goV3(250, 0.3);
             strafeLeft(920, 0.7, new double[]{0,0,0,0});
+            adjust90();
             blockPusher.setPosition(0.6);
             starttime = runtime.milliseconds();
             blockPushed = true;
-            intakeOff();
-            turn(90, 90 >= getHeading(), 0);
+        intakeOff();
         if(blockPos==2)
             goV3(-4300, 0.7);
         else if(blockPos==1)
@@ -337,9 +332,12 @@ public class velocitytester extends LinearOpMode
         rotateOut();
         sleep(900);
         openClaw();
-        sleep(200);
+        YEETER.setPower(-1);
+        sleep(300);
+        YEETER.setPower(0);
         rotateIn();
         goV3(200, 0.5);
+        sleep(100);
     }
 
     private void goV3(int ticks, double power, double[] x){
@@ -510,8 +508,8 @@ public class velocitytester extends LinearOpMode
     }
 
     private void intake(){
-        IN1.setPower(0.6);
-        IN2.setPower(0.6);
+        IN1.setPower(0.45);
+        IN2.setPower(0.45);
     }
     private void outtake(){
         IN1.setPower(-0.4);
@@ -809,6 +807,31 @@ public class velocitytester extends LinearOpMode
                 motorsOff();
                 turned = true;
             } else if (getHeading0() > 0) {
+                fL.setVelocity(smallPower);
+                fR.setVelocity(-smallPower);
+                bL.setVelocity(smallPower);
+                bR.setVelocity(-smallPower);
+            } else {
+                fL.setVelocity(-smallPower);
+                fR.setVelocity(smallPower);
+                bL.setVelocity(-smallPower);
+                bR.setVelocity(smallPower);
+            }
+        }
+    }
+    private void adjust90(){
+        boolean turned = false;
+        double smallPower = 240;
+        runtim2.reset();
+        while (!turned && opModeIsActive() && runtim2.seconds() < 0.7) {
+            if(blockPushed && runtime.milliseconds()>=starttime + 400){
+                CLAW.setPosition(0.03);
+                blockPushed = false;
+            }
+            if (Math.abs(getHeading()-90) <= 0.1) {
+                motorsOff();
+                turned = true;
+            } else if (getHeading() > 90) {
                 fL.setVelocity(smallPower);
                 fR.setVelocity(-smallPower);
                 bL.setVelocity(smallPower);

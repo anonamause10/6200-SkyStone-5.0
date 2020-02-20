@@ -74,7 +74,7 @@ public class teleop extends LinearOpMode {
 
 
     private boolean lbumpprev = false;
-    private boolean rbumpprev = false;
+    private boolean sensorActive = true;
     private DigitalChannel touch = null;
     private boolean encodersShown = false;
     // List of available sound resources
@@ -184,10 +184,13 @@ public class teleop extends LinearOpMode {
                 clawServo.setPosition(0.2);
             }else if(gamepad2.y){
                 clawServo.setPosition(0.04);
-            }else if(blockPusher.getPosition()==0&&LIFT.getCurrentPosition()<=20&&DS2.getDistance(DistanceUnit.MM)<100){
+            }else if(sensorActive&&blockPusher.getPosition()==0&&LIFT.getCurrentPosition()<=20&&DS2.getDistance(DistanceUnit.MM)<100){
                 blockPusher.setPosition(0.6);
                 starttime = runtime.milliseconds();
                 blockPushed = true;
+            }
+            if(gamepad2.right_bumper&&gamepad2.left_bumper&&gamepad2.y&&!yPrev){
+                sensorActive = !sensorActive;
             }
             if(blockPushed && runtime.milliseconds()>=starttime + 400){
                 clawServo.setPosition(0.03);
@@ -198,7 +201,7 @@ public class teleop extends LinearOpMode {
                 starttime = runtime.milliseconds();
                 blockPushed = true;
             }
-            if(gamepad2.right_bumper && gamepad2.y)
+            if(gamepad2.right_bumper && gamepad2.dpad_left)
                 encodersShown = true;
             if(gamepad2.left_bumper && gamepad2.y){
                 FL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -210,9 +213,9 @@ public class teleop extends LinearOpMode {
                 BL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 BR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             }
-            rbumpprev = gamepad2.right_bumper;
             aPrev = gamepad2.a;
             xPrev = gamepad2.x;
+            yPrev = gamepad2.y;
 
             //ARM STUFF
 
@@ -243,6 +246,9 @@ public class teleop extends LinearOpMode {
                     LIFT.setPower(0);
                     LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                 }
+            }else if(gamepad2.dpad_up){
+                LIFT.setPower(0.58);
+                LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             }else if(gamepad2.dpad_down){
                 LIFT.setPower(0);
                 LIFT.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -319,6 +325,9 @@ public class teleop extends LinearOpMode {
             telemetry.addData("Lift:", LIFT.getPower());
             telemetry.addData("Lif2:",LIFT.getCurrentPosition());
             telemetry.addData("Status", "Run Time: " + runtime.toString());
+            if(sensorActive) {
+                telemetry.addData("IntakeSensor", DS2.getDistance(DistanceUnit.MM));
+            }
             telemetry.addData("touch", touch.getState());
             telemetry.update();
 

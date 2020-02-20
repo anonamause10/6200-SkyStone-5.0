@@ -59,7 +59,12 @@ import java.util.concurrent.TimeUnit;
 public class TestDetection extends LinearOpMode
 {
     private SkystoneDetectorNew detector;
-
+    int x = 40;
+    int y = 40;
+    boolean leftPrev = false;
+    boolean rightPrev = false;
+    boolean upPrev = false;
+    boolean downPrev = false;
 
 
     @Override
@@ -91,6 +96,8 @@ public class TestDetection extends LinearOpMode
 
             telemetry.addData("Distance: ", detector.getDist());
             telemetry.addData("Position: ", detector.getPos());
+            telemetry.addData("x: ", detector.getX());
+            telemetry.addData("y: ", detector.getY());
             telemetry.update();
 
             /*
@@ -98,12 +105,29 @@ public class TestDetection extends LinearOpMode
              * when it will be automatically stopped for you) *IS* supported. The "if" statement
              * below will stop streaming from the camera when the "A" button on gamepad 1 is pressed.
              */
+            if(gamepad1.dpad_up&&!upPrev){
+                y+=5;
+            }
+            if(gamepad1.dpad_down&&!downPrev){
+                y-=5;
+            }
+            if(gamepad1.dpad_left&&!leftPrev){
+                x-=5;
+            }
+            if(gamepad1.dpad_right&&!rightPrev){
+                x+=5;
+            }
+            detector.setPos(x,y);
             if(gamepad1.a)
             {
 
                 detector.stop();
                 //webcam.closeCameraDevice();
             }
+            upPrev = gamepad1.dpad_up;
+            downPrev = gamepad1.dpad_down;
+            leftPrev = gamepad1.dpad_left;
+            rightPrev = gamepad1.dpad_right;
 
         }
     }

@@ -39,6 +39,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -57,31 +58,31 @@ import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-@Disabled
-@Autonomous(name="auto stonks down", group="ree")
 
-public class robot extends LinearOpMode
+@Autonomous(name="blue43", group="ree")
+
+
+public class blue43 extends LinearOpMode
 {
+    private Servo blockPusher = null;
+
+    boolean blockPushed = false;
+    double starttime = 0;
     private int[] zeroPos = {0,0,0,0};
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime runtim2 = new ElapsedTime();
     private boolean liftgoingup = false;
     private boolean imuworking = true;
-    private DcMotor fL = null;
-    private DcMotor fR = null;
-    private DcMotor bL = null;
-    private DcMotor bR = null;
+    private DcMotorEx fL = null;
+    private DcMotorEx fR = null;
+    private DcMotorEx bL = null;
+    private DcMotorEx bR = null;
     private DcMotor IN1 = null;
     private DcMotor IN2 = null;
     private DcMotor LIFT = null;
     private Servo CLAW =null;
     private Servo ROTATE = null;
     private Servo servo = null;
-    private Servo servo2 = null;
-    private DistanceSensor sR;
-    private DistanceSensor sR2;
-    private DistanceSensor sRF;
-    private DistanceSensor sRR;
     private DigitalChannel touch;
     private PIDController pidDrive;
     private DcMotor YEETER;
@@ -95,6 +96,7 @@ public class robot extends LinearOpMode
     Orientation             lastAngles = new Orientation();
     double globalAngle, rotation;
     boolean sensorWorking = true;
+    boolean intFirst = false;
     // The IMU sensor object
     BNO055IMU imu;
 
@@ -114,16 +116,11 @@ public class robot extends LinearOpMode
 
         voltage = getBatteryVoltage();
         scale = 12.8 / voltage;
-        double scale2 = 1;
-        if (voltage <= 13.2) {
-            scale2 = 1.08;
-            scale = scale * scale2;
-        }
 
         // create a sound parameter that holds the desired player parameters.
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
         pidRotate = new PIDController(.003, .00003, 0);
-        pidDrive = new PIDController(.05, 0, 0);
+        pidDrive = new PIDController(.02, 0.005, 0);
         pidDrive.setSetpoint(0);
         pidDrive.setOutputRange(0, 1.0);
         pidDrive.setInputRange(-270, 270);
@@ -131,10 +128,10 @@ public class robot extends LinearOpMode
 
         params.loopControl = 0;
         params.waitForNonLoopingSoundsToFinish = true;
-        fL = hardwareMap.get(DcMotor.class, "fL");
-        fR = hardwareMap.get(DcMotor.class, "fR");
-        bL = hardwareMap.get(DcMotor.class, "bL");
-        bR = hardwareMap.get(DcMotor.class, "bR");
+        fL = hardwareMap.get(DcMotorEx.class, "fL");
+        fR = hardwareMap.get(DcMotorEx.class, "fR");
+        bL = hardwareMap.get(DcMotorEx.class, "bL");
+        bR = hardwareMap.get(DcMotorEx.class, "bR");
         fL.setDirection(DcMotor.Direction.REVERSE);
         bL.setDirection(DcMotor.Direction.REVERSE);
         fR.setDirection(DcMotor.Direction.FORWARD);
@@ -162,19 +159,13 @@ public class robot extends LinearOpMode
         CLAW = hardwareMap.get(Servo.class, "CLAW");
         CLAW.setPosition(.2);
         ROTATE = hardwareMap.get(Servo.class, "ROTATE");
-        ROTATE.setPosition(.725);
+        ROTATE.setPosition(.84);
         servo = hardwareMap.get(Servo.class, "left");
-        servo2 = hardwareMap.get(Servo.class, "right");
-        servo.setPosition(0.2);
-        servo2.setPosition(.6);
 
-
-        sR = hardwareMap.get(DistanceSensor.class, "DSB");
-        sR2 = hardwareMap.get(DistanceSensor.class, "DS2");
-        sRR = hardwareMap.get(DistanceSensor.class, "DSR");
-        sRF = hardwareMap.get(DistanceSensor.class, "DSF");
         touch = hardwareMap.get(DigitalChannel.class, "touch");
         touch.setMode(DigitalChannel.Mode.INPUT);
+        blockPusher = hardwareMap.get(Servo.class, "push");
+        blockPusher.setPosition(0);
 
 
         BNO055IMU.Parameters parameters2 = new BNO055IMU.Parameters();
@@ -222,274 +213,240 @@ public class robot extends LinearOpMode
                 blockPos = 2;
                 usingCamera = false;
             }
-
+            if(gamepad2.start)
+                intFirst = true;
+            if(intFirst)
+                telemetry.addData("first block", intFirst);
             telemetry.update();
         }
-        runtime.reset();
-        if (usingCamera) {
-            //blockPos = (int) detector.getPos();
-            //detector.stop();
-        }
-
-        double[] array1 = {0.7, -0.7, -0.7, 0.7};
-        if (blockPos == 1) {
-            array1 = new double[]{-0.7, 0.7, 0.7, -0.7};
-        }
-
-        if (blockPos == 2)
-            goV2(720, 0.5 * scale, new double[]{0, 0, 0, 0});
-        else if(blockPos==1){
-            goV2(740, 0.5 * scale, array1);
-            sleep(300);
+        goV3(720, 0.7);
+        servosUp();
+        if(blockPos==0){
+            strafeLeft(370, 0.7, new double[]{0,0,0,0});
+            if(Math.abs(getHeading0())>=0.1) {
+                turnToZero();
+            }
+        }else if(blockPos==2){
+            strafeRight(520, 0.7, new double[]{0,0,0,0});
+            if(Math.abs(getHeading0())>=0.1) {
+                turnToZero();
+            }
         }else{
-            goV2(740, 0.5 * scale, array1);
-            sleep(125);
-        }
-
-        if (LIFT.getPower() > 0) {
-            LIFT.setPower(-0.4);
-        }
-        array1 = new double[]{0.3,0.3,0.3,0.3};
-
-        if (blockPos == 0){
-            outtake();
-            turn(30, array1, true, 2);
-        }else if(blockPos==1){
-            outtake();
-            turn(330, array1, false, 2);
-        }else{
-            turn(328, array1, false, 2);
-        }
-        if(!imuworking) {stop();}
-
-            intake();
-            if (LIFT.getPower() != 0) {
-                LIFT.setPower(0);
+            strafeRight(200, 0.7, new double[]{0,0,0,0});
+            if(Math.abs(getHeading0())>=0.1) {
+                turnToZero();
             }
-            sleep(800);
-            double power = -0.5 * scale;
-            if (!(blockPos == 0)) {
-                fL.setPower(power);
-                fR.setPower(power);
-                bL.setPower(power);
-                bR.setPower(power);
-                if (blockPos != 2)
-                    sleep(100);
-                sleep(355);
-
-            } else {
-                fL.setPower(-power);
-                fR.setPower(power);
-                bL.setPower(-power);
-                bR.setPower(power);
-                sleep(100);
-                fL.setPower(power);
-                fR.setPower(power);
-                bL.setPower(power);
-                bR.setPower(power);
-                sleep(365);
-            }
-
-            intakeOff();
-            closeClaw();
-
-            turn(270, new double[]{0, 0, 0, 0}, false, 2);
-
-            if (sRR.getDistance(DistanceUnit.MM) < 8000) {
-                int numberOfTimes = 1;
-                distanceFromWall = (int) sRR.getDistance(DistanceUnit.MM);
-                for (int i = 0; i < 6; i++) {
-                    int addition = (int) sRR.getDistance(DistanceUnit.MM);
-                    if (addition < 7000) {
-                        distanceFromWall = (addition + distanceFromWall);
-                        numberOfTimes++;
-                    }
-                }
-                distanceFromWall /= numberOfTimes;
-            } else {
-                sensorWorking = false;
-            }
-
-            //drive under skybridge
-
-            servosUp();
-            turn(180, new double[]{0, 0, 0, 0}, false, 2);
-            goV2(-350, 0.3, new double[]{0, 0, 0, 0});
-            servosDown();
-            fL.setPower(-0.7 * scale);fR.setPower(0.7 * scale);
-            bL.setPower(0.7 * scale);bR.setPower(-0.7 * scale);
-            sleep(300);
-            fL.setPower(0.7 * scale);fR.setPower(0.7 * scale);
-            bL.setPower(0.7 * scale);bR.setPower(0.7 * scale);
-            sleep(270);
-            fL.setPower(-0.7 * scale);fR.setPower(0.7 * scale);
-            bL.setPower(-0.7 * scale);bR.setPower(0.7 * scale);
-            while (opModeIsActive() && getHeading() < 270) {
-                if (getHeading() > 235 && ROTATE.getPosition() > 0.6 && LIFT.getCurrentPosition() > 5) {
-                    LIFT.setPower(-0.2 * scale);
-                } else if (getHeading() > 235) {
-                    LIFT.setPower(-0.01 * scale);
-                }updateT();}
-            motorsOff();
-            servosUp();
-            LIFT.setPower(-0.01 * scale);
-
-            driveSleep(300, -0.5);
-            //placeblock
-            driveSleep(300, 0.5);
-
-            if(Math.abs(getHeading()-270) >=1){
-                turn(270,new double[]{0,0,0,0}, getHeading()<=270, 0);
-            }
-            correctDistanceFromWall();
-
-
-            boolean rightSensorWorking = correctDistanceFromWall(1);
-
-
-            if(rightSensorWorking) {
-
-                turn(270, new double[]{0, 0, 0, 0}, getHeading() <= 270, 0);
-
-                driveSleep(1400, 0.7);
-
-                if (Math.abs(getHeading() - 272) > 1)
-                    turn(272, new double[]{0, 0, 0, 0}, 272 > getHeading(), 0);
-
-                boolean blocktwo = pickUpSecondSkystone();
-
-                if(blocktwo) {
-
-                    turn(270, new double[]{0, 0, 0, 0}, getHeading() < 270, 0);
-
-                    outtake();
-                    servosDown();
-
-                    driveSleep(1150, -0.7);
-                    driveSleep(820, -0.55);
-
-
-                    YEETER.setPower(-1);
-                    power = 0.15 * scale;
-                    fL.setPower(power);
-                    fR.setPower(power + 0.01);
-                    bL.setPower(power);
-                    bR.setPower(power + 0.01);
-
-                    sleep(300);
-                    YEETER.setPower(0);
-                    rotateIn();
-                    outtake();
-                    sleep(600);
-                    intakeOff();
-                    motorsOff();
-                    LIFT.setPower(-0.3);
-                }
-
-                } else {
-                    turn(93, new double[]{0, 0, 0, 0}, 93 > getHeading(), 2);
-                    intakeOff();
-                    YEETER.setPower(-1);
-                    sleep(300);
-                    if (blockPos >= 1 || !frontIsWorking) {
-                        sleep(100);
-                    }
-                    if (blockPos == 2 || !frontIsWorking) {
-                        sleep(100);
-                    }
-                    YEETER.setPower(0);
-                }
-
-
-                while (opModeIsActive()) {
-                    if (LIFT.getCurrentPosition() < 10 || !touch.getState()) {
-                        LIFT.setPower(0);
-                        break;
-                    }
-                }
-
-    }
-
-    private boolean pickUpSecondSkystone(){
-        boolean frontsensorgood;
-        if (blockPos == 2)
-            frontsensorgood = moveWithForwardSensor(690, 0.4 * scale);
-        else if (blockPos == 1)
-            frontsensorgood = moveWithForwardSensor(890, 0.4 * scale);
-        else
-            frontsensorgood = moveWithForwardSensor(1090, 0.4 * scale);
-
-        if (!frontsensorgood) {
-            driveSleep(800, -0.7);
-            frontIsWorking = false;
         }
-        if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall - 50) {
-            moveWithRightSensor(distanceFromWall, 0.5);
-        }
-        strafeLeft(630, 0.5 * scale, new double[]{0, 0, 0, 0});
         intake();
-        double power = 0.3 * scale;
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
-        if (blockPos != 2)
-            sleep(530);
-        else {
-            sleep(530);
-            power = -0.3 * scale;
-            fL.setPower(power);
-            fR.setPower(power);
-            bL.setPower(power);
-            bR.setPower(power);
-            sleep(120);
+        goV3(800, 0.5);
+        if(Math.abs(getHeading0())>=0.1){
+            turnToZero();
         }
-        strafeRight(770, 0.5 * scale, new double[]{0, 0, 0, 0});
-        if (sR2.getDistance(DistanceUnit.MM) < 70) {
-            intakeOff();
-            closeClaw();
-            return true;
+        if(blockPos==0)
+            goV3(-640, 0.7);
+        else if(blockPos==1)
+            goV3(-750, 0.7);
+        else
+            goV3(-810, 0.7);
+        blockPusher.setPosition(0.6);
+        starttime = runtime.milliseconds();
+        blockPushed = true;
+        intakeOff();
+        turn(89.5, true, 0);
+
+        if(blockPos==2)
+            drive(4100, 0.7);
+        else if(blockPos==1)
+            drive(3800,0.7);
+        else
+            drive(3400, 0.7);
+        blockPusher.setPosition(0.9);
+        LIFT.setPower(1);
+        turn(180, new double[]{0,0,0,0}, true, 0);
+        LIFT.setPower(0.2);
+        moveWhileUsingLift(-420, 0.35, 500, 0.4, new double[] {0,0,0,0});
+        LIFT.setPower(0.2);
+        rotateOut();
+        sleep(800);
+        openClaw();
+        sleep(200);
+        blockPusher.setPosition(0);
+        rotateIn();
+        servosDown();
+        sleep(500);
+        fL.setPower(-0.7 * scale);
+        fR.setPower(0.7 * scale);
+        bL.setPower(0.7 * scale);
+        bR.setPower(-0.7 * scale);
+        sleep(300);
+        fL.setPower(0.7 * scale);
+        fR.setPower(0.7 * scale);
+        bL.setPower(0.7 * scale);
+        bR.setPower(0.7 * scale);
+        sleep(470);
+        fL.setPower(-0.7 * scale);
+        fR.setPower(0.7 * scale);
+        bL.setPower(-0.7 * scale);
+        bR.setPower(0.7 * scale);
+        while (opModeIsActive() && getHeading() < 270) {
+            updateT();
         }
-        return false;
+        motorsOff();
+        servosUp();
+        LIFT.setPower(-0.4);
+        goV3(-430, 0.4);
+        if(blockPos==0){
+            strafeLeft(180, 0.5, new double[]{0,0,0,0});
+        }else
+            strafeLeft(120, 0.5, new double[] {0,0,0,0});
+        adjust270();
+        if(blockPos==2)
+            drive(3900, 0.7);
+        else if(blockPos==1)
+            drive(3650, 0.7);
+        else
+            drive(3250, 0.7);
+
+        adjust270();
+        if(blockPos!=1)
+            strafeLeft(720, 0.7, new double[]{0,0,0,0});
+        else
+            strafeLeft(800, 0.7, new double[]{0,0,0,0});
+        intake();
+        goV3(250, 0.3);
+        strafeRight(920, 0.7, new double[]{0,0,0,0});
+        adjust270();
+        blockPusher.setPosition(0.6);
+        starttime = runtime.milliseconds();
+        blockPushed = true;
+        intakeOff();
+        if(blockPos==2)
+            goV3(-4300, 0.7);
+        else if(blockPos==1)
+            goV3(-4000, 0.7);
+        else
+            goV3(-3600, 0.7);
+        blockPusher.setPosition(0.9);
+        moveWhileUsingLift(-350, 0.5, 500, 0.9, new double[] {0,0,0,0});
+        LIFT.setPower(0.2);
+        rotateOut();
+        sleep(900);
+        openClaw();
+        strafeRight(300, 1, new double[]{0,0,0,0});
+        YEETER.setPower(-1);
+        sleep(300);
+        YEETER.setPower(0);
+        rotateIn();
+        goV3(200, 0.5);
+        sleep(100);
     }
-    private void goV2(int ticks, double power){
-        goV2(ticks, power, new double[]{0,0,0,0});
-    }
-    private void goV2(int ticks, double power, double[] endPowers){
+
+    private void goV3(int ticks, double power, double[] x){
         boolean phase2 = false;
         resetEncoders();
         runtim2.reset();
         if(ticks < 0){
-            fL.setPower(-power);
-            fR.setPower(-power);
-            bL.setPower(-power);
-            bR.setPower(-power);
-            while(opModeIsActive()&&averageTicks()>ticks){
+            if(Math.abs(ticks - averageTicks2()) < ticks/4 ){
+                fL.setPower(-power/2);
+                fR.setPower(-power/2);
+                bL.setPower(-power/2);
+                bR.setPower(-power/2);
+            }else {
+                fL.setPower(-power);
+                fR.setPower(-power);
+                bL.setPower(-power);
+                bR.setPower(-power);
+            }
+            while(opModeIsActive()&&averageTicks2()>ticks){
+                updateT();
+                if(blockPushed && runtime.milliseconds()>=starttime + 400){
+                    CLAW.setPosition(0.03);
+                    blockPushed = false;
+                }
+                if((!touch.getState()||LIFT.getCurrentPosition()<5) && LIFT.getPower()<0 ) {
+                    LIFT.setPower(0);
+                }
+            }
+        }else{
+            if(ticks - averageTicks2() < ticks/4 ){
+                fL.setPower(power/2);
+                fR.setPower(power/2);
+                bL.setPower(power/2);
+                bR.setPower(power/2);
+            }else {
+                fL.setPower(power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(power);
+            }
+            while(opModeIsActive()&&averageTicks2()<ticks){
+                updateT();
+                if(blockPushed && runtime.milliseconds()>=starttime + 400){
+                    CLAW.setPosition(0.03);
+                    blockPushed = false;
+                }
+                if((!touch.getState()||LIFT.getCurrentPosition()<5) && LIFT.getPower()<0 ){
+                    LIFT.setPower(0);
+                }
+            }
+        }
+        fL.setPower(x[0]);
+        fR.setPower(x[1]);
+        bL.setPower(x[2]);
+        bR.setPower(x[3]);
+    }
+    private void goV3(int ticks, double power){
+        goV3(ticks, power, new double[]{0,0,0,0});
+    }
+    private void goV3SecondBlock(int ticks, double power){
+        resetEncoders();
+        runtim2.reset();
+        if(ticks < 0){
+            if(Math.abs(ticks - averageTicks2()) < ticks/4 ){
+                fL.setPower(-power/2);
+                fR.setPower(-power/2);
+                bL.setPower(-power/2);
+                bR.setPower(-power/2);
+            }else {
+                fL.setPower(-power);
+                fR.setPower(-power);
+                bL.setPower(-power);
+                bR.setPower(-power);
+            }
+            while(opModeIsActive()&&averageTicks2()>ticks){
+                if(averageTicks2() < ticks + 1300 ) {
+                    if (LIFT.getCurrentPosition() < 450 && rotatedIN()){
+                        LIFT.setPower(1);
+                    }else{
+                        LIFT.setPower(0);
+                        rotateOut();
+                    }
+                }
                 updateT();
             }
         }else{
-            fL.setPower(power);
-            fR.setPower(power);
-            bL.setPower(power);
-            bR.setPower(power);
-            while(opModeIsActive()&&averageTicks()<ticks){
-
-                if(LIFT.getCurrentPosition()>=50 ){
-                    LIFT.setPower(-0.4*scale);
-                }else{
-                    LIFT.setPower(0);
-                }
-                if(sR2.getDistance(DistanceUnit.MM)<70){
-                    closeClaw();
-                    intakeOff();
-                }
+            if(ticks - averageTicks2() < ticks/4 ){
+                fL.setPower(power/2);
+                fR.setPower(power/2);
+                bL.setPower(power/2);
+                bR.setPower(power/2);
+            }else {
+                fL.setPower(power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(power);
+            }
+            while(opModeIsActive()&&averageTicks2()<ticks){
                 updateT();
             }
         }
-        fL.setPower(endPowers[0]);
-        fR.setPower(endPowers[1]);
-        bL.setPower(endPowers[2]);
-        bR.setPower(endPowers[3]);
+        fL.setPower(0);
+        fR.setPower(0);
+        bL.setPower(0);
+        bR.setPower(0);
+    }
+    private int averageTicks2(){
+        return (bL.getCurrentPosition() + bR.getCurrentPosition()) /2;
     }
     private void strafeRight(int ticks, double power, double[] endPowers){
         resetEncoders();
@@ -525,11 +482,18 @@ public class robot extends LinearOpMode
         Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
         return (angles.firstAngle+360)%360;
     }
+    public double getHeading0() {
+        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        return (angles.firstAngle);
+    }
     private void rotateIn(){
-        ROTATE.setPosition(0.725);
+        ROTATE.setPosition(0.89);
+    }
+    private boolean rotatedIN(){
+        return ROTATE.getPosition()>0.5;
     }
     private void rotateOut(){
-        ROTATE.setPosition(0.06);
+        ROTATE.setPosition(0.16);
     }
     private void closeClaw(){
         CLAW.setPosition(0.05);
@@ -538,17 +502,15 @@ public class robot extends LinearOpMode
         CLAW.setPosition(0.2);
     }
     private void servosUp(){
-        servo.setPosition(0);
-        servo2.setPosition(.4);
+        servo.setPosition(0.85);
     }
     private void servosDown(){
-        servo.setPosition(0.2);
-        servo2.setPosition(.6);
+        servo.setPosition(0.4);
     }
 
     private void intake(){
-        IN1.setPower(0.7);
-        IN2.setPower(0.7);
+        IN1.setPower(0.45);
+        IN2.setPower(0.45);
     }
     private void outtake(){
         IN1.setPower(-0.4);
@@ -569,7 +531,7 @@ public class robot extends LinearOpMode
                 (float)bL.getCurrentPosition(), (float)bR.getCurrentPosition());
         telemetry.addData("Status", "Run Time: " + runtime.toString());
         telemetry.addData("Status", "Run Time2: " + runtim2.toString());
-        telemetry.addData("Right Sensor", sRR.getDistance(DistanceUnit.MM));
+        //telemetry.addData("Right Sensor", sRR.getDistance(DistanceUnit.MM));
         telemetry.addData("Sensor Working", sensorWorking);
         telemetry.addData("BlockPos", blockPos);
         telemetry.addData("INTAKE POWER", IN1.getPower());
@@ -582,143 +544,6 @@ public class robot extends LinearOpMode
 
     String formatDegrees(double degrees) {
         return String.format(Locale.getDefault(), "%.1f", AngleUnit.DEGREES.normalize(degrees));
-    }
-
-    void moveWithBackSensor(int target, double power){
-
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        runtim2.reset();
-        if(sR.getDistance(DistanceUnit.MM)>target){
-            while(opModeIsActive()&&(sR.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<5){
-                fL.setPower(-power);
-                fR.setPower(-power);
-                bL.setPower(-power);
-                bR.setPower(-power);
-                updateT();
-            }}else{
-            while(opModeIsActive()&&(sR.getDistance(DistanceUnit.MM) < target)&&runtim2.seconds()<5){
-                fL.setPower(power);
-                fR.setPower(power);
-                bL.setPower(power);
-                bR.setPower(power);
-                updateT();
-            }
-        }
-        fL.setPower(0);
-        fR.setPower(0);
-        bL.setPower(0);
-        bR.setPower(0);
-        resetEncoders();
-    }
-
-    boolean moveWithForwardSensor(int target, double power){
-
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        runtim2.reset();
-        if(sRF.getDistance(DistanceUnit.MM)>target){
-            while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<4){
-                fL.setPower(power);
-                fR.setPower(power);
-                bL.setPower(power);
-                bR.setPower(power);
-                updateT();
-            }}else{
-            while(opModeIsActive()&&(sRF.getDistance(DistanceUnit.MM) > target)&&runtim2.seconds()<4){
-                fL.setPower(-power);
-                fR.setPower(-power);
-                bL.setPower(-power);
-                bR.setPower(-power);
-                updateT();
-            }
-        }
-        motorsOff();
-        return sRF.getDistance(DistanceUnit.MM)<7000;
-    }
-    void moveWithRightSensor(int target, double power){
-
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        runtim2.reset();
-        double startAngle = getHeading();
-        if(sRR.getDistance(DistanceUnit.MM)<target){
-            while(opModeIsActive()&&(sRR.getDistance(DistanceUnit.MM) < target)&&runtim2.seconds()<2.5){
-                fL.setPower(-power);
-                fR.setPower(power);
-                bL.setPower(power);
-                bR.setPower(-power);
-
-                if(startAngle==0) {
-                    if(imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - startAngle>0.25){
-                        fL.setPower(fL.getPower()-0.02);
-                        fR.setPower(fR.getPower()+0.02);
-                        bL.setPower(bL.getPower()-0.02);
-                        bR.setPower(bR.getPower()+0.02);
-                    }else if((imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - startAngle<0.25)){
-                        fL.setPower(fL.getPower()+0.02);
-                        fR.setPower(fR.getPower()-0.02);
-                        bL.setPower(bL.getPower()+0.02);
-                        bR.setPower(bR.getPower()-0.02);
-                    }else{}
-                }else {
-                    if (getHeading() - startAngle > 0.25) {
-                        fL.setPower(fL.getPower() - 0.02);
-                        fR.setPower(fR.getPower() + 0.02);
-                        bL.setPower(bL.getPower() - 0.02);
-                        bR.setPower(bR.getPower() + 0.02);
-                    } else if ((getHeading() - startAngle < 0.25)) {
-                        fL.setPower(fL.getPower() + 0.02);
-                        fR.setPower(fR.getPower() - 0.02);
-                        bL.setPower(bL.getPower() + 0.02);
-                        bR.setPower(bR.getPower() - 0.02);
-                    }else{}
-                }
-                updateT();
-            }}else {
-            while (opModeIsActive() && (sRR.getDistance(DistanceUnit.MM) > target) && runtim2.seconds() < 2.5) {
-                fL.setPower(power);
-                fR.setPower(-power);
-                bL.setPower(-power);
-                bR.setPower(power);
-                if (startAngle == 0) {
-                    if (imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - startAngle < 0.25) {
-                        fL.setPower(fL.getPower() - 0.02);
-                        fR.setPower(fR.getPower() + 0.02);
-                        bL.setPower(bL.getPower() - 0.02);
-                        bR.setPower(bR.getPower() + 0.02);
-                    } else if ((imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle - startAngle > 0.25)) {
-                        fL.setPower(fL.getPower() + 0.02);
-                        fR.setPower(fR.getPower() - 0.02);
-                        bL.setPower(bL.getPower() + 0.02);
-                        bR.setPower(bR.getPower() - 0.02);
-                    } else {
-                    }
-                } else {
-                    if (getHeading() - startAngle < 0.25) {
-                        fL.setPower(fL.getPower() - 0.02);
-                        fR.setPower(fR.getPower() + 0.02);
-                        bL.setPower(bL.getPower() - 0.02);
-                        bR.setPower(bR.getPower() + 0.02);
-                    } else if ((getHeading() - startAngle > 0.25)) {
-                        fL.setPower(fL.getPower() + 0.02);
-                        fR.setPower(fR.getPower() - 0.02);
-                        bL.setPower(bL.getPower() + 0.02);
-                        bR.setPower(bR.getPower() - 0.02);
-                    } else {
-                    }
-                }
-                updateT();
-
-            }
-        }
-        motorsOff();
     }
 
 
@@ -848,7 +673,12 @@ public class robot extends LinearOpMode
         resetAngle();
     }
 
-
+    void turn(double tun, int foundation){
+        turn(tun, new double[] {0,0,0,0}, tun > getHeading(), foundation);
+    }
+    void turn(double tun, boolean targ, int foundation){
+        turn(tun, new double[] {0,0,0,0}, targ, foundation);
+    }
     void turn(double tun, double[] endPowers, boolean targGreater, int foundation){
         boolean startedAtZero = getHeading()==0;
         double vuAng = tun;
@@ -858,6 +688,13 @@ public class robot extends LinearOpMode
             if(runtim2.seconds()>2 && getHeading() == 0 && startedAtZero){
                 imuworking = false;
             }
+            if(LIFT.getCurrentPosition()>400&&LIFT.getPower()==1){
+                LIFT.setPower(0.2);
+            }
+            if(blockPushed && runtime.milliseconds()>=starttime + 400){
+                CLAW.setPosition(0.03);
+                blockPushed = false;
+            }
             double ang = getHeading();
 
             telemetry.addData("Angle", ang);
@@ -866,87 +703,90 @@ public class robot extends LinearOpMode
                             "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
                     bL.getPower(), bR.getPower());
             telemetry.update();
+            double smallPower = 380;
+            double bigPower = 1500;
+            double mediumPower = 1000;
             if(Math.abs(ang - vuAng) <= 0.5){
                 fL.setPower(0);
                 fR.setPower(0);
                 bL.setPower(0);
                 bR.setPower(0);
             }else if(ang>=260&& vuAng<=90){
-                fL.setPower(-0.4);
-                fR.setPower(0.4);
-                bL.setPower(-0.4);
-                bR.setPower(0.4);
+                fL.setPower(-mediumPower);
+                fR.setPower(mediumPower);
+                bL.setPower(-mediumPower);
+                bR.setPower(mediumPower);
             }else if(ang<=90&& vuAng>=260){
-                fL.setPower(0.4);
-                fR.setPower(-0.4);
-                bL.setPower(0.4);
-                bR.setPower(-0.4);
+                fL.setVelocity(mediumPower);
+                fR.setVelocity(-mediumPower);
+                bL.setVelocity(mediumPower);
+                bR.setVelocity(-mediumPower);
             }else if (ang-vuAng > 35){
                 if(foundation==1) {
-                    fL.setPower(0.7);
-                    fR.setPower(-0.7);
-                    bL.setPower(0.7);
-                    bR.setPower(-0.7);
+                    fL.setVelocity(bigPower);
+                    fR.setVelocity(-bigPower);
+                    bL.setVelocity(bigPower);
+                    bR.setVelocity(-bigPower);
                 }else{
-                    fL.setPower(0.4);
-                    fR.setPower(-0.4);
-                    bL.setPower(0.4);
-                    bR.setPower(-0.4);
+                    fL.setVelocity(mediumPower);
+                    fR.setVelocity(-mediumPower);
+                    bL.setVelocity(mediumPower);
+                    bR.setVelocity(-mediumPower);
                 }
             }else if(vuAng - ang > 35){
                 if(foundation==1) {
-                    fL.setPower(-0.7);
-                    fR.setPower(0.7);
-                    bL.setPower(-0.7);
-                    bR.setPower(0.7);
+                    fL.setVelocity(-bigPower);
+                    fR.setVelocity(bigPower);
+                    bL.setVelocity(-bigPower);
+                    bR.setVelocity(bigPower);
                 }else{
-                    fL.setPower(-0.4);
-                    fR.setPower(0.4);
-                    bL.setPower(-0.4);
-                    bR.setPower(0.4);
+                    fL.setVelocity(-mediumPower);
+                    fR.setVelocity(mediumPower);
+                    bL.setVelocity(-mediumPower);
+                    bR.setVelocity(mediumPower);
                 }
-            }else if (ang < vuAng) {
+            }else if (ang < vuAng+1.8) {
                 if(!targGreater){
                     turned = true;
                     motorsOff();
                 }else{
                     if(foundation==1){
-                        fL.setPower(-0.4*scale);
-                        fR.setPower(0.4*scale);
-                        bL.setPower(-0.4*scale);
-                        bR.setPower(0.4*scale);
+                        fL.setVelocity(-mediumPower);
+                        fR.setVelocity(mediumPower);
+                        bL.setVelocity(-mediumPower);
+                        bR.setVelocity(mediumPower);
                     }else if(foundation==2) {
-                        fL.setPower(-0.22*scale);
-                        fR.setPower(0.22*scale);
-                        bL.setPower(-0.22*scale);
-                        bR.setPower(0.22*scale);
+                        fL.setVelocity(-smallPower);
+                        fR.setVelocity(smallPower);
+                        bL.setVelocity(-smallPower);
+                        bR.setVelocity(smallPower);
                     }else{
-                        fL.setPower(-0.16*scale);
-                        fR.setPower(0.16*scale);
-                        bL.setPower(-0.16*scale);
-                        bR.setPower(0.16*scale);
+                        fL.setVelocity(-smallPower);
+                        fR.setVelocity(smallPower);
+                        bL.setVelocity(-smallPower);
+                        bR.setVelocity(smallPower);
                     }
                 }
-            }else if (ang > vuAng) {
+            }else if (ang > vuAng-1.8) {
                 if(targGreater){
                     turned = true;
                     motorsOff();
                 }else{
                     if(foundation==1) {
-                        fL.setPower(0.4*scale);
-                        fR.setPower(-0.4*scale);
-                        bL.setPower(0.4*scale);
-                        bR.setPower(-0.4*scale);
+                        fL.setVelocity(mediumPower);
+                        fR.setVelocity(-mediumPower);
+                        bL.setVelocity(mediumPower);
+                        bR.setVelocity(-mediumPower);
                     }else if(foundation==2){
-                        fL.setPower(0.22*scale);
-                        fR.setPower(-0.22*scale);
-                        bL.setPower(0.22*scale);
-                        bR.setPower(-0.22*scale);
+                        fL.setVelocity(smallPower*1.2);
+                        fR.setVelocity(-smallPower*1.2);
+                        bL.setVelocity(smallPower*1.2);
+                        bR.setVelocity(-smallPower*1.2);
                     }else{
-                        fL.setPower(0.16*scale);
-                        fR.setPower(-0.16*scale);
-                        bL.setPower(0.16*scale);
-                        bR.setPower(-0.16*scale);
+                        fL.setVelocity(smallPower);
+                        fR.setVelocity(-smallPower);
+                        bL.setVelocity(smallPower);
+                        bR.setVelocity(-smallPower);
                     }}
             }
             ang = getHeading();
@@ -957,6 +797,53 @@ public class robot extends LinearOpMode
         fR.setPower(endPowers[1]);
         bL.setPower(endPowers[2]);
         bR.setPower(endPowers[3]);
+    }
+    private void turnToZero(){
+        boolean turned = false;
+        double smallPower = 240;
+        runtim2.reset();
+        while (!turned && opModeIsActive() && runtim2.seconds() < 0.7) {
+
+            if (Math.abs(getHeading0()) <= 0.1) {
+                motorsOff();
+                turned = true;
+            } else if (getHeading0() > 0) {
+                fL.setVelocity(smallPower);
+                fR.setVelocity(-smallPower);
+                bL.setVelocity(smallPower);
+                bR.setVelocity(-smallPower);
+            } else {
+                fL.setVelocity(-smallPower);
+                fR.setVelocity(smallPower);
+                bL.setVelocity(-smallPower);
+                bR.setVelocity(smallPower);
+            }
+        }
+    }
+    private void adjust270(){
+        boolean turned = false;
+        double smallPower = 240;
+        runtim2.reset();
+        while (!turned && opModeIsActive() && runtim2.seconds() < 0.7) {
+            if(blockPushed && runtime.milliseconds()>=starttime + 400){
+                CLAW.setPosition(0.03);
+                blockPushed = false;
+            }
+            if (Math.abs(getHeading()-270) <= 0.1) {
+                motorsOff();
+                turned = true;
+            } else if (getHeading() > 270) {
+                fL.setVelocity(smallPower);
+                fR.setVelocity(-smallPower);
+                bL.setVelocity(smallPower);
+                bR.setVelocity(-smallPower);
+            } else {
+                fL.setVelocity(-smallPower);
+                fR.setVelocity(smallPower);
+                bL.setVelocity(-smallPower);
+                bR.setVelocity(smallPower);
+            }
+        }
     }
 
     private void resetEncoders(){
@@ -978,60 +865,11 @@ public class robot extends LinearOpMode
     private double averageTicks(){
         return (fL.getCurrentPosition()+fR.getCurrentPosition()+bL.getCurrentPosition()+bR.getCurrentPosition())/4;
     }
-    private void strafeToAngle(int angle, double power){
-        fL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        runtim2.reset();
-        boolean working = true;
-        if(getHeading() < 30 && angle > 300){
-            fL.setPower(power);
-            fR.setPower(-power);
-            bL.setPower(-power);
-            bR.setPower(power);
-            while (opModeIsActive() && runtim2.seconds() <= 4 && working) {
-
-                updateT();
-                if (getHeading() < angle && getHeading() > (angle - 10)) {
-                    working = false;
-                }
-            }
-        }else if(angle > getHeading()) {
-            fL.setPower(-power);
-            fR.setPower(power);
-            bL.setPower(power);
-            bR.setPower(-power);
-
-            while (opModeIsActive() && runtim2.seconds() <= 4 && working) {
-                updateT();
-                if (getHeading() > angle) {
-                    working = false;
-                }
-            }
-        }else if(angle < getHeading()) {
-            fL.setPower(power);
-            fR.setPower(-power);
-            bL.setPower(-power);
-            bR.setPower(power);
-            while (opModeIsActive() && runtim2.seconds() <= 4 && working) {
-                updateT();
-                if (getHeading() < angle) {
-                    working = false;
-                }
-            }
-        }
-    }
 
     public void drive(int ticks, double power){
         // restart imu angle tracking.
         resetAngle();
         int degrees = 0;
-
-        fL.setPower(power);
-        fR.setPower(power);
-        bL.setPower(power);
-        bR.setPower(power);
         fL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         fR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         bL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -1040,6 +878,11 @@ public class robot extends LinearOpMode
         fR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         bR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        fL.setPower(power);
+        fR.setPower(power);
+        bL.setPower(power);
+        bR.setPower(power);
 
 
         pidDrive.reset();
@@ -1058,26 +901,63 @@ public class robot extends LinearOpMode
         double pow = 0;
         runtim2.reset();
         boolean working = true;
-
-
-
-        do
+        if (degrees < 0)
         {
-            if(LIFT.getCurrentPosition()>=50){
-                LIFT.setPower(-0.4*scale);
-            }else{
-                LIFT.setPower(0);
+            // On right turn we have to get off zero first.
+            while (opModeIsActive() && getAngle() == 0)
+            {
+                fL.setPower(power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(power);
+                //sleep(100);
+                if(blockPushed && runtime.milliseconds()>=starttime + 400){
+                    CLAW.setPosition(0.03);
+                    blockPushed = false;
+                }
+                if((!touch.getState()||LIFT.getCurrentPosition()<5) && LIFT.getPower()<0 ){
+                    LIFT.setPower(0);
+                }
             }
-            pow = pidDrive.performPID(getAngle()); // power will be + on left turn.
-            updateT();
-            fL.setPower(power-pow);
-            fR.setPower(power+pow);
-            bL.setPower(power-pow);
-            bR.setPower(power+pow);
-            if (Math.abs((4*ticks)-fL.getCurrentPosition()-fR.getCurrentPosition()-fL.getCurrentPosition()-bR.getCurrentPosition())<100){
-                working = false;
-            }
-        } while (opModeIsActive() && runtim2.seconds()<1.5 && working );
+
+            do
+            {
+                power = pidDrive.performPID(getAngle()); // power will be - on right turn.
+                fL.setPower(power);
+                fR.setPower(power);
+                bL.setPower(power);
+                bR.setPower(power);
+                if(blockPushed && runtime.milliseconds()>=starttime + 400){
+                    CLAW.setPosition(0.03);
+                    blockPushed = false;
+                }
+                if((!touch.getState()||LIFT.getCurrentPosition()<5) && LIFT.getPower()<0 ){
+                    LIFT.setPower(0);
+                }
+            } while (opModeIsActive() && !pidDrive.onTarget());
+        }
+        else    // left turn.
+
+
+            do
+            {
+                pow = pidDrive.performPID(getAngle()); // power will be + on left turn.
+                updateT();
+                fL.setPower(power-pow);
+                fR.setPower(power+pow);
+                bL.setPower(power-pow);
+                bR.setPower(power+pow);
+                if (((2*ticks)-bL.getCurrentPosition()-bR.getCurrentPosition())<100){
+                    working = false;
+                }
+                if(blockPushed && runtime.milliseconds()>=starttime + 400){
+                    CLAW.setPosition(0.03);
+                    blockPushed = false;
+                }
+                if((!touch.getState()||LIFT.getCurrentPosition()<5) && LIFT.getPower()<0 ){
+                    LIFT.setPower(0);
+                }
+            } while (opModeIsActive() && runtim2.seconds()<5 && working );
 
         // turn the motors off.
         fL.setPower(0);
@@ -1096,6 +976,7 @@ public class robot extends LinearOpMode
         rotation = getAngle();
 
         // wait for rotation to stop.
+        sleep(500);
 
         // reset angle tracking on new heading.
         resetAngle();
@@ -1191,25 +1072,6 @@ public class robot extends LinearOpMode
         while(opModeIsActive() && runtim2.milliseconds()<millis){
         }
     }
-    private boolean correctDistanceFromWall(){
-        return correctDistanceFromWall(0);
-    }
-    private boolean correctDistanceFromWall(int x){
-        if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall-2)
-            moveWithRightSensor(distanceFromWall, 0.3 * scale);
-        if (sRR.getDistance(DistanceUnit.MM) > distanceFromWall+2) {
-            moveWithRightSensor(distanceFromWall, 0.3 * scale);
-            if (x > 0) {
-                if (sRR.getDistance(DistanceUnit.MM) < distanceFromWall - 2)
-                    moveWithRightSensor(distanceFromWall, 0.3 * scale);
-            }
-        }
-        if(sRR.getDistance(DistanceUnit.MM)>8000){
-            return false;
-        }else{
-            return true;
-        }
-    }
     private void moveWhileUsingLift(int ticks, double power, int position, double liftpower){
         moveWhileUsingLift(ticks, power, position, liftpower, new double[]{0,0,0,0});
     }
@@ -1231,9 +1093,9 @@ public class robot extends LinearOpMode
                     LIFT.setPower(-liftpower);
                 }else{
                     if(LIFT.getCurrentPosition()>100)
-                    LIFT.setPower(0.2);
+                        LIFT.setPower(0.2);
                     else
-                    LIFT.setPower(0);
+                        LIFT.setPower(0);
                 }
                 updateT();
             }

@@ -77,6 +77,8 @@ public class SkystoneDetectorNew
     public double downscale = 0.5;
     public boolean right;
     public boolean whole;
+    public int xPos=40;
+    public int yPos=40;
 
     public SkystoneDetectorNew(HardwareMap hardwareMap, boolean webcam, boolean right, boolean whole)
     {
@@ -126,6 +128,19 @@ public class SkystoneDetectorNew
          * Wait for the user to press start on the Driver Station
          */
 
+    }
+
+    public void setPos(int x, int y){
+        xPos = x;
+        yPos = y;
+    }
+
+    public int getX(){
+        return xPos;
+    }
+
+    public int getY(){
+        return yPos;
     }
 
     public double getDist(){
@@ -235,7 +250,9 @@ public class SkystoneDetectorNew
             }else{
                 found = false;
             }
-
+            Imgproc.circle(displayMat, new Point(xPos, yPos), 20, new Scalar(255,255,255));
+            Imgproc.circle(displayMat, new Point(370, 235), 20, new Scalar(255,255,255));
+            Imgproc.circle(displayMat, new Point(350, 365), 20, new Scalar(255,255,255));
 
             //Print result
             Imgproc.putText(displayMat,"Result: " + screenPosition.x +"/"+screenPosition.y,new Point(10,getAdjustedSize().height-30),0,1, new Scalar(255,255,0),1);
@@ -249,26 +266,21 @@ public class SkystoneDetectorNew
                 if(whole){
                     if(right){
                         if (black != null) {
-                            dist = Math.abs(black.br().x - input.width());
+                            dist = Math.abs(black.tl().x);
+                            double pos1 = mask.get(235,370)[0];
+                            double pos0 = mask.get(365,350)[0];
 
-                            double pos0 = mask.get(322,576)[0];
-                            double pos1 = mask.get(322,352)[0];
-                            double pos2 = mask.get(322,236)[0];
-
-                            double donk = Math.min(pos0, pos2);
-                            donk = Math.min(donk, pos1);
-                            if(donk == pos0) {
-                                pos = 0;
-                            }else if(donk == pos1){
-                                pos = 1;
-                            }else if(donk == pos2){
+                            if(pos1 == 255 && pos0 == 255){
                                 pos = 2;
+                            }else if(pos1 == 255){
+                                pos = 0;
+                            }else if(pos0 == 255){
+                                pos = 1;
                             }else{
                                 pos = 0;
                             }
                             Log.w("sizes","Blockpos0: "+pos0);
                             Log.w("sizes","Blockpos1: "+pos1);
-                            Log.w("sizes","Blockpos2: "+pos2);
 
                         }
                     }
@@ -306,9 +318,6 @@ public class SkystoneDetectorNew
                 }
             }
 
-            Imgproc.circle(displayMat, new Point(576, 322), 20, new Scalar(255,255,255));
-            Imgproc.circle(displayMat, new Point(352, 322), 20, new Scalar(255,255,255));
-            Imgproc.circle(displayMat, new Point(236, 322), 20, new Scalar(255,255,255));
             return displayMat;
         }
 
