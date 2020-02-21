@@ -187,15 +187,17 @@ public class red43 extends LinearOpMode
         gravity = imu.getGravity();
         String angle = formatAngle(angles.angleUnit, angles.firstAngle);
         double ang = Double.parseDouble(angle);
-
+        SkystoneDetectorNew detector = new SkystoneDetectorNew(hardwareMap, true, true,true);
         telemetry.addData("Robot", "Initialized");
         int blockPos = 0;
 
         //waitForStart();
         while (!opModeIsActive() && !isStopRequested()) {
 
-            if (usingCamera)
+            if (usingCamera) {
+                blockPos = (int) detector.getPos();
                 telemetry.addData("camera", blockPos);
+            }
             else
                 telemetry.addData("blockPOs", blockPos);
             if (gamepad1.x && gamepad1.right_bumper) {
@@ -212,15 +214,14 @@ public class red43 extends LinearOpMode
                 blockPos = 2;
                 usingCamera = false;
             }
-            if(gamepad2.start)
-                intFirst = true;
-            if(intFirst)
-                telemetry.addData("first block", intFirst);
             telemetry.update();
         }
         runtime.reset();
-            goV3(720, 0.7);
-            servosUp();
+        if(usingCamera)
+            blockPos = (int)detector.getPos();
+
+        goV3(720, 0.7);
+        servosUp();
             if(blockPos==0){
                 strafeRight(370, 0.7, new double[]{0,0,0,0});
                 if(Math.abs(getHeading0())>=0.1) {
@@ -301,11 +302,11 @@ public class red43 extends LinearOpMode
             strafeRight(120, 0.5, new double[] {0,0,0,0});
             adjust90();
             if(blockPos==2)
-            drive(3900, 0.7);
+            drive(4000, 0.7);
             else if(blockPos==1)
             drive(3650, 0.7);
             else
-            drive(3250, 0.7);
+            drive(3350, 0.7);
 
             adjust90();
             if(blockPos==1)
@@ -486,7 +487,7 @@ public class red43 extends LinearOpMode
         return (angles.firstAngle);
     }
     private void rotateIn(){
-        ROTATE.setPosition(0.89);
+        ROTATE.setPosition(0.84);
     }
     private boolean rotatedIN(){
         return ROTATE.getPosition()>0.5;

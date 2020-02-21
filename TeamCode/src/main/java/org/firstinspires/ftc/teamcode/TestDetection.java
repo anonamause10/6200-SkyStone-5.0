@@ -70,7 +70,7 @@ public class TestDetection extends LinearOpMode
     @Override
     public void runOpMode()
     {
-        boolean blockPos = true;
+        boolean blockPos = false;
         /*
          * Wait for the user to press start on the Driver Station
          */

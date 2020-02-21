@@ -267,8 +267,8 @@ public class SkystoneDetectorNew
                     if(right){
                         if (black != null) {
                             dist = Math.abs(black.tl().x);
-                            double pos1 = mask.get(235,370)[0];
-                            double pos0 = mask.get(365,350)[0];
+                            double pos0 = mask.get(235,370)[0];
+                            double pos1 = mask.get(365,350)[0];
 
                             if(pos1 == 255 && pos0 == 255){
                                 pos = 2;
@@ -287,8 +287,8 @@ public class SkystoneDetectorNew
                     else{
                         if (black != null) {
                             dist = Math.abs(black.tl().x);
-                            double pos1 = mask.get(322,576)[0];
-                            double pos0 = mask.get(322,352)[0];
+                            double pos1 = mask.get(235,370)[0];
+                            double pos0 = mask.get(365,350)[0];
 
                             if(pos1 == 255 && pos0 == 255){
                                 pos = 2;

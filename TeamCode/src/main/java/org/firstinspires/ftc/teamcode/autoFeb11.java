@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Autonomous(name="test block", group="ree")
+@Disabled
 
 public class autoFeb11 extends LinearOpMode
 {

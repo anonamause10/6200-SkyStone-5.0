@@ -115,7 +115,7 @@ public class blue43 extends LinearOpMode
 
 
         voltage = getBatteryVoltage();
-        scale = 12.8 / voltage;
+        scale = 13.2 / voltage;
 
         // create a sound parameter that holds the desired player parameters.
         SoundPlayer.PlaySoundParams params = new SoundPlayer.PlaySoundParams();
@@ -188,15 +188,16 @@ public class blue43 extends LinearOpMode
         gravity = imu.getGravity();
         String angle = formatAngle(angles.angleUnit, angles.firstAngle);
         double ang = Double.parseDouble(angle);
-
+        SkystoneDetectorNew detector = new SkystoneDetectorNew(hardwareMap, true, false,true);
         telemetry.addData("Robot", "Initialized");
         int blockPos = 0;
 
         //waitForStart();
         while (!opModeIsActive() && !isStopRequested()) {
-
-            if (usingCamera)
+            if (usingCamera) {
+                blockPos = (int) detector.getPos();
                 telemetry.addData("camera", blockPos);
+            }
             else
                 telemetry.addData("blockPOs", blockPos);
             if (gamepad1.x && gamepad1.right_bumper) {
@@ -213,26 +214,24 @@ public class blue43 extends LinearOpMode
                 blockPos = 2;
                 usingCamera = false;
             }
-            if(gamepad2.start)
-                intFirst = true;
-            if(intFirst)
-                telemetry.addData("first block", intFirst);
             telemetry.update();
         }
+        if(usingCamera)
+        blockPos = (int)detector.getPos();
         goV3(720, 0.7);
         servosUp();
         if(blockPos==0){
-            strafeLeft(370, 0.7, new double[]{0,0,0,0});
+            strafeLeft(300, 0.7, new double[]{0,0,0,0});
             if(Math.abs(getHeading0())>=0.1) {
                 turnToZero();
             }
         }else if(blockPos==2){
-            strafeRight(520, 0.7, new double[]{0,0,0,0});
+            strafeRight(630, 0.7, new double[]{0,0,0,0});
             if(Math.abs(getHeading0())>=0.1) {
                 turnToZero();
             }
         }else{
-            strafeRight(200, 0.7, new double[]{0,0,0,0});
+            strafeRight(350, 0.7, new double[]{0,0,0,0});
             if(Math.abs(getHeading0())>=0.1) {
                 turnToZero();
             }
@@ -243,28 +242,31 @@ public class blue43 extends LinearOpMode
             turnToZero();
         }
         if(blockPos==0)
-            goV3(-640, 0.7);
+            goV3(-680, 0.7);
         else if(blockPos==1)
             goV3(-750, 0.7);
         else
-            goV3(-810, 0.7);
+            goV3(-760, 0.7);
         blockPusher.setPosition(0.6);
         starttime = runtime.milliseconds();
         blockPushed = true;
         intakeOff();
-        turn(89.5, true, 0);
+        turn(88, true, 0);
 
         if(blockPos==2)
-            drive(4100, 0.7);
+            drive(4000, 0.7);
         else if(blockPos==1)
-            drive(3800,0.7);
+            drive(3700,0.7);
         else
-            drive(3400, 0.7);
+            drive(3300, 0.7);
         blockPusher.setPosition(0.9);
         LIFT.setPower(1);
-        turn(180, new double[]{0,0,0,0}, true, 0);
+        turn(178, new double[]{0,0,0,0}, true, 0);
         LIFT.setPower(0.2);
-        moveWhileUsingLift(-420, 0.35, 500, 0.4, new double[] {0,0,0,0});
+        if(blockPos==2)
+            moveWhileUsingLift(-450, 0.29, 500, 0.4, new double[] {0,0,0,0});
+        else
+            moveWhileUsingLift(-350, 0.29, 500, 0.4, new double[] {0,0,0,0});
         LIFT.setPower(0.2);
         rotateOut();
         sleep(800);
@@ -295,44 +297,37 @@ public class blue43 extends LinearOpMode
         servosUp();
         LIFT.setPower(-0.4);
         goV3(-430, 0.4);
-        if(blockPos==0){
-            strafeLeft(180, 0.5, new double[]{0,0,0,0});
-        }else
-            strafeLeft(120, 0.5, new double[] {0,0,0,0});
+        strafeLeft(490, 0.5, new double[]{0,0,0,0});
         adjust270();
         if(blockPos==2)
-            drive(3900, 0.7);
+            drive(3750, 0.7);
         else if(blockPos==1)
-            drive(3650, 0.7);
+            drive(3500, 0.7);
         else
-            drive(3250, 0.7);
+            drive(3150, 0.7);
 
         adjust270();
-        if(blockPos!=1)
-            strafeLeft(720, 0.7, new double[]{0,0,0,0});
-        else
-            strafeLeft(800, 0.7, new double[]{0,0,0,0});
+        strafeLeft(820, 0.7, new double[]{0,0,0,0});
         intake();
         goV3(250, 0.3);
-        strafeRight(920, 0.7, new double[]{0,0,0,0});
+        strafeRight(800, 0.7, new double[]{0,0,0,0});
         adjust270();
         blockPusher.setPosition(0.6);
         starttime = runtime.milliseconds();
         blockPushed = true;
         intakeOff();
         if(blockPos==2)
-            goV3(-4300, 0.7);
+            goV3(-4100, 0.7);
         else if(blockPos==1)
-            goV3(-4000, 0.7);
+            goV3(-3800, 0.7);
         else
-            goV3(-3600, 0.7);
+            goV3(-3400, 0.7);
         blockPusher.setPosition(0.9);
         moveWhileUsingLift(-350, 0.5, 500, 0.9, new double[] {0,0,0,0});
         LIFT.setPower(0.2);
         rotateOut();
         sleep(900);
         openClaw();
-        strafeRight(300, 1, new double[]{0,0,0,0});
         YEETER.setPower(-1);
         sleep(300);
         YEETER.setPower(0);
@@ -487,7 +482,7 @@ public class blue43 extends LinearOpMode
         return (angles.firstAngle);
     }
     private void rotateIn(){
-        ROTATE.setPosition(0.89);
+        ROTATE.setPosition(0.84);
     }
     private boolean rotatedIN(){
         return ROTATE.getPosition()>0.5;
@@ -703,10 +698,10 @@ public class blue43 extends LinearOpMode
                             "back left (%.2f), back right (%.2f)", fL.getPower(), fR.getPower(),
                     bL.getPower(), bR.getPower());
             telemetry.update();
-            double smallPower = 380;
+            double smallPower = 280;
             double bigPower = 1500;
             double mediumPower = 1000;
-            if(Math.abs(ang - vuAng) <= 0.5){
+            if(Math.abs(ang - vuAng) <= 0.7){
                 fL.setPower(0);
                 fR.setPower(0);
                 bL.setPower(0);
@@ -745,7 +740,7 @@ public class blue43 extends LinearOpMode
                     bL.setVelocity(-mediumPower);
                     bR.setVelocity(mediumPower);
                 }
-            }else if (ang < vuAng+1.8) {
+            }else if (ang < vuAng) {
                 if(!targGreater){
                     turned = true;
                     motorsOff();
@@ -767,7 +762,7 @@ public class blue43 extends LinearOpMode
                         bR.setVelocity(smallPower);
                     }
                 }
-            }else if (ang > vuAng-1.8) {
+            }else if (ang > vuAng) {
                 if(targGreater){
                     turned = true;
                     motorsOff();
